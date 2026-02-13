@@ -1,0 +1,192 @@
+import React, { useState } from "react";
+import { jsPDF } from "jspdf";
+import { Home, Share2, CheckCircle, FileLock, Power, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+interface ReportData {
+  myIncome: number;
+  spouseIncome: number;
+  childSupport: number;
+  compensatory: number;
+  [key: string]: number | string | undefined;
+}
+
+const ExportPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [isImploding, setIsImploding] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
+
+  const [data] = useState<ReportData | null>(() => {
+    const raw = localStorage.getItem("results");
+    return raw ? JSON.parse(raw) : null;
+  });
+
+  const generatePDF = () => {
+    if (!data) return;
+    const doc = new jsPDF();
+
+    doc.setFontSize(22);
+    doc.setTextColor(79, 70, 229); // Indigo
+    doc.text("DivorceDoc Legal Report", 20, 20);
+
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 30);
+
+    doc.setLineWidth(0.5);
+    doc.line(20, 35, 190, 35);
+
+    doc.setFontSize(16);
+    doc.text("Financial Summary", 20, 50);
+
+    doc.setFontSize(12);
+    doc.text(`Your Income: ${data.myIncome} EUR`, 20, 65);
+    doc.text(`Spouse Income: ${data.spouseIncome} EUR`, 20, 75);
+    doc.text(
+      `Monthly Gap: ${Math.abs(data.spouseIncome - data.myIncome)} EUR`,
+      20,
+      85,
+    );
+
+    doc.setFontSize(16);
+    doc.text("Legal Estimations (Indicative)", 20, 105);
+
+    doc.setFontSize(12);
+    doc.text(`Child Support: ${data.childSupport} EUR / month`, 20, 120);
+    doc.text(`Compensatory Allowance: ${data.compensatory} EUR`, 20, 130);
+
+    doc.setFontSize(10);
+    doc.setTextColor(150);
+    doc.text("Disclaimer: This document is generated automatically.", 20, 180);
+
+    try {
+      doc.save("DivorceDoc_Report.pdf");
+    } catch (e) {
+      console.error(e);
+      alert("Échec de la génération du rapport. (Code: PDF_01)");
+    }
+  };
+
+  const confirmWipe = () => {
+    setShowExitModal(false);
+    setIsImploding(true);
+    // Simulate wipe duration
+    setTimeout(() => {
+      localStorage.clear();
+      navigate("/");
+      // In a real app, maybe show a "Session closed" toast on landing,
+      // but navigating to "/" effectively closes the session.
+    }, 1500);
+  };
+
+  if (isImploding) {
+    return (
+      <div className="h-screen bg-black flex items-center justify-center overflow-hidden relative">
+        <div className="animate-implode flex flex-col items-center z-10">
+          <div className="w-96 h-96 rounded-full bg-white blur-[100px] animate-pulse" />
+        </div>
+        <div className="absolute text-center z-20">
+          <p className="text-white font-bold tracking-widest text-xl uppercase mb-2">
+            Session Clôturée
+          </p>
+          <p className="text-(--color-plasma-cyan) text-xs">
+            Votre vie privée est préservée.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-(--color-deep-space) flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+      {/* Background Grid */}
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5" />
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)",
+          backgroundSize: "50px 50px",
+        }}
+      />
+
+      <div className="glass-panel p-8 rounded-3xl w-full max-w-sm relative z-10 animate-fade-in border border-white/10">
+        {/* Sealed Packet Visual */}
+        <div className="w-24 h-24 bg-(--color-plasma-cyan)/10 rounded-full flex items-center justify-center mx-auto mb-6 relative group cursor-pointer hover:bg-(--color-plasma-cyan)/20 transition-all duration-500">
+          <div className="absolute inset-0 rounded-full border border-(--color-plasma-cyan) opacity-30 animate-ping" />
+          <FileLock className="w-10 h-10 text-(--color-plasma-cyan)" />
+        </div>
+
+        <h1 className="text-2xl font-bold text-white mb-2 tracking-wide text-glow">
+          Secure Report
+        </h1>
+        <p className="text-gray-400 mb-8 text-sm">
+          Encrypted file ready for export.
+        </p>
+
+        <button
+          onClick={generatePDF}
+          className="w-full bg-(--color-plasma-cyan) hover:bg-cyan-300 text-(--color-deep-space) font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.3)] mb-6 flex items-center justify-center space-x-2 transition transform active:scale-95"
+        >
+          <Share2 className="w-5 h-5" />
+          <span className="uppercase tracking-widest text-xs">
+            Decrypt & Download
+          </span>
+        </button>
+
+        <div className="border-t border-white/10 pt-6 mt-2">
+          <h3 className="text-[10px] uppercase text-red-400 tracking-widest mb-4">
+            Danger Zone
+          </h3>
+
+          <button
+            onClick={() => setShowExitModal(true)}
+            className="w-full group bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-500 font-medium py-3 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300"
+          >
+            <Power className="w-4 h-4" />
+            <span className="text-xs uppercase tracking-widest group-hover:text-red-400">
+              Effacer les données et quitter
+            </span>
+          </button>
+          <p className="text-[9px] text-gray-600 mt-2">
+            Initiating purge will permanently wipe all local session data.
+          </p>
+        </div>
+      </div>
+
+      {/* Exit Confirmation Modal */}
+      {showExitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="glass-panel p-6 rounded-2xl max-w-xs w-full border border-red-500/30 shadow-[0_0_40px_rgba(239,68,68,0.2)]">
+            <h3 className="text-lg font-bold text-white mb-2">
+              Confirmation finale
+            </h3>
+            <p className="text-sm text-gray-300 mb-6 leading-relaxed">
+              Voulez-vous vraiment quitter ? <br />
+              <span className="text-red-400">
+                Votre rapport PDF non téléchargé sera définitivement perdu
+              </span>
+              , car nous ne conservons rien sur nos serveurs.
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowExitModal(false)}
+                className="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={confirmWipe}
+                className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold uppercase tracking-wider shadow-[0_0_20px_rgba(239,68,68,0.4)] transition"
+              >
+                Tout Effacer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ExportPage;
