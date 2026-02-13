@@ -14,45 +14,64 @@ type ScanSessionItem = {
     date?: string;
   };
   confidence: number;
+  category?: "bulletin" | "charges" | "revenus-conjoint";
   previewUrl?: string | null;
   timestamp: number;
 };
 
-const loadLatestScan = (): ScanSessionItem | null => {
-  const direct = localStorage.getItem("scannedData");
+const loadSessionData = (): ScanSessionItem[] => {
   const session = localStorage.getItem("scanSession");
-
-  if (direct) return JSON.parse(direct) as ScanSessionItem;
-  if (session) {
-    const items = JSON.parse(session) as ScanSessionItem[];
-    return items?.length ? items[items.length - 1] : null;
-  }
-  return null;
+  return session ? JSON.parse(session) : [];
 };
 
 const DataValidationPage: React.FC = () => {
   const navigate = useNavigate();
-  const scannedData = useMemo<ScanSessionItem | null>(
-    () => loadLatestScan(),
-    [],
-  );
+  const sessionData = useMemo<ScanSessionItem[]>(() => loadSessionData(), []);
+
+  // Helper to get latest item for a category
+  const getLatestByCategory = (cat: string) =>
+    [...sessionData].reverse().find((item) => item.category === cat);
+
+  // Helper to sum charges
+  const sumCharges = () =>
+    sessionData
+      .filter((item) => item.category === "charges")
+      .reduce(
+        (sum, item) =>
+          sum +
+          (item.keywords.charges ||
+            item.keywords.income ||
+            item.keywords.netSocial ||
+            0),
+        0,
+      );
+
+  const scannedData = sessionData[sessionData.length - 1] || null; // For backward compatibility/preview
   const imagePreview = scannedData?.previewUrl || null;
   const [showSource, setShowSource] = useState(false);
 
   // Form State
   const regime = "community";
-  const [formData, setFormData] = useState(() => ({
-    myIncome: scannedData?.keywords?.netSocial
-      ? String(scannedData.keywords.netSocial)
-      : scannedData?.keywords?.income
-        ? String(scannedData.keywords.income)
-        : "",
-    myCharges: scannedData?.keywords?.charges
-      ? String(scannedData.keywords.charges)
-      : "",
-    spouseIncome: "2000", // Default
-    date: scannedData?.keywords?.date || "",
-  }));
+  const [formData, setFormData] = useState(() => {
+    const myDoc = getLatestByCategory("bulletin");
+    const spouseDoc = getLatestByCategory("revenus-conjoint");
+    const totalCharges = sumCharges();
+
+    return {
+      myIncome: myDoc?.keywords?.netSocial
+        ? String(myDoc.keywords.netSocial)
+        : myDoc?.keywords?.income
+          ? String(myDoc.keywords.income)
+          : "",
+      myCharges: totalCharges > 0 ? String(totalCharges) : "",
+      spouseIncome: spouseDoc?.keywords?.income
+        ? String(spouseDoc.keywords.income)
+        : spouseDoc?.keywords?.netSocial
+          ? String(spouseDoc.keywords.netSocial)
+          : "2000",
+      date: myDoc?.keywords?.date || "",
+    };
+  });
 
   // Validation State
   const [errors, setErrors] = useState<Record<string, string>>({});

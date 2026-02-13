@@ -38,9 +38,6 @@ const ScannerPage: React.FC = () => {
 
   // Session State
   const [pageCount, setPageCount] = useState(0);
-  const [lastScannedPreview, setLastScannedPreview] = useState<string | null>(
-    null,
-  );
   const [sessionItems, setSessionItems] = useState<ScanSessionItem[]>([]);
   const [category, setCategory] = useState<
     "bulletin" | "charges" | "revenus-conjoint"
@@ -117,6 +114,9 @@ const ScannerPage: React.FC = () => {
     incoming: ScanSessionItem,
   ): ScanSessionItem => {
     if (!incoming.personKey || !incoming.category) return incoming;
+
+    // Feature Request: Do not average charges, sum them instead (handled in Validation)
+    if (incoming.category === "charges") return incoming;
 
     const matches = session.filter(
       (item) =>
@@ -217,7 +217,6 @@ const ScannerPage: React.FC = () => {
         pdfScale: 4.0,
         ocrMode: "auto",
       });
-      setLastScannedPreview(processedImage);
 
       const pdfText =
         file.type === "application/pdf" ? await extractPdfText(file) : "";

@@ -13,6 +13,7 @@ import TermsPage from "./pages/TermsPage";
 import MethodologyPage from "./pages/MethodologyPage";
 import GlossaryPage from "./pages/GlossaryPage";
 import ThemeToggle from "./components/ThemeToggle";
+import Footer from "./components/Footer";
 
 const App: React.FC = () => {
   return (
@@ -31,6 +32,7 @@ const App: React.FC = () => {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/export" element={<ExportPage />} />
       </Routes>
+      <Footer />
     </>
   );
 };
