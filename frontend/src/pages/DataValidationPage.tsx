@@ -46,16 +46,61 @@ const DataValidationPage: React.FC = () => {
         0,
       );
 
-  const scannedData = sessionData[sessionData.length - 1] || null; // For backward compatibility/preview
-  const imagePreview = scannedData?.previewUrl || null;
+  const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
   const [showSource, setShowSource] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+
+  // Ensure current index is valid when sessionData changes
+  React.useEffect(() => {
+    if (sessionData.length > 0 && currentPreviewIndex >= sessionData.length) {
+      setCurrentPreviewIndex(0);
+    } else if (sessionData.length > 0 && currentPreviewIndex < 0) {
+      setCurrentPreviewIndex(0);
+    }
+  }, [sessionData.length]);
+
+  const scannedData = sessionData[currentPreviewIndex] || null;
+  const imagePreview = scannedData?.previewUrl || null;
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentPreviewIndex((prev) =>
+      prev > 0 ? prev - 1 : sessionData.length - 1,
+    );
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentPreviewIndex((prev) =>
+      prev < sessionData.length - 1 ? prev + 1 : 0,
+    );
+  };
+
+  const handleZoomIn = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setZoomLevel((prev) => Math.min(prev + 0.5, 3));
+  };
+
+  const handleZoomOut = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setZoomLevel((prev) => Math.max(prev - 0.5, 1));
+  };
 
   // Form State
-  const regime = "community";
+  // Form State
   const [formData, setFormData] = useState(() => {
     const myDoc = getLatestByCategory("bulletin");
     const spouseDoc = getLatestByCategory("revenus-conjoint");
     const totalCharges = sumCharges();
+
+    // Load pre-filled profile data
+    let profile = {};
+    try {
+      const stored = localStorage.getItem("profileData");
+      if (stored) profile = JSON.parse(stored);
+    } catch (e) {
+      console.error("Failed to parse profileData", e);
+    }
 
     return {
       myIncome: myDoc?.keywords?.netSocial
@@ -69,7 +114,15 @@ const DataValidationPage: React.FC = () => {
         : spouseDoc?.keywords?.netSocial
           ? String(spouseDoc.keywords.netSocial)
           : "2000",
-      date: myDoc?.keywords?.date || "",
+
+      // New Fields (Priority: Profile > OCR > Default)
+      marriageDate: (profile as any).date || myDoc?.keywords?.date || "",
+      childrenCount:
+        (profile as any).children !== undefined
+          ? String((profile as any).children)
+          : "2",
+      divorceType: (profile as any).divorceType || "amiable",
+      matrimonialRegime: (profile as any).regime || "community",
     };
   });
 
@@ -121,7 +174,7 @@ const DataValidationPage: React.FC = () => {
     return error;
   };
 
-  const handleNext = () => {
+  const handleNextStep = () => {
     const newErrors: Record<string, string> = {};
 
     // Stage C Check
@@ -139,23 +192,31 @@ const DataValidationPage: React.FC = () => {
 
     // Stage E: Injection
     // We inject default values for fields not yet exposed in the UI to ensure the engine doesn't return NaN
+    const profileData = JSON.parse(localStorage.getItem("profileData") || "{}");
+
     const finalPayload = {
       myIncome: parseFloat(formData.myIncome) || 0,
       myCharges: parseFloat(formData.myCharges) || 0,
       spouseIncome: parseFloat(formData.spouseIncome) || 0,
 
-      // Default Assumptions for Demo (since UI doesn't ask these yet)
-      marriageDuration: 12,
-      myAge: 42,
-      spouseAge: 44,
-      childrenCount: 2,
-      custodyType: "classic",
-      assetsValue: 0,
-      assetsCRD: 0,
-      rewardsAlice: 0,
-      rewardsBob: 0,
+      // New Fields Injection
+      marriageDate: formData.marriageDate,
+      childrenCount: parseInt(formData.childrenCount) || 0,
+      divorceType: formData.divorceType,
+      matrimonialRegime: formData.matrimonialRegime,
 
-      regime: regime,
+      // From Profile/Quiz
+      marriageDuration: 0, // Calculated in engine from date
+      myAge: profileData.myAge || 42,
+      spouseAge: profileData.spouseAge || 44,
+      custodyType: profileData.custodyType || "classic",
+      myTaxes: profileData.myTaxes || 0,
+      myRent: profileData.myRent || 0,
+      assetsValue: profileData.assetsValue || 0,
+      assetsCRD: profileData.assetsCRD || 0,
+      rewardsAlice: profileData.rewardsAlice || 0,
+      rewardsBob: profileData.rewardsBob || 0,
+
       metadata: {
         source: "OCR_DISPATCH",
         timestamp: Date.now(),
@@ -181,13 +242,25 @@ const DataValidationPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-(--color-deep-space) flex flex-col text-white pb-24">
       {/* Split View Header - Thumbnail (Stage 4 UX) */}
-      <div className="bg-black/40 h-32 relative border-b border-white/10 flex items-center justify-center overflow-hidden">
+      <div className="bg-black/40 h-32 relative border-b border-white/10 flex items-center justify-center overflow-hidden group">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+
+        {/* Carousel Navigation - Left */}
+        {sessionData.length > 1 && (
+          <button
+            onClick={handlePrev}
+            className="absolute left-2 z-10 p-2 bg-black/50 hover:bg-black/80 rounded-full text-white/70 hover:text-white transition-all"
+          >
+            {"<"}
+          </button>
+        )}
+
         {imagePreview ? (
           <img
             src={imagePreview}
             alt="Aperçu document"
-            className="h-full w-auto object-contain opacity-80"
+            className="h-full w-auto object-contain opacity-80 cursor-pointer hover:opacity-100 transition-opacity"
+            onClick={() => setShowSource(true)}
           />
         ) : scannedData ? (
           <div className="text-xs text-gray-500 font-mono p-4">
@@ -196,41 +269,110 @@ const DataValidationPage: React.FC = () => {
         ) : (
           <span className="text-xs text-gray-600">No Document Source</span>
         )}
-        <button
-          onClick={() => setShowSource(true)}
-          disabled={!imagePreview}
-          className="absolute bottom-2 right-2 flex items-center space-x-1 bg-black/60 px-3 py-1 rounded-full border border-white/20 text-[10px] uppercase disabled:opacity-40"
-        >
-          <Eye className="w-3 h-3" /> <span>View Source</span>
-        </button>
+
+        {/* Carousel Navigation - Right */}
+        {sessionData.length > 1 && (
+          <button
+            onClick={handleNext}
+            className="absolute right-2 z-10 p-2 bg-black/50 hover:bg-black/80 rounded-full text-white/70 hover:text-white transition-all"
+          >
+            {">"}
+          </button>
+        )}
+
+        {/* Counter and Full Screen Button */}
+        <div className="absolute bottom-2 right-2 flex items-center space-x-2">
+          {sessionData.length > 1 && (
+            <span className="text-[10px] bg-black/60 px-2 py-1 rounded-full text-white/60">
+              {currentPreviewIndex + 1} / {sessionData.length}
+            </span>
+          )}
+          <button
+            onClick={() => setShowSource(true)}
+            disabled={!imagePreview}
+            className="flex items-center space-x-1 bg-black/60 px-3 py-1 rounded-full border border-white/20 text-[10px] uppercase disabled:opacity-40 hover:bg-white/10 transition-colors"
+          >
+            <Eye className="w-3 h-3" /> <span>Zoom</span>
+          </button>
+        </div>
       </div>
 
       {showSource && imagePreview && (
         <div
-          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
           onClick={() => setShowSource(false)}
         >
           <div
-            className="max-w-4xl w-full bg-(--bg-secondary) border border-(--border-color) rounded-2xl overflow-hidden"
+            className="w-full h-full max-w-6xl max-h-[90vh] flex flex-col relative"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between p-4 border-b border-(--border-color)">
-              <h3 className="text-sm font-bold tracking-widest uppercase">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 z-20">
+              <h3 className="text-sm font-bold tracking-widest uppercase text-white/80">
                 Document Source
               </h3>
-              <button
-                onClick={() => setShowSource(false)}
-                className="text-sm text-(--text-muted) hover:text-(--text-primary)"
-              >
-                Fermer
-              </button>
+              <div className="flex items-center space-x-4">
+                {/* Zoom Controls */}
+                <div className="flex items-center bg-white/10 rounded-lg overflow-hidden">
+                  <button
+                    onClick={handleZoomOut}
+                    className="p-2 hover:bg-white/10 text-white"
+                  >
+                    -
+                  </button>
+                  <span className="px-2 text-xs font-mono">
+                    {Math.round(zoomLevel * 100)}%
+                  </span>
+                  <button
+                    onClick={handleZoomIn}
+                    className="p-2 hover:bg-white/10 text-white"
+                  >
+                    +
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowSource(false);
+                    setZoomLevel(1); // Reset zoom on close
+                  }}
+                  className="text-sm text-white/60 hover:text-white"
+                >
+                  Fermer
+                </button>
+              </div>
             </div>
-            <div className="bg-black/80 flex items-center justify-center p-4">
+
+            {/* Modal Content - Scrollable if zoomed */}
+            <div className="flex-1 overflow-auto flex items-center justify-center p-4 bg-black/50 rounded-2xl border border-white/10 relative">
+              {/* Modal Carousel Navigation - Left */}
+              {sessionData.length > 1 && (
+                <button
+                  onClick={handlePrev}
+                  className="fixed left-4 top-1/2 -translate-y-1/2 z-30 p-4 bg-black/50 hover:bg-black/90 rounded-full text-white/50 hover:text-white transition-all backdrop-blur-sm"
+                >
+                  {"<"}
+                </button>
+              )}
+
               <img
                 src={imagePreview}
                 alt="Document source"
-                className="max-h-[70vh] object-contain"
+                className="transition-transform duration-200 ease-out origin-center"
+                style={{
+                  transform: `scale(${zoomLevel})`,
+                  cursor: zoomLevel > 1 ? "grab" : "default",
+                }}
               />
+
+              {/* Modal Carousel Navigation - Right */}
+              {sessionData.length > 1 && (
+                <button
+                  onClick={handleNext}
+                  className="fixed right-4 top-1/2 -translate-y-1/2 z-30 p-4 bg-black/50 hover:bg-black/90 rounded-full text-white/50 hover:text-white transition-all backdrop-blur-sm"
+                >
+                  {">"}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -263,9 +405,10 @@ const DataValidationPage: React.FC = () => {
             {confidence.myIncome === "high" && (
               <Check className="w-4 h-4 text-green-400" />
             )}
-            {confidence.myIncome === "low" && (
-              <AlertTriangle className="w-4 h-4 text-orange-400" />
-            )}
+            {confidence.myIncome === "low" &&
+              parseFloat(formData.myIncome) < 800 && (
+                <AlertTriangle className="w-4 h-4 text-orange-400" />
+              )}
           </div>
           <div className="flex items-center space-x-2">
             <input
@@ -288,11 +431,12 @@ const DataValidationPage: React.FC = () => {
           {errors.myIncome && (
             <div className="text-red-400 text-xs mt-2">{errors.myIncome}</div>
           )}
-          {confidence.myIncome !== "high" && (
-            <div className="text-orange-300 text-[10px] mt-1">
-              {confidenceMessage}
-            </div>
-          )}
+          {confidence.myIncome !== "high" &&
+            parseFloat(formData.myIncome) < 800 && (
+              <div className="text-orange-300 text-[10px] mt-1">
+                {confidenceMessage}
+              </div>
+            )}
         </div>
 
         {/* Charges Field */}
@@ -312,6 +456,9 @@ const DataValidationPage: React.FC = () => {
             />
             <span className="text-xl text-gray-500">€</span>
           </div>
+          {errors.myCharges && (
+            <div className="text-red-400 text-xs mt-2">{errors.myCharges}</div>
+          )}
         </div>
 
         {/* Spouse Income (Manual) */}
@@ -334,6 +481,76 @@ const DataValidationPage: React.FC = () => {
             Donnée non présente sur ce document
           </div>
         </div>
+
+        {/* Marriage Date */}
+        <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+          <label className="text-xs uppercase tracking-widest text-gray-300 block mb-2">
+            Date de Mariage
+          </label>
+          <input
+            type="date"
+            value={formData.marriageDate}
+            onChange={(e) =>
+              setFormData({ ...formData, marriageDate: e.target.value })
+            }
+            className="bg-transparent text-lg font-mono text-white w-full outline-none border-b border-transparent focus:border-(--color-plasma-cyan)"
+          />
+          {errors.marriageDate && (
+            <div className="text-red-400 text-xs mt-2">
+              {errors.marriageDate}
+            </div>
+          )}
+        </div>
+
+        {/* Children Count */}
+        <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+          <label className="text-xs uppercase tracking-widest text-gray-300 block mb-2">
+            Nombre d'enfants
+          </label>
+          <input
+            type="number"
+            min="0"
+            value={formData.childrenCount}
+            onChange={(e) =>
+              setFormData({ ...formData, childrenCount: e.target.value })
+            }
+            className="bg-transparent text-2xl font-mono text-white w-full outline-none border-b border-transparent focus:border-(--color-plasma-cyan)"
+          />
+        </div>
+
+        {/* Divorce Type */}
+        <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+          <label className="text-xs uppercase tracking-widest text-gray-300 block mb-2">
+            Type de Divorce
+          </label>
+          <select
+            value={formData.divorceType}
+            onChange={(e) =>
+              setFormData({ ...formData, divorceType: e.target.value })
+            }
+            className="bg-transparent text-lg font-mono text-white w-full outline-none border-b border-transparent focus:border-(--color-plasma-cyan) [&>option]:bg-black"
+          >
+            <option value="amiable">Amiable</option>
+            <option value="contentious">Contentieux</option>
+          </select>
+        </div>
+
+        {/* Matrimonial Regime */}
+        <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+          <label className="text-xs uppercase tracking-widest text-gray-300 block mb-2">
+            Régime Matrimonial
+          </label>
+          <select
+            value={formData.matrimonialRegime}
+            onChange={(e) =>
+              setFormData({ ...formData, matrimonialRegime: e.target.value })
+            }
+            className="bg-transparent text-lg font-mono text-white w-full outline-none border-b border-transparent focus:border-(--color-plasma-cyan) [&>option]:bg-black"
+          >
+            <option value="community">Communauté</option>
+            <option value="separation">Séparation de biens</option>
+          </select>
+        </div>
       </div>
 
       {/* Floating Action Bar */}
@@ -345,7 +562,7 @@ const DataValidationPage: React.FC = () => {
           Back
         </button>
         <button
-          onClick={handleNext}
+          onClick={handleNextStep}
           className="bg-(--color-plasma-cyan) text-black px-8 py-4 rounded-full font-bold uppercase tracking-widest text-xs hover:shadow-[0_0_20px_rgba(20,184,166,0.5)] transition"
         >
           Valider & Calculer

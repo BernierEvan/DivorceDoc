@@ -1,158 +1,216 @@
 export interface FinancialData {
   myIncome: number;
-  spouseIncome: number;
   myCharges: number;
-  marriageDuration: number; // Years
+  myTaxes: number; // Impôts mensuels
+  myRent: number; // Loyer ou crédit immobilier mensuel
+  spouseIncome: number;
+  marriageDuration: number;
   myAge: number;
   spouseAge: number;
   childrenCount: number;
-  custodyType: "classic" | "alternating" | "reduced";
-  assetsValue?: number; // Immobilier
-  assetsCRD?: number; // Capital Restant Dû
-  rewardsAlice?: number; // Rewards due to Me
-  rewardsBob?: number; // Rewards due to Spouse
+  custodyType: string;
+  assetsValue: number;
+  assetsCRD: number;
+  rewardsAlice: number; // Récompenses dues PAR la communauté À Alice
+  rewardsBob: number; // Récompenses dues PAR la communauté À Bob
+  divorceType?: string;
+  marriageDate?: string;
+  matrimonialRegime?: string;
+  metadata?: any;
 }
 
 export interface SimulationResult {
-  compensatory: {
-    min: number;
-    mean: number;
-    max: number;
-    details: {
-      pilote: number;
-      insee: number;
+  compensatoryAllowance: number;
+  childSupport: number;
+  childSupportPerChild: number;
+  custodyTypeUsed: string;
+  liquidationShare: number;
+  remainingLiveable: number;
+  belowPovertyThreshold: boolean;
+  budget: {
+    totalRevenus: number; // myIncome + paReceived
+    totalCharges: number; // taxes + rent + charges + paPaid
+    taxes: number;
+    rent: number;
+    fixedCharges: number;
+    paPaid: number;
+    paReceived: number;
+  };
+  details: {
+    pilote: {
+      value: number;
+      min: number;
+      max: number;
     };
-  };
-  childSupport: {
-    perChild: number;
-    total: number;
-  };
-  liquidation?: {
-    netAsset: number; // Actif Net Communauté
-    soulteToPay: number; // How much I have to pay (if positive) or receive (if negative)
-  };
-  resteAVivre?: {
-    me: number;
-    spouse: number;
-    warning: boolean;
+    insee: {
+      value: number;
+      min: number;
+      max: number;
+    };
+    formula?: string;
   };
 }
 
-const LEGAL_CONSTANTS_2026 = {
-  RSA_SOLO: 645.5,
-  SMIC_NET: 1450.0,
-  SEUIL_PAUVRETE: 1216.0, // 60% median
-  COEFF_AGE: {
-    UNDER_45: 1.0, // Spec A.1 says < 45 = 1.0
-    FROM_45_TO_55: 1.2,
-    OVER_55: 1.5,
-  },
-  CHILD_SUPPORT_RATES: {
-    classic: { 1: 0.135, 2: 0.115, 3: 0.1 },
-    alternating: { 1: 0.09, 2: 0.078, 3: 0.067 },
-    reduced: { 1: 0.18, 2: 0.155, 3: 0.13 },
-  },
+// Barème Ministère de la Justice 2026
+const RSA_SOLO = 645.5;
+const SEUIL_PAUVRETE_2026 = 1216; // €/mois
+const CHILD_SUPPORT_RATES: Record<string, Record<number, number>> = {
+  classic: { 1: 0.135, 2: 0.115, 3: 0.1 },
+  alternating: { 1: 0.09, 2: 0.078, 3: 0.067 },
+  reduced: { 1: 0.18, 2: 0.155, 3: 0.13 },
 };
 
 export const legalEngine = {
-  calculate: (inputData: FinancialData): SimulationResult => {
-    // Sanitize Inputs: Ensure no undefined/NaN propagates
-    const data = {
-      ...inputData,
-      myIncome: inputData.myIncome || 0,
-      spouseIncome: inputData.spouseIncome || 0,
-      myCharges: inputData.myCharges || 0,
-      marriageDuration: inputData.marriageDuration || 0,
-      myAge: inputData.myAge || 0,
-      spouseAge: inputData.spouseAge || 0,
-      childrenCount: inputData.childrenCount || 0,
-    };
+  calculate: (data: FinancialData): SimulationResult => {
+    // ---------------------------------------------------------
+    // 1. CALCUL PRESTATION COMPENSATOIRE (PC)
+    // ---------------------------------------------------------
 
-    // --- 1. PRESTATION COMPENSATOIRE (ALGORITHME A) ---
-    /*
-     * Base Légale: Code Civil Art. 270 à 281.
-     * Méthodes Croisées: Pilote & INSEE.
-     */
-    // A.1 Méthode Pilote
-    const deltaRevenuAnnual = Math.abs(
-      (data.spouseIncome - data.myIncome) * 12,
-    );
-    // Determine Age Coeff of the RECEIVER (Usually the one with less income)
-    const receiverAge =
-      data.myIncome < data.spouseIncome ? data.myAge : data.spouseAge;
-    let coeffAge = LEGAL_CONSTANTS_2026.COEFF_AGE.UNDER_45;
-    if (receiverAge >= 45 && receiverAge <= 55)
-      coeffAge = LEGAL_CONSTANTS_2026.COEFF_AGE.FROM_45_TO_55;
-    if (receiverAge > 55) coeffAge = LEGAL_CONSTANTS_2026.COEFF_AGE.OVER_55;
+    // Determine Beneficiary (who earns less?)
+    const beneficiaryIsMe = data.myIncome < data.spouseIncome;
+    const beneficiaryIncome = beneficiaryIsMe
+      ? data.myIncome
+      : data.spouseIncome;
+    const payerIncome = beneficiaryIsMe ? data.spouseIncome : data.myIncome;
+    const beneficiaryAge = beneficiaryIsMe ? data.myAge : data.spouseAge;
 
-    const pcPilote = deltaRevenuAnnual * (data.marriageDuration / 2) * coeffAge;
+    // --- METHODE PILOTE (Approche Temporelle) ---
+    // PC = DeltaAnnuel * (Duration / 2) * CoeffAge
+    const deltaMonthly = payerIncome - beneficiaryIncome;
+    const deltaAnnual = deltaMonthly * 12;
 
-    // A.2 Méthode Insee (Simplified for Simulation)
-    // Loss of Living Standard ~ 20% of Gap over 8 years
-    const pcInsee = deltaRevenuAnnual * 0.2 * 8;
+    // Calculate Duration from Date if available
+    let duration = data.marriageDuration;
+    if (data.marriageDate) {
+      const start = new Date(data.marriageDate);
+      const end = new Date();
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
+      if (!isNaN(diffYears)) {
+        duration = Math.round(diffYears);
+      }
+    }
 
-    const pcMean = Math.round((pcPilote + pcInsee) / 2);
+    let ageCoeff = 1.0;
+    if (beneficiaryAge >= 45 && beneficiaryAge < 55) ageCoeff = 1.2;
+    if (beneficiaryAge >= 55) ageCoeff = 1.5;
 
-    // --- 2. PENSION ALIMENTAIRE (ALGORITHME B) ---
-    /*
-     * CALCUL DE PENSION ALIMENTAIRE (CONTRIBUTION)
-     * Base Légale: Code Civil Art. 371-2 et 373-2-2.
-     * Référentiel: Table de référence du Ministère de la Justice (2026).
-     * Formule: PA = (Revenu_Debiteur - RSA_Socle) * Coeff_Garde
-     */
-    const debtorIncome = data.myIncome;
-    const rRef = Math.max(0, debtorIncome - LEGAL_CONSTANTS_2026.RSA_SOLO);
+    let pcPilote = 0;
+    if (deltaAnnual > 0) {
+      pcPilote = deltaAnnual * (duration / 2) * ageCoeff;
+    }
 
-    // Select Rate (Fixing type checks)
-    let rate = 0;
+    // Standard Deviation (+/- 10%) for Pilote Range
+    const piloteMin = pcPilote * 0.9;
+    const piloteMax = pcPilote * 1.1;
+
+    // --- METHODE INSEE (Unités de Consommation) ---
+    // 1. UC Avant Divorce (Ménage complet)
+    // Adulte 1 + Adulte 2 (0.5) + Enfants (0.3 each)
+    const ucBefore = 1 + 0.5 + 0.3 * data.childrenCount;
+    const totalIncome = data.myIncome + data.spouseIncome;
+    const standardLivingBefore = totalIncome / ucBefore;
+
+    // 2. UC Après Divorce (Bénéficiaire)
+    // On suppose que le parent bénéficiaire a la charge principale
+    const ucAfter = 1 + 0.3 * data.childrenCount;
+    const standardLivingAfter = beneficiaryIncome / ucAfter;
+
+    // 3. Perte et Compensation
+    const lossMonthly = Math.max(0, standardLivingBefore - standardLivingAfter);
+    // Range: 15% (Min) to 25% (Max) over 8 years (96 months)
+    // Mean at 20%
+    const pcInseeMin = lossMonthly * 96 * 0.15;
+    const pcInseeMax = lossMonthly * 96 * 0.25;
+    const pcInsee = lossMonthly * 96 * 0.2; // Mean
+
+    // Resultat final (Moyenne des Moyennes)
+    const finalPC = Math.round((pcPilote + pcInsee) / 2);
+
+    // ---------------------------------------------------------
+    // 2. CALCUL PENSION ALIMENTAIRE (PA)
+    // Barème Ministère de la Justice — Table de Référence 2026
+    // PA = (Revenu_Débiteur − RSA_Socle) × Taux × NbEnfants
+    // ---------------------------------------------------------
+
+    let paPerChild = 0;
+    let paTotal = 0;
+    const custody = data.custodyType || "classic";
+
     if (data.childrenCount > 0) {
-      const count = Math.min(data.childrenCount, 3) as 1 | 2 | 3; // Clamp to 3 for map key
-      rate = LEGAL_CONSTANTS_2026.CHILD_SUPPORT_RATES[data.custodyType][count];
+      const rRef = Math.max(0, payerIncome - RSA_SOLO);
+
+      // Clamp children count to 1-3 for rate lookup
+      const rateKey = Math.min(data.childrenCount, 3) as 1 | 2 | 3;
+      const rateTable =
+        CHILD_SUPPORT_RATES[custody] || CHILD_SUPPORT_RATES.classic;
+      const rate = rateTable[rateKey] || 0.135;
+
+      paPerChild = Math.round(rRef * rate);
+      paTotal = paPerChild * data.childrenCount;
     }
 
-    const paPerChild = Math.round(rRef * rate);
-    const paTotal = paPerChild * data.childrenCount;
+    // ---------------------------------------------------------
+    // 3. LIQUIDATION (Assets)
+    // ---------------------------------------------------------
+    const netAsset = (data.assetsValue || 0) - (data.assetsCRD || 0);
+    let soulteToPay = 0;
 
-    // --- 3. LIQUIDATION (ALGORITHME C) ---
-    let liquidationResult = undefined;
-    if (data.assetsValue && data.assetsCRD !== undefined) {
-      const netAsset = data.assetsValue - data.assetsCRD;
-      const rewardsDiff = (data.rewardsBob || 0) - (data.rewardsAlice || 0); // Assuming Alice is User
-
-      // Soulte: Amount I have to PAY to keep the house
-      // Soulte = P_net / 2 + (Rewards_Spouse - Rewards_Me)
-      // If I keep the house, I owe half net value + any rewards owed to spouse.
-      const soulteToPay = netAsset / 2 + rewardsDiff;
-
-      liquidationResult = {
-        netAsset,
-        soulteToPay: Math.round(soulteToPay),
-      };
+    if (data.matrimonialRegime === "separation") {
+      soulteToPay = netAsset / 2;
+    } else {
+      // COMMUNAUTE (Default)
+      const rewardsDiff = (data.rewardsBob || 0) - (data.rewardsAlice || 0);
+      soulteToPay = netAsset / 2 + rewardsDiff;
     }
 
-    // --- 4. RESTE A VIVRE (ALGORITHME D) ---
-    // Projection Post-Divorce for User
-    // Income - Taxes(est 20%) - Charges - PA Paid - PC Paid (if annualised)
-    // Simplified: Net Income - Charges - PA (assuming debtor).
-    const resteMe = data.myIncome - data.myCharges - paTotal;
-    const resteSpouse = data.spouseIncome; // Simplified
+    // ---------------------------------------------------------
+    // 4. RESTE A VIVRE (BUDGET)
+    // Reste = ΣRevenus − ΣCharges
+    // Revenus = RevenuNet + PA reçue
+    // Charges = Impôts + Loyer/Crédit + Charges fixes + PA versée
+    // ---------------------------------------------------------
+    const isPayer = data.myIncome > data.spouseIncome;
+    const paPaid = isPayer ? paTotal : 0;
+    const paReceived = isPayer ? 0 : paTotal;
+
+    const taxes = data.myTaxes || 0;
+    const rent = data.myRent || 0;
+    const fixedCharges = data.myCharges || 0;
+
+    const totalRevenus = data.myIncome + paReceived;
+    const totalCharges = taxes + rent + fixedCharges + paPaid;
+    const remaining = totalRevenus - totalCharges;
 
     return {
-      compensatory: {
-        min: Math.round(Math.min(pcPilote, pcInsee)),
-        mean: pcMean,
-        max: Math.round(Math.max(pcPilote, pcInsee)),
-        details: { pilote: Math.round(pcPilote), insee: Math.round(pcInsee) },
+      compensatoryAllowance: Math.round(finalPC),
+      childSupport: Math.round(paTotal),
+      childSupportPerChild: paPerChild,
+      custodyTypeUsed: custody,
+      liquidationShare: Math.round(soulteToPay),
+      remainingLiveable: Math.round(remaining),
+      belowPovertyThreshold: remaining < SEUIL_PAUVRETE_2026,
+      budget: {
+        totalRevenus: Math.round(totalRevenus),
+        totalCharges: Math.round(totalCharges),
+        taxes: Math.round(taxes),
+        rent: Math.round(rent),
+        fixedCharges: Math.round(fixedCharges),
+        paPaid: Math.round(paPaid),
+        paReceived: Math.round(paReceived),
       },
-      childSupport: {
-        perChild: paPerChild,
-        total: paTotal,
-      },
-      liquidation: liquidationResult,
-      resteAVivre: {
-        me: Math.round(resteMe),
-        spouse: Math.round(resteSpouse),
-        warning: resteMe < LEGAL_CONSTANTS_2026.SEUIL_PAUVRETE,
+      details: {
+        pilote: {
+          value: Math.round(pcPilote),
+          min: Math.round(piloteMin),
+          max: Math.round(piloteMax),
+        },
+        insee: {
+          value: Math.round(pcInsee),
+          min: Math.round(pcInseeMin),
+          max: Math.round(pcInseeMax),
+        },
+        formula: `Moyenne Globale Estimée`,
       },
     };
   },

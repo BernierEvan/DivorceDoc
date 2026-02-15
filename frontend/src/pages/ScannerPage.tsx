@@ -506,6 +506,15 @@ const ScannerPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={() => navigate("/validation")}
+              className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] underline underline-offset-4 transition-colors"
+            >
+              Je préfère saisir mes données manuellement
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -656,30 +665,39 @@ const ScannerPage: React.FC = () => {
               </p>
             </div>
           ) : !imageSrc ? (
-            <div className="flex items-center justify-between w-full px-8">
-              <button
-                onClick={triggerFileUpload}
-                className="flex flex-col items-center justify-center text-(--text-muted) hover:text-(--text-primary) transition"
-              >
-                <div className="w-10 h-10 rounded-full bg-(--bg-tertiary) border border-(--border-color) flex items-center justify-center mb-1">
-                  <Layers className="w-4 h-4" />
-                </div>
-                <span className="text-[9px] uppercase tracking-wider">
-                  Importer
-                </span>
-              </button>
+            <>
+              <div className="flex items-center justify-between w-full px-8">
+                <button
+                  onClick={triggerFileUpload}
+                  className="flex flex-col items-center justify-center text-(--text-muted) hover:text-(--text-primary) transition"
+                >
+                  <div className="w-10 h-10 rounded-full bg-(--bg-tertiary) border border-(--border-color) flex items-center justify-center mb-1">
+                    <Layers className="w-4 h-4" />
+                  </div>
+                  <span className="text-[9px] uppercase tracking-wider">
+                    Importer
+                  </span>
+                </button>
+
+                <button
+                  onClick={capture}
+                  className="w-20 h-20 rounded-full border-4 border-(--accent-primary)/30 flex items-center justify-center shadow-[0_0_30px_rgba(13,148,136,0.2)] active:scale-95 transition relative group"
+                >
+                  <div className="w-12 h-12 rounded-full bg-(--accent-primary) shadow-[0_0_15px_var(--accent-primary)] flex items-center justify-center">
+                    <Camera className="w-6 h-6 text-white" />
+                  </div>
+                </button>
+
+                <div className="w-10" />
+              </div>
 
               <button
-                onClick={capture}
-                className="w-20 h-20 rounded-full border-4 border-(--accent-primary)/30 flex items-center justify-center shadow-[0_0_30px_rgba(13,148,136,0.2)] active:scale-95 transition relative group"
+                onClick={() => navigate("/validation")}
+                className="absolute bottom-2 text-[10px] text-[var(--text-muted)] underline opacity-70 hover:opacity-100 uppercase tracking-widest"
               >
-                <div className="w-12 h-12 rounded-full bg-(--accent-primary) shadow-[0_0_15px_var(--accent-primary)] flex items-center justify-center">
-                  <Camera className="w-6 h-6 text-white" />
-                </div>
+                Passer la validation manuelle
               </button>
-
-              <div className="w-10" />
-            </div>
+            </>
           ) : (
             <div className="flex space-x-6 w-full justify-center">
               <button

@@ -25,7 +25,7 @@ export const pdfGenerator = {
       doc.saveGraphicsState();
       // Set very low opacity for watermark (8%)
       // @ts-expect-error - jsPDF GState for opacity
-      doc.setGState(new doc.GState({ opacity: 0.08 }));
+      doc.setGState(new doc.GState({ opacity: 0.15 }));
       doc.setFont("helvetica", "bold");
       doc.setFontSize(28);
       doc.setTextColor(COLOR_PRIMARY);
@@ -72,7 +72,7 @@ export const pdfGenerator = {
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(COLOR_ACCENT);
-    doc.text("SIMULATION CERTIFIÉE LOCALE", 20, 21);
+    doc.text("SIMULATION DU DIVORCE", 20, 21);
 
     // Meta Data (Right)
     const sessionHash = `#${Math.floor(Math.random() * 16777215)
@@ -129,16 +129,68 @@ export const pdfGenerator = {
 
     drawRow(
       "Prestation Compensatoire (Moyenne)",
-      `${results.compensatory.mean} €`,
+      `${results.compensatoryAllowance.toLocaleString()} €`,
+    );
+    // Breakdown
+    drawRow(
+      "  - Méthode Pilote",
+      `${results.details?.pilote.value.toLocaleString()} €`,
     );
     drawRow(
-      "Pension Alimentaire (Total / mois)",
-      `${results.childSupport.total} €`,
+      "  - Méthode Insee",
+      `${results.details?.insee.value.toLocaleString()} €`,
     );
-    const soulteTxt = results.liquidation
-      ? `${results.liquidation.soulteToPay} €`
+    const custodyLabel =
+      results.custodyTypeUsed === "classic"
+        ? "Classique"
+        : results.custodyTypeUsed === "alternating"
+          ? "Alternée"
+          : "Réduite";
+    drawRow(
+      `Pension Alimentaire (Garde ${custodyLabel})`,
+      `${results.childSupport.toLocaleString()} € / mois`,
+    );
+    if (results.childSupportPerChild > 0) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      rowY += 4;
+      doc.text(
+        `    ${results.childSupportPerChild.toLocaleString()} € par enfant — Barème MJ 2026`,
+        30,
+        rowY,
+      );
+      rowY += 4;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+    }
+    const soulteTxt = results.liquidationShare
+      ? `${Math.abs(results.liquidationShare).toLocaleString()} € ${results.liquidationShare > 0 ? "(à verser)" : "(à recevoir)"}`
       : "Non applicable";
     drawRow("Soulte à verser/recevoir", soulteTxt, true);
+    if (data.assetsValue > 0) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      rowY += 4;
+      const pNet = data.assetsValue - (data.assetsCRD || 0);
+      doc.text(
+        `    Pnet = ${data.assetsValue.toLocaleString()} − ${(data.assetsCRD || 0).toLocaleString()} = ${pNet.toLocaleString()} €`,
+        30,
+        rowY,
+      );
+      if ((data.rewardsAlice || 0) > 0 || (data.rewardsBob || 0) > 0) {
+        rowY += 4;
+        doc.text(
+          `    Récompenses : A=${(data.rewardsAlice || 0).toLocaleString()} €, B=${(data.rewardsBob || 0).toLocaleString()} €`,
+          30,
+          rowY,
+        );
+      }
+      rowY += 4;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+    }
 
     y += 55;
 
@@ -160,7 +212,11 @@ export const pdfGenerator = {
     y += 5;
     doc.text(`• Enfants: ${data.childrenCount}`, leftColX, y);
     y += 5;
-    doc.text(`• Garde: ${data.custodyType}`, leftColX, y);
+    doc.text(
+      `• Garde: ${data.custodyType === "classic" ? "Classique" : data.custodyType === "alternating" ? "Alternée" : "Réduite"}`,
+      leftColX,
+      y,
+    );
     y += 5;
 
     // Column 2: Finances (Reset Y for col 2, but we need max Y for next section)
@@ -179,12 +235,92 @@ export const pdfGenerator = {
       col2Y,
     );
     col2Y += 5;
+    doc.text(`• Impôts: ${data.myTaxes || 0} € / mois`, rightColX, col2Y);
+    col2Y += 5;
+    doc.text(`• Loyer/Crédit: ${data.myRent || 0} € / mois`, rightColX, col2Y);
+    col2Y += 5;
+    doc.text(
+      `• Charges fixes: ${data.myCharges || 0} € / mois`,
+      rightColX,
+      col2Y,
+    );
+    col2Y += 5;
     doc.text(`• Immobilier: ${data.assetsValue || 0} €`, rightColX, col2Y);
     col2Y += 5;
     doc.text(`• Crédit Restant: ${data.assetsCRD || 0} €`, rightColX, col2Y);
     col2Y += 5;
 
     y = Math.max(y, col2Y) + 10;
+
+    // Budget Summary
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(COLOR_PRIMARY);
+    doc.text("Reste à Vivre (Budget)", leftColX, y);
+    y += 6;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(COLOR_MUTED);
+    doc.text(
+      `+ Revenu net: ${results.budget.totalRevenus.toLocaleString()} €`,
+      leftColX,
+      y,
+    );
+    y += 5;
+    if (results.budget.taxes > 0) {
+      doc.text(
+        `− Impôts: ${results.budget.taxes.toLocaleString()} €`,
+        leftColX,
+        y,
+      );
+      y += 5;
+    }
+    if (results.budget.rent > 0) {
+      doc.text(
+        `− Loyer/Crédit: ${results.budget.rent.toLocaleString()} €`,
+        leftColX,
+        y,
+      );
+      y += 5;
+    }
+    if (results.budget.fixedCharges > 0) {
+      doc.text(
+        `− Charges fixes: ${results.budget.fixedCharges.toLocaleString()} €`,
+        leftColX,
+        y,
+      );
+      y += 5;
+    }
+    if (results.budget.paPaid > 0) {
+      doc.text(
+        `− PA versée: ${results.budget.paPaid.toLocaleString()} €`,
+        leftColX,
+        y,
+      );
+      y += 5;
+    }
+    doc.setFont("helvetica", "bold");
+    if (results.belowPovertyThreshold) {
+      doc.setTextColor(200, 100, 0);
+    } else {
+      doc.setTextColor(COLOR_PRIMARY);
+    }
+    doc.text(
+      `= Reste à Vivre: ${results.remainingLiveable.toLocaleString()} € / mois`,
+      leftColX,
+      y,
+    );
+    if (results.belowPovertyThreshold) {
+      y += 5;
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8);
+      doc.setTextColor(200, 100, 0);
+      doc.text(
+        "⚠ Inférieur au seuil de pauvreté 2026 (1 216 €/mois)",
+        leftColX,
+        y,
+      );
+      doc.setFontSize(10);
+    }
+    y += 10;
 
     // --- 4. JUSTIFICATION DES CALCULS ---
     y = drawSectionTitle("4", "Methodologie & Calculs", y);
@@ -221,48 +357,174 @@ export const pdfGenerator = {
     doc.text(`Barème Ministère 2026: Table ${data.custodyType}`, 25, y);
     y += 10;
 
-    // --- 5. DISCLAIMERS ---
-    y = pageHeight - 60; // Stick to bottom area
-    doc.setDrawColor(252, 165, 165); // Red 300
-    doc.setFillColor(254, 242, 242); // Red 50
-    doc.roundedRect(20, y, pageWidth - 40, 35, 2, 2, "FD");
+    // --- 5. ANALYSES GRAPHIQUES ---
+    doc.addPage();
+    drawWatermark();
+    y = 20;
 
+    y = drawSectionTitle("5", "Analyses Graphiques", y);
+
+    // A. Disparité Revenus (Barre Empilée)
     doc.setFont("helvetica", "bold");
+    doc.setTextColor(COLOR_PRIMARY);
+    doc.setFontSize(10);
+    doc.text("A. Disparité des Revenus", 25, y);
+    y += 8;
+
+    const totalIncome = data.myIncome + data.spouseIncome;
+    const myShare = totalIncome > 0 ? data.myIncome / totalIncome : 0;
+    const spouseShare = totalIncome > 0 ? data.spouseIncome / totalIncome : 0;
+
+    const barWidth = 140;
+    const barHeight = 12;
+    const startX = 35;
+
+    // Draw My Share (Cyan)
+    doc.setFillColor(20, 184, 166); // Teal 500
+    doc.rect(startX, y, barWidth * myShare, barHeight, "F");
+
+    // Draw Spouse Share (Slate)
+    doc.setFillColor(148, 163, 184); // Slate 400
+    doc.rect(
+      startX + barWidth * myShare,
+      y,
+      barWidth * spouseShare,
+      barHeight,
+      "F",
+    );
+
+    // Labels inside bars
     doc.setFontSize(8);
-    doc.setTextColor(185, 28, 28); // Red 700
-    doc.text("AVERTISSEMENT LÉGAL IMPORTANT", 30, y + 8);
+    doc.setTextColor(255, 255, 255);
+    if (myShare > 0.1) {
+      doc.text(
+        `${Math.round(myShare * 100)}%`,
+        startX + (barWidth * myShare) / 2,
+        y + 8,
+        { align: "center" },
+      );
+    }
+    if (spouseShare > 0.1) {
+      doc.text(
+        `${Math.round(spouseShare * 100)}%`,
+        startX + barWidth * myShare + (barWidth * spouseShare) / 2,
+        y + 8,
+        { align: "center" },
+      );
+    }
 
-    doc.setFont("helvetica", "normal");
-    doc.text(
-      "1. Ce document est une estimation mathématique et ne remplace pas un avocat.",
-      30,
-      y + 16,
-    );
-    doc.text(
-      "2. Seul un Juge aux Affaires Familiales peut fixer les montants définitifs.",
-      30,
-      y + 21,
-    );
-    doc.text(
-      "3. Les données sont déclaratives et n'ont pas été certifiées.",
-      30,
-      y + 26,
-    );
-
-    // --- 6. FOOTER ---
-    const footerY = pageHeight - 10;
-    doc.setDrawColor(226, 232, 240);
-    doc.line(20, footerY - 5, pageWidth - 20, footerY - 5);
-
+    // Legend below
+    y += barHeight + 6;
     doc.setFontSize(8);
+    // My Legend
+    doc.setFillColor(20, 184, 166);
+    doc.rect(startX, y, 4, 4, "F");
     doc.setTextColor(COLOR_MUTED);
-    doc.text("Page 1 / 1", 20, footerY);
-    doc.text(
-      "Généré par DivorceDoc - Application d'Aide à la Décision",
-      pageWidth - 20,
-      footerY,
-      { align: "right" },
-    );
+    doc.text("Mes Revenus", startX + 6, y + 3);
+    // Spouse Legend
+    doc.setFillColor(148, 163, 184);
+    doc.rect(startX + 60, y, 4, 4, "F");
+    doc.text("Revenus Conjoint", startX + 66, y + 3);
+
+    y += 15;
+
+    // B. Budget Post-Divorce (Vertical Bars)
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(COLOR_PRIMARY);
+    doc.setFontSize(10);
+    doc.text("B. Budget Mensuel Estimé", 25, y);
+    y += 10;
+
+    const budgetItems = [
+      { label: "Revenus", value: data.myIncome, color: [20, 184, 166] }, // Teal
+      { label: "Charges", value: data.myCharges, color: [239, 68, 68] }, // Red
+      {
+        label: "Reste",
+        value: results.remainingLiveable,
+        color: [99, 102, 241], // Indigo
+      },
+    ];
+
+    const maxVal = Math.max(...budgetItems.map((i) => i.value)) || 1;
+    const chartHeight = 40;
+    const colWidth = 30;
+    const gap = 15;
+    let currentX = 45; // Start chart X
+
+    budgetItems.forEach((item) => {
+      const h = (item.value / maxVal) * chartHeight;
+      const topY = y + (chartHeight - h);
+
+      // Draw Bar
+      doc.setFillColor(item.color[0], item.color[1], item.color[2]);
+      doc.rect(currentX, topY, colWidth, h, "F");
+
+      // Draw Value on Top
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(COLOR_PRIMARY);
+      doc.text(`${item.value}€`, currentX + colWidth / 2, topY - 2, {
+        align: "center",
+      });
+
+      // Draw Label below
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(COLOR_MUTED);
+      doc.text(item.label, currentX + colWidth / 2, y + chartHeight + 5, {
+        align: "center",
+      });
+
+      currentX += colWidth + gap;
+    });
+
+    // --- 6. GLOBAL ELEMENTS (Footer & Disclaimer on ALL Pages) ---
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+
+      // 1. Legal Disclaimer (Bottom)
+      const disclaimerY = pageHeight - 60;
+      doc.setDrawColor(252, 165, 165); // Red 300
+      doc.setFillColor(254, 242, 242); // Red 50
+      doc.roundedRect(20, disclaimerY, pageWidth - 40, 35, 2, 2, "FD");
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(185, 28, 28); // Red 700
+      doc.text("AVERTISSEMENT LÉGAL IMPORTANT", 30, disclaimerY + 8);
+
+      doc.setFont("helvetica", "normal");
+      doc.text(
+        "1. Ce document est une estimation mathématique et ne remplace pas un avocat.",
+        30,
+        disclaimerY + 16,
+      );
+      doc.text(
+        "2. Seul un Juge aux Affaires Familiales peut fixer les montants définitifs.",
+        30,
+        disclaimerY + 21,
+      );
+      doc.text(
+        "3. Les données sont déclaratives et n'ont pas été certifiées.",
+        30,
+        disclaimerY + 26,
+      );
+
+      // 2. Footer
+      const footerY = pageHeight - 10;
+      doc.setDrawColor(226, 232, 240);
+      doc.line(20, footerY - 5, pageWidth - 20, footerY - 5);
+
+      doc.setFontSize(8);
+      doc.setTextColor(COLOR_MUTED);
+      doc.text(`Page ${i} / ${pageCount}`, 20, footerY);
+      doc.text(
+        "Généré par DivorceDoc - Application d'Aide à la Décision",
+        pageWidth - 20,
+        footerY,
+        { align: "right" },
+      );
+    }
 
     // Output
     const blob = doc.output("blob");

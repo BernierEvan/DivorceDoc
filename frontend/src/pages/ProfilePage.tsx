@@ -10,14 +10,24 @@ const ProfilePage: React.FC = () => {
   const [date, setDate] = useState("");
   const [children, setChildren] = useState(0);
   const [regime, setRegime] = useState("community");
+  const [custodyType, setCustodyType] = useState("classic");
 
   const handleNext = () => {
+    if (!date) {
+      alert("Veuillez entrer une date de mariage.");
+      return;
+    }
+    if (new Date(date) > new Date()) {
+      alert("La date de mariage ne peut pas être dans le futur.");
+      return;
+    }
+
     // Save profile data
     localStorage.setItem(
       "profileData",
-      JSON.stringify({ divorceType, date, children, regime }),
+      JSON.stringify({ divorceType, date, children, regime, custodyType }),
     );
-    navigate("/scanner");
+    navigate("/quiz");
   };
 
   return (
@@ -51,6 +61,13 @@ const ProfilePage: React.FC = () => {
         <div className="glass-panel p-6 rounded-2xl border border-white/10">
           <label className="flex items-center space-x-2 text-[10px] uppercase tracking-widest text-gray-400 mb-4">
             <HeartHandshake className="w-3 h-3" /> <span>Divorce Type</span>
+            <InfoTooltip
+              content="Consentement mutuel (Amiable) : les deux époux s'accordent sur le divorce et ses conséquences.
+
+Divorce pour faute : un époux reproche à l'autre une violation grave des devoirs du mariage.
+
+Altération du lien conjugal : le divorce est prononcé après une séparation de fait d'au moins 1 an."
+            />
           </label>
           <select
             value={divorceType}
@@ -71,6 +88,7 @@ const ProfilePage: React.FC = () => {
           <input
             type="date"
             value={date}
+            max={new Date().toISOString().split("T")[0]}
             onChange={(e) => setDate(e.target.value)}
             className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white focus:border-[var(--color-plasma-cyan)] outline-none"
           />
@@ -99,6 +117,34 @@ const ProfilePage: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* Custody Type - Only show if children > 0 */}
+        {children > 0 && (
+          <div className="glass-panel p-6 rounded-2xl border border-white/10">
+            <label className="flex items-center space-x-2 text-[10px] uppercase tracking-widest text-gray-400 mb-4">
+              <Users className="w-3 h-3" /> <span>Type de Garde</span>
+            </label>
+            <div className="space-y-3">
+              {[
+                { key: "classic", label: "Classique (Droit de visite)" },
+                { key: "alternating", label: "Alternée (50/50)" },
+                { key: "reduced", label: "Réduite (Élargi)" },
+              ].map((g) => (
+                <button
+                  key={g.key}
+                  onClick={() => setCustodyType(g.key)}
+                  className={`w-full p-4 rounded-xl border text-sm font-medium transition-all duration-300 ${
+                    custodyType === g.key
+                      ? "border-[var(--color-plasma-cyan)] bg-[var(--color-plasma-cyan)]/10 text-white shadow-[0_0_15px_rgba(34,211,238,0.2)]"
+                      : "border-white/5 bg-white/5 text-gray-400 hover:bg-white/10"
+                  }`}
+                >
+                  {g.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Regime Buttons */}
         <div className="glass-panel p-6 rounded-2xl border border-white/10">

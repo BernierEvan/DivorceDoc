@@ -6,6 +6,7 @@ import DataValidationPage from "./pages/DataValidationPage";
 import DashboardPage from "./pages/DashboardPage";
 import ExportPage from "./pages/ExportPage";
 import ProfilePage from "./pages/ProfilePage";
+import QuizPage from "./pages/QuizPage";
 
 import GuidePage from "./pages/GuidePage";
 import PrivacyPage from "./pages/PrivacyPage";
@@ -27,6 +28,7 @@ const App: React.FC = () => {
         <Route path="/methodology" element={<MethodologyPage />} />
         <Route path="/glossary" element={<GlossaryPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/quiz" element={<QuizPage />} />
         <Route path="/scanner" element={<ScannerPage />} />
         <Route path="/validation" element={<DataValidationPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
