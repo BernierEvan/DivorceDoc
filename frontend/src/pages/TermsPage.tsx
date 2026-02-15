@@ -27,14 +27,14 @@ const TermsPage: React.FC = () => {
     icon?: any;
     isWarning?: boolean;
   }) => (
-    <section className="animate-fade-in mb-10">
+    <section className="mb-10 animate-fade-in">
       <div className="flex items-center mb-4 space-x-2">
         {Icon && (
           <Icon
             className={`w-5 h-5 ${isWarning ? "text-yellow-500" : "text-[var(--color-plasma-cyan)]"}`}
           />
         )}
-        <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400">
+        <h2 className="text-sm font-bold tracking-widest text-gray-400 uppercase">
           {title}
         </h2>
       </div>
@@ -64,7 +64,7 @@ const TermsPage: React.FC = () => {
       <div className="p-6 pt-8 flex items-center justify-between z-10 sticky top-0 bg-[var(--color-deep-space)]/90 backdrop-blur-xl border-b border-white/5">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition group"
+          className="p-2 transition rounded-full bg-white/5 hover:bg-white/10 group"
         >
           <ChevronLeft className="w-5 h-5 text-gray-300 group-hover:text-white" />
         </button>
@@ -74,16 +74,16 @@ const TermsPage: React.FC = () => {
         <div className="w-9" />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-8 pb-32">
+      <div className="flex-1 px-6 py-8 pb-32 overflow-y-auto">
         {/* Title */}
         <div className="mb-12 text-center">
           <div className="inline-flex items-center justify-center p-4 bg-[var(--color-plasma-cyan)]/10 rounded-full mb-6 border border-[var(--color-plasma-cyan)]/20 animate-pulse-glow">
             <Scale className="w-8 h-8 text-[var(--color-plasma-cyan)]" />
           </div>
-          <h1 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+          <h1 className="mb-4 text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
             Conditions Générales d'Utilisation
           </h1>
-          <p className="text-sm text-gray-400 max-w-sm mx-auto">
+          <p className="max-w-sm mx-auto text-sm text-gray-400">
             Dernière mise à jour : Février 2026
           </p>
         </div>
@@ -105,11 +105,11 @@ const TermsPage: React.FC = () => {
           icon={AlertTriangle}
           isWarning={true}
         >
-          <strong className="block text-yellow-400 mb-2 font-bold tracking-wider">
+          <strong className="block mb-2 font-bold tracking-wider text-yellow-400">
             L'UTILISATION DE L'APPLICATION NE CONSTITUE EN AUCUN CAS UN CONSEIL
             JURIDIQUE.
           </strong>
-          <ul className="list-disc pl-4 space-y-2">
+          <ul className="pl-4 space-y-2 list-disc">
             <li>
               <strong className="text-white">Nature du service :</strong> Simple
               outil mathématique basé sur des barèmes publics.
@@ -145,7 +145,7 @@ const TermsPage: React.FC = () => {
 
         <Section title="4. Responsabilité Utilisateur" icon={UserCheck}>
           <p>Vous êtes seul responsable de :</p>
-          <ul className="list-disc pl-4 mt-2 space-y-1">
+          <ul className="pl-4 mt-2 space-y-1 list-disc">
             <li>L'exactitude des documents importés.</li>
             <li>L'usage personnel (non commercial) du service.</li>
             <li>La vérification humaine de chaque chiffre extrait.</li>
@@ -154,7 +154,7 @@ const TermsPage: React.FC = () => {
 
         <Section title="5. Limitation de Responsabilité" icon={ShieldOff}>
           <p>L'Éditeur n'est pas responsable :</p>
-          <ul className="list-disc pl-4 mt-2 space-y-1 text-gray-400">
+          <ul className="pl-4 mt-2 space-y-1 text-gray-400 list-disc">
             <li>Des erreurs OCR (Tesseract.js).</li>
             <li>Des divergences avec les décisions judiciaires réelles.</li>
             <li>Des pertes de données par fermeture accidentelle.</li>
@@ -173,7 +173,7 @@ const TermsPage: React.FC = () => {
           <p>
             Le service est financé par <strong>Google AdSense/AdMob</strong>.
           </p>
-          <ul className="list-disc pl-4 mt-2 space-y-1">
+          <ul className="pl-4 mt-2 space-y-1 list-disc">
             <li>L'Utilisateur accepte l'exposition publicitaire.</li>
             <li>
               L'Éditeur peut restreindre l'accès en cas d'utilisation de

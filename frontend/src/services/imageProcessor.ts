@@ -1,7 +1,7 @@
 import * as pdfjsLib from "pdfjs-dist";
 
 // Worker configuration
-pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+pdfjsLib.GlobalWorkerOptions.workerSrc = import.meta.env.BASE_URL + "pdf.worker.min.mjs";
 
 interface ProcessOptions {
   maxWidth?: number;
@@ -214,7 +214,8 @@ async function ingestFile(file: File, pdfScale = 3.0): Promise<ImageBitmap> {
 
     // PDF.js needs a real canvas or OffscreenCanvas to render
     const { canvas, ctx } = getCanvas(viewport.width, viewport.height);
-    await page.render({ canvas: null, canvasContext: ctx as any, viewport }).promise;
+    await page.render({ canvas: null, canvasContext: ctx as any, viewport })
+      .promise;
     return createImageBitmap(canvas);
   } else {
     return createImageBitmap(file);

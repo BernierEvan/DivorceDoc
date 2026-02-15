@@ -30,27 +30,27 @@ export default defineConfig({
         categories: ["finance", "utilities"],
         icons: [
           {
-            src: "/icon-192.svg",
+            src: "icon-192.svg",
             sizes: "192x192",
             type: "image/svg+xml",
             purpose: "any",
           },
           {
-            src: "/icon-512.svg",
+            src: "icon-512.svg",
             sizes: "512x512",
             type: "image/svg+xml",
             purpose: "any maskable",
           },
           {
-            src: "/apple-touch-icon.svg",
+            src: "apple-touch-icon.svg",
             sizes: "180x180",
             type: "image/svg+xml",
-            purpose: "apple touch icon",
+            purpose: "any",
           },
         ],
         screenshots: [
           {
-            src: "/icon-512.svg",
+            src: "icon-512.svg",
             sizes: "512x512",
             type: "image/svg+xml",
             form_factor: "narrow",

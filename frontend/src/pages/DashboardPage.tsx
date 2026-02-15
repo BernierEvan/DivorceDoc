@@ -10,12 +10,7 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
-import {
-  Download,
-  ChevronLeft,
-  Edit2,
-  Scale,
-} from "lucide-react";
+import { Download, ChevronLeft, Edit2, Scale } from "lucide-react";
 import { legalEngine, type SimulationResult } from "../services/legalEngine";
 import { AdUnit } from "../components/AdUnit";
 import { InfoTooltip } from "../components/InfoTooltip";
