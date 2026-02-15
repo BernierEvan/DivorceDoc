@@ -20,9 +20,10 @@ export const ocrWorker = {
     imagePathOrBuffer: string,
     hintText?: string,
   ): Promise<ExtractedData> => {
-    // 1. Initialize Worker (French)
+    // 1. Initialize Worker (French + English)
     const worker = await Tesseract.createWorker("fra+eng");
 
+    // ── Pass 1: Primary recognition (PSM 6 — uniform text block) ──
     await worker.setParameters({
       preserve_interword_spaces: "1",
       tessedit_pageseg_mode: "6" as Tesseract.PSM,
@@ -32,35 +33,9 @@ export const ocrWorker = {
       tessedit_char_whitelist:
         "0123456789€.,/:-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ",
     });
+    const primaryRet = await worker.recognize(imagePathOrBuffer);
 
-    // 2. Recognize
-    const ret = await worker.recognize(imagePathOrBuffer);
-
-    // 2a. Alternate page segmentation for better line extraction
-    await worker.setParameters({
-      preserve_interword_spaces: "1",
-      tessedit_pageseg_mode: "4" as Tesseract.PSM,
-      user_defined_dpi: "400",
-      tessedit_ocr_engine_mode: "1",
-      textord_tabfind_find_tables: "1",
-      tessedit_char_whitelist:
-        "0123456789€.,/:-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ",
-    });
-    const altRet = await worker.recognize(imagePathOrBuffer);
-
-    // 2a-bis. Fully automatic segmentation for noisy PDFs
-    await worker.setParameters({
-      preserve_interword_spaces: "1",
-      tessedit_pageseg_mode: "3" as Tesseract.PSM,
-      user_defined_dpi: "400",
-      tessedit_ocr_engine_mode: "1",
-      textord_tabfind_find_tables: "1",
-      tessedit_char_whitelist:
-        "0123456789€.,/:-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ",
-    });
-    const autoRet = await worker.recognize(imagePathOrBuffer);
-
-    // 2b. Numeric-only pass to improve digit accuracy
+    // ── Pass 2: Numeric-only pass (improves digit accuracy for amounts) ──
     await worker.setParameters({
       preserve_interword_spaces: "1",
       tessedit_pageseg_mode: "6" as Tesseract.PSM,
@@ -76,90 +51,34 @@ export const ocrWorker = {
     });
     const numericRet = await worker.recognize(imagePathOrBuffer);
 
-    // 2c. Sparse text mode for tables (payslip layouts)
-    await worker.setParameters({
-      preserve_interword_spaces: "1",
-      tessedit_pageseg_mode: "11" as Tesseract.PSM,
-      user_defined_dpi: "400",
-      tessedit_ocr_engine_mode: "1",
-      textord_tabfind_find_tables: "1",
-      tessedit_char_whitelist:
-        "0123456789€.,/:-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ",
-    });
-    const sparseRet = await worker.recognize(imagePathOrBuffer);
-
-    // 2d. Legacy engine pass (sometimes better on PDFs)
-    await worker.setParameters({
-      preserve_interword_spaces: "1",
-      tessedit_pageseg_mode: "6" as Tesseract.PSM,
-      user_defined_dpi: "400",
-      tessedit_ocr_engine_mode: "0",
-      textord_tabfind_find_tables: "1",
-      tessedit_char_whitelist:
-        "0123456789€.,/:-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ",
-    });
-    const legacyRet = await worker.recognize(imagePathOrBuffer);
-
-    // 2e. Upscaled pass (helps small fonts in PDFs)
-    const upscaledSource = await tryUpscaleSource(imagePathOrBuffer, 2);
-    let upscaleRetText = "";
-    let upscaleNumericText = "";
-    let upscaleConfidence = 0;
-    if (upscaledSource) {
+    // ── Pass 3 (conditional): Sparse text for tables if confidence is low ──
+    let sparseText = "";
+    if (primaryRet.data.confidence < 60) {
       await worker.setParameters({
         preserve_interword_spaces: "1",
-        tessedit_pageseg_mode: "6" as Tesseract.PSM,
+        tessedit_pageseg_mode: "11" as Tesseract.PSM,
         user_defined_dpi: "400",
         tessedit_ocr_engine_mode: "1",
         textord_tabfind_find_tables: "1",
         tessedit_char_whitelist:
           "0123456789€.,/:-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ",
       });
-      const upscaleRet = await worker.recognize(upscaledSource);
-
-      await worker.setParameters({
-        preserve_interword_spaces: "1",
-        tessedit_pageseg_mode: "6" as Tesseract.PSM,
-        user_defined_dpi: "400",
-        tessedit_ocr_engine_mode: "1",
-        tessedit_char_whitelist: "0123456789,. ",
-        tessedit_char_blacklist:
-          "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ€:/-",
-        classify_bln_numeric_mode: "1",
-        load_system_dawg: "0",
-        load_freq_dawg: "0",
-        tessedit_enable_dict_correction: "0",
-      });
-      const upscaleNumericRet = await worker.recognize(upscaledSource);
-
-      upscaleRetText = upscaleRet.data.text || "";
-      upscaleNumericText = upscaleNumericRet.data.text || "";
-      upscaleConfidence = Math.max(
-        upscaleRet.data.confidence,
-        upscaleNumericRet.data.confidence,
-      );
+      const sparseRet = await worker.recognize(imagePathOrBuffer);
+      sparseText = sparseRet.data.text || "";
     }
 
-    // 3. Extract Metrics
-    const confidence = Math.max(
-      ret.data.confidence,
-      altRet.data.confidence,
-      autoRet.data.confidence,
-      sparseRet.data.confidence,
-      legacyRet.data.confidence,
-      upscaleConfidence,
-    );
-    const text = `${ret.data.text}\n${altRet.data.text}\n${autoRet.data.text}\n${sparseRet.data.text}\n${legacyRet.data.text}\n${upscaleRetText}`;
+    // 3. Build combined text & confidence
+    const confidence = primaryRet.data.confidence;
+    const text = sparseText
+      ? `${primaryRet.data.text}\n${sparseText}`
+      : primaryRet.data.text;
 
     // 4. Terminate
     await worker.terminate();
 
     // 5. Run Stage B: Extraction & Structuring
     const mergedText = hintText ? `${text}\n${hintText}` : text;
-    const extracted = parseDocument(
-      mergedText,
-      [numericRet.data.text, upscaleNumericText].filter(Boolean).join("\n"),
-    );
+    const extracted = parseDocument(mergedText, numericRet.data.text || "");
 
     return {
       text: mergedText,
@@ -604,41 +523,4 @@ function extractInlineLabelAmount(
   return null;
 }
 
-async function tryUpscaleSource(
-  source: string,
-  scale: number,
-): Promise<string | null> {
-  try {
-    if (!source || typeof source !== "string") return null;
-    if (
-      !source.startsWith("data:") &&
-      !source.startsWith("blob:") &&
-      !source.startsWith("http")
-    ) {
-      return null;
-    }
 
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    const loaded = new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve();
-      img.onerror = () => reject();
-    });
-    img.src = source;
-    await loaded;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.floor(img.width * scale);
-    canvas.height = Math.floor(img.height * scale);
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
-
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-    return canvas.toDataURL("image/png");
-  } catch {
-    return null;
-  }
-}

@@ -93,10 +93,10 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
         <h1 className="text-2xl font-bold text-white text-glow mb-2">
-          Profile Setup
+          Configuration du Profil
         </h1>
         <p className="text-sm text-gray-400">
-          Initialize basic legal parameters.
+          Initialisez les paramètres juridiques de base.
         </p>
       </div>
 
@@ -104,7 +104,7 @@ const ProfilePage: React.FC = () => {
         {/* Type of Divorce */}
         <div className="glass-panel p-6 rounded-2xl border border-white/10">
           <label className="flex items-center space-x-2 text-[10px] uppercase tracking-widest text-gray-400 mb-4">
-            <HeartHandshake className="w-3 h-3" /> <span>Divorce Type</span>
+            <HeartHandshake className="w-3 h-3" /> <span>Type de Divorce</span>
             <InfoTooltip
               content="Consentement mutuel (Amiable) : les deux époux s'accordent sur le divorce et ses conséquences.
 
@@ -118,16 +118,16 @@ Altération du lien conjugal : le divorce est prononcé après une séparation d
             onChange={(e) => setDivorceType(e.target.value)}
             className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white focus:border-[var(--color-plasma-cyan)] outline-none appearance-none"
           >
-            <option value="consent">Mutual Consent (Amiable)</option>
-            <option value="fault">Fault-Based</option>
-            <option value="separation">Alteration of Bond</option>
+            <option value="consent">Consentement Mutuel (Amiable)</option>
+            <option value="fault">Divorce pour Faute</option>
+            <option value="separation">Altération du Lien Conjugal</option>
           </select>
         </div>
 
         {/* Marriage Date */}
         <div className="glass-panel p-6 rounded-2xl border border-white/10">
           <label className="flex items-center space-x-2 text-[10px] uppercase tracking-widest text-gray-400 mb-4">
-            <Calendar className="w-3 h-3" /> <span>Date of Marriage</span>
+            <Calendar className="w-3 h-3" /> <span>Date de Mariage</span>
           </label>
           <input
             type="date"
@@ -141,7 +141,7 @@ Altération du lien conjugal : le divorce est prononcé après une séparation d
         {/* Children Counter */}
         <div className="glass-panel p-6 rounded-2xl border border-white/10">
           <label className="flex items-center space-x-2 text-[10px] uppercase tracking-widest text-gray-400 mb-4">
-            <Users className="w-3 h-3" /> <span>Children</span>
+            <Users className="w-3 h-3" /> <span>Enfants</span>
           </label>
           <div className="flex items-center justify-between bg-black/50 rounded-xl p-2">
             <button
@@ -193,7 +193,7 @@ Altération du lien conjugal : le divorce est prononcé après une séparation d
         {/* Regime Buttons */}
         <div className="glass-panel p-6 rounded-2xl border border-white/10">
           <label className="flex items-center space-x-2 text-[10px] uppercase tracking-widest text-gray-400 mb-4">
-            <span>Matrimonial Regime</span>
+            <span>Régime Matrimonial</span>
             <InfoTooltip content="C'est l'ensemble des règles qui fixent le sort de vos biens. Par défaut (sans contrat de mariage), vous êtes sous le régime de la communauté réduite aux acquêts." />
           </label>
           <div className="space-y-3">
@@ -207,7 +207,7 @@ Altération du lien conjugal : le divorce est prononcé après une séparation d
                     : "border-white/5 bg-white/5 text-gray-400 hover:bg-white/10"
                 }`}
               >
-                {r.charAt(0).toUpperCase() + r.slice(1)}
+                {r === "community" ? "Communauté" : r === "separation" ? "Séparation de biens" : "Participation aux acquêts"}
               </button>
             ))}
           </div>
@@ -299,7 +299,7 @@ Altération du lien conjugal : le divorce est prononcé après une séparation d
           className="w-full bg-[var(--color-plasma-cyan)] hover:bg-cyan-300 text-[var(--color-deep-space)] font-bold py-5 rounded-2xl shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all flex items-center justify-center space-x-3 group active:scale-95"
         >
           <span className="tracking-widest text-sm uppercase">
-            Continue to Scan
+            Continuer vers le Scan
           </span>
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </button>

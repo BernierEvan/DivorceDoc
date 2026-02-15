@@ -75,7 +75,7 @@ const DashboardPage: React.FC = () => {
           <ChevronLeft className="w-5 h-5 text-gray-400" />
         </button>
         <h1 className="text-sm font-bold tracking-widest uppercase text-glow">
-          Dashboard
+          Tableau de Bord
         </h1>
         <div className="flex space-x-2 mr-16">
           {/* Export Button - Navigates to Export Page */}
@@ -134,7 +134,7 @@ const DashboardPage: React.FC = () => {
             <div className="glass-panel p-4 rounded-xl border border-white/10 flex justify-between items-center">
               <div>
                 <p className="text-[10px] text-gray-400 uppercase">
-                  My Income (Net Social)
+                  Mon Revenu (Net Social)
                 </p>
                 <p className="text-xl font-mono text-[var(--color-plasma-cyan)]">
                   {financialData.myIncome}€

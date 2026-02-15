@@ -271,10 +271,10 @@ const DataValidationPage: React.FC = () => {
           />
         ) : scannedData ? (
           <div className="text-xs text-gray-500 font-mono p-4">
-            OCR Text Extract: {scannedData.text.slice(0, 50)}...
+            Extrait OCR : {scannedData.text.slice(0, 50)}...
           </div>
         ) : (
-          <span className="text-xs text-gray-600">No Document Source</span>
+          <span className="text-xs text-gray-600">Aucun document source</span>
         )}
 
         {/* Carousel Navigation - Right */}
@@ -316,7 +316,7 @@ const DataValidationPage: React.FC = () => {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 z-20">
               <h3 className="text-sm font-bold tracking-widest uppercase text-white/80">
-                Document Source
+                Document Source Original
               </h3>
               <div className="flex items-center space-x-4">
                 {/* Zoom Controls */}
@@ -485,7 +485,7 @@ const DataValidationPage: React.FC = () => {
             <span className="text-xl text-gray-500">€</span>
           </div>
           <div className="text-[10px] text-gray-500 mt-1">
-            Donnée non présente sur ce document
+            Donnée non extraite de ce document
           </div>
         </div>
 
@@ -571,7 +571,7 @@ const DataValidationPage: React.FC = () => {
           onClick={() => navigate(-1)}
           className="p-4 text-gray-400 hover:text-white"
         >
-          Back
+          Retour
         </button>
         <button
           onClick={handleNextStep}

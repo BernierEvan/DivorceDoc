@@ -143,7 +143,7 @@ const QuizPage: React.FC = () => {
                   : "border-white/5 bg-white/5 text-gray-400"
               }`}
             >
-              Stable (CDI/Func)
+              Stable (CDI/Fonctionnaire)
             </button>
             <button
               onClick={() => setJobStability("precaire")}
