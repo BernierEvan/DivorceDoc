@@ -25,7 +25,7 @@ export const ocrWorker = {
 
     await worker.setParameters({
       preserve_interword_spaces: "1",
-      tessedit_pageseg_mode: "6",
+      tessedit_pageseg_mode: "6" as Tesseract.PSM,
       user_defined_dpi: "400",
       tessedit_ocr_engine_mode: "1",
       textord_tabfind_find_tables: "1",
@@ -39,7 +39,7 @@ export const ocrWorker = {
     // 2a. Alternate page segmentation for better line extraction
     await worker.setParameters({
       preserve_interword_spaces: "1",
-      tessedit_pageseg_mode: "4",
+      tessedit_pageseg_mode: "4" as Tesseract.PSM,
       user_defined_dpi: "400",
       tessedit_ocr_engine_mode: "1",
       textord_tabfind_find_tables: "1",
@@ -51,7 +51,7 @@ export const ocrWorker = {
     // 2a-bis. Fully automatic segmentation for noisy PDFs
     await worker.setParameters({
       preserve_interword_spaces: "1",
-      tessedit_pageseg_mode: "3",
+      tessedit_pageseg_mode: "3" as Tesseract.PSM,
       user_defined_dpi: "400",
       tessedit_ocr_engine_mode: "1",
       textord_tabfind_find_tables: "1",
@@ -63,7 +63,7 @@ export const ocrWorker = {
     // 2b. Numeric-only pass to improve digit accuracy
     await worker.setParameters({
       preserve_interword_spaces: "1",
-      tessedit_pageseg_mode: "6",
+      tessedit_pageseg_mode: "6" as Tesseract.PSM,
       user_defined_dpi: "400",
       tessedit_ocr_engine_mode: "1",
       tessedit_char_whitelist: "0123456789,. ",
@@ -79,7 +79,7 @@ export const ocrWorker = {
     // 2c. Sparse text mode for tables (payslip layouts)
     await worker.setParameters({
       preserve_interword_spaces: "1",
-      tessedit_pageseg_mode: "11",
+      tessedit_pageseg_mode: "11" as Tesseract.PSM,
       user_defined_dpi: "400",
       tessedit_ocr_engine_mode: "1",
       textord_tabfind_find_tables: "1",
@@ -91,7 +91,7 @@ export const ocrWorker = {
     // 2d. Legacy engine pass (sometimes better on PDFs)
     await worker.setParameters({
       preserve_interword_spaces: "1",
-      tessedit_pageseg_mode: "6",
+      tessedit_pageseg_mode: "6" as Tesseract.PSM,
       user_defined_dpi: "400",
       tessedit_ocr_engine_mode: "0",
       textord_tabfind_find_tables: "1",
@@ -108,7 +108,7 @@ export const ocrWorker = {
     if (upscaledSource) {
       await worker.setParameters({
         preserve_interword_spaces: "1",
-        tessedit_pageseg_mode: "6",
+        tessedit_pageseg_mode: "6" as Tesseract.PSM,
         user_defined_dpi: "400",
         tessedit_ocr_engine_mode: "1",
         textord_tabfind_find_tables: "1",
@@ -119,7 +119,7 @@ export const ocrWorker = {
 
       await worker.setParameters({
         preserve_interword_spaces: "1",
-        tessedit_pageseg_mode: "6",
+        tessedit_pageseg_mode: "6" as Tesseract.PSM,
         user_defined_dpi: "400",
         tessedit_ocr_engine_mode: "1",
         tessedit_char_whitelist: "0123456789,. ",

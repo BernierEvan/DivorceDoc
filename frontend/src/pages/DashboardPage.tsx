@@ -12,18 +12,13 @@ import {
 } from "recharts";
 import {
   Download,
-  Share2,
   ChevronLeft,
-  Info,
-  TrendingUp,
-  AlertTriangle,
   Edit2,
   Scale,
 } from "lucide-react";
 import { legalEngine, type SimulationResult } from "../services/legalEngine";
 import { AdUnit } from "../components/AdUnit";
 import { InfoTooltip } from "../components/InfoTooltip";
-import { adManager } from "../services/adManager";
 import { SEO } from "../components/SEO";
 
 const DashboardPage: React.FC = () => {

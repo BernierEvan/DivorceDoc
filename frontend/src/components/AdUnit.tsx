@@ -8,7 +8,7 @@ interface AdUnitProps {
 
 export const AdUnit: React.FC<AdUnitProps> = ({
   type,
-  slotId,
+  slotId: _slotId,
   className = "",
 }) => {
   // Mock Ad Rendering

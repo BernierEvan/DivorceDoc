@@ -5,7 +5,6 @@ import type { SimulationResult, FinancialData } from "./legalEngine";
 const COLOR_PRIMARY = "#0F172A"; // Slate 900
 const COLOR_ACCENT = "#14B8A6"; // Teal 500
 const COLOR_MUTED = "#64748B"; // Slate 500
-const _COLOR_BG_LIGHT = "#F8FAFC"; // Slate 50
 
 export const pdfGenerator = {
   generateReport: (data: FinancialData, results: SimulationResult): void => {

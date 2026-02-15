@@ -10,11 +10,6 @@ interface ProcessOptions {
   pdfScale?: number;
 }
 
-interface ImageStats {
-  blurScore: number; // Variance of Laplacian
-  brightness: number; // Mean luma
-}
-
 export const imageProcessor = {
   /**
    * Main pipeline entry point
@@ -82,7 +77,6 @@ export const imageProcessor = {
     }
 
     // Pass 3: Otsu Binarization (Dynamic Thresholding)
-    const otsuThreshold = calculateOtsuThreshold(histogram, grayBuffer.length); // Calculate based on original hist or new? Using original for Otsu usually best, but here we equalized. Let's strictly use Otsu on the Gray buffer.
     // Re-calculate histogram of Equalized image for accurate Otsu?
     // Actually, standard pipeline: Grayscale -> Otsu is robust. Equalization helps if lighting is bad.
     // Let's compute Otsu on the *Contrast Stretched* buffer.
@@ -220,7 +214,7 @@ async function ingestFile(file: File, pdfScale = 3.0): Promise<ImageBitmap> {
 
     // PDF.js needs a real canvas or OffscreenCanvas to render
     const { canvas, ctx } = getCanvas(viewport.width, viewport.height);
-    await page.render({ canvasContext: ctx as any, viewport }).promise;
+    await page.render({ canvas: null, canvasContext: ctx as any, viewport }).promise;
     return createImageBitmap(canvas);
   } else {
     return createImageBitmap(file);

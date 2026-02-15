@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { FileText, Shield, Zap } from "lucide-react";
+import { Shield } from "lucide-react";
 import { InfoTooltip } from "../components/InfoTooltip";
 import { SEO, faqJsonLd } from "../components/SEO";
 import { errorSystem } from "../services/errorSystem";

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Home, Share2, CheckCircle, FileLock, Power, X } from "lucide-react";
+import { Share2, FileLock, Power } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import {

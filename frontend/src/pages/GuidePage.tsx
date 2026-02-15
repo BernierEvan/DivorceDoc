@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   FileText,
   ChevronLeft,
-  CheckCircle,
   Shield,
   Camera,
   CreditCard,
