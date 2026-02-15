@@ -7,7 +7,7 @@ import { errorSystem } from "../services/errorSystem";
 
 const landingFaq = faqJsonLd([
   {
-    question: "Comment fonctionne le simulateur de divorce DivorceDoc ?",
+    question: `Comment fonctionne le simulateur de divorce "DivorceDoc" ?`,
     answer:
       "DivorceDoc analyse vos documents (bulletins de paie, avis d'imposition) directement sur votre appareil grâce à l'OCR Tesseract.js. Aucune donnée n'est envoyée sur un serveur. L'outil calcule la prestation compensatoire, la pension alimentaire, la liquidation du régime matrimonial et le reste à vivre.",
   },
@@ -55,10 +55,10 @@ const LandingPage: React.FC = () => {
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-[var(--accent-primary)] rounded-full blur-[150px] opacity-10 animate-pulse-glow" />
 
       {/* Header */}
-      <div className="w-full p-6 flex justify-between items-center z-20">
+      <div className="z-20 flex items-center justify-between w-full p-6">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-[var(--accent-primary)] rounded-lg flex items-center justify-center">
-            <span className="font-bold text-white font-mono">D</span>
+            <span className="font-mono font-bold text-white">D</span>
           </div>
           <span className="text-[var(--text-primary)] font-bold tracking-wider">
             DivorceDoc
@@ -73,9 +73,9 @@ const LandingPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="max-w-md w-full z-10 flex-1 flex flex-col items-center justify-center p-6 pb-24">
+      <div className="z-10 flex flex-col items-center justify-center flex-1 w-full max-w-md p-6 pb-24">
         {/* Zero-G Entry Visualization */}
-        <div className="h-64 mb-10 relative flex justify-center items-center preserve-3d">
+        <div className="relative flex items-center justify-center h-64 mb-10 preserve-3d">
           {/* Privacy Force Field (The Shield) */}
           <div className="absolute w-44 h-80 rounded-[3rem] border-2 border-[var(--accent-primary)] shadow-[0_0_30px_rgba(20,184,166,0.3)] animate-float" />
           <div className="absolute w-48 h-84 rounded-[3.5rem] border border-[var(--accent-primary)] opacity-30 animate-pulse-glow" />
@@ -84,7 +84,7 @@ const LandingPage: React.FC = () => {
           <div className="w-36 h-72 bg-[var(--bg-secondary)] rounded-[2.5rem] border border-[var(--border-color)] relative shadow-2xl animate-[float_6s_ease-in-out_infinite_1s] overflow-hidden">
             {/* Phone Screen Gradient */}
             <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-tertiary)] to-[var(--bg-primary)] opacity-90" />
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+            <div className="absolute left-0 right-0 flex justify-center bottom-4">
               <div className="w-12 h-12 rounded-full bg-[var(--accent-primary)] blur-md opacity-20 animate-pulse" />
             </div>
             <div className="absolute top-1/2 left-1/2 w-1.5 h-1.5 bg-[var(--accent-primary)] rounded-full shadow-[0_0_10px_var(--accent-primary)] animate-[bounce_2s_infinite]" />
@@ -139,7 +139,7 @@ const LandingPage: React.FC = () => {
           Guide de préparation des documents
         </Link>
 
-        <nav className="mt-4 flex space-x-4" aria-label="Liens légaux">
+        <nav className="flex mt-4 space-x-4" aria-label="Liens légaux">
           <Link
             to="/privacy"
             className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-[10px] uppercase tracking-widest transition-colors"
@@ -158,7 +158,7 @@ const LandingPage: React.FC = () => {
         </nav>
 
         <nav
-          className="mt-4 flex flex-col items-center space-y-2"
+          className="flex flex-col items-center mt-4 space-y-2"
           aria-label="Ressources"
         >
           <Link
