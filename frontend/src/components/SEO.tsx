@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 const SITE_NAME = "DivorceDoc";
-const SITE_URL = "https://divorcedoc.fr";
+const SITE_URL = "https://bernierevan.github.io/DivorceDoc";
 const DEFAULT_DESCRIPTION =
   "Simulez gratuitement votre prestation compensatoire, pension alimentaire et liquidation du régime matrimonial. 100% confidentiel, aucune donnée conservée.";
 const DEFAULT_IMAGE = `${SITE_URL}/icon-512.svg`;

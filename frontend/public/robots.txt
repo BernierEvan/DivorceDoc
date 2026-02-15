@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://divorcedoc.fr/sitemap.xml
+Sitemap: https://bernierevan.github.io/DivorceDoc/sitemap.xml
 
 # Disallow app-internal routes that should not be indexed
 Disallow: /scanner
