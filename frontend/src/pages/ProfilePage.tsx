@@ -207,7 +207,11 @@ Altération du lien conjugal : le divorce est prononcé après une séparation d
                     : "border-white/5 bg-white/5 text-gray-400 hover:bg-white/10"
                 }`}
               >
-                {r === "community" ? "Communauté" : r === "separation" ? "Séparation de biens" : "Participation aux acquêts"}
+                {r === "community"
+                  ? "Communauté"
+                  : r === "separation"
+                    ? "Séparation de biens"
+                    : "Participation aux acquêts"}
               </button>
             ))}
           </div>

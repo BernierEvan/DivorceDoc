@@ -4,7 +4,7 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "/DivorceDoc/",
+  base: "/",
   plugins: [
     react(),
     VitePWA({
@@ -24,8 +24,8 @@ export default defineConfig({
         background_color: "#020617",
         display: "standalone",
         orientation: "portrait",
-        scope: "/DivorceDoc/",
-        start_url: "/DivorceDoc/",
+        scope: "/",
+        start_url: "/",
         lang: "fr",
         categories: ["finance", "utilities"],
         icons: [
@@ -60,7 +60,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,woff2,mjs}"],
-        navigateFallback: "/DivorceDoc/index.html",
+        navigateFallback: "/index.html",
         navigateFallbackAllowlist: [/^(?!\/__).*/],
         runtimeCaching: [
           {
