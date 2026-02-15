@@ -1,10 +1,150 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr" dir="ltr" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover"
+    />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#020617" />
+    <meta name="background-color" content="#020617" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="DivorceDoc" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="DivorceDoc" />
+    <meta name="msapplication-TileColor" content="#020617" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Primary SEO -->
+    <title>
+      DivorceDoc — Simulateur Divorce Gratuit | Prestation Compensatoire,
+      Pension Alimentaire
+    </title>
+    <meta
+      name="description"
+      content="Simulez gratuitement votre prestation compensatoire, pension alimentaire et liquidation du régime matrimonial. Outil 100% confidentiel, traitement local, aucune donnée conservée."
+    />
+    <meta
+      name="keywords"
+      content="simulation divorce, prestation compensatoire, pension alimentaire, calcul divorce, simulateur divorce gratuit, liquidation régime matrimonial, soulte divorce, reste à vivre, divorce en ligne, outil divorce France, calcul pension alimentaire 2026"
+    />
+    <meta name="author" content="DivorceDoc" />
+    <meta
+      name="robots"
+      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
+    />
+    <link rel="canonical" href="https://divorcedoc.fr/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content="DivorceDoc" />
+    <meta
+      property="og:title"
+      content="DivorceDoc — Simulateur Divorce Gratuit | Prestation Compensatoire, Pension Alimentaire"
+    />
+    <meta
+      property="og:description"
+      content="Simulez gratuitement votre prestation compensatoire, pension alimentaire et liquidation du régime matrimonial. 100% confidentiel."
+    />
+    <meta property="og:url" content="https://divorcedoc.fr/" />
+    <meta property="og:image" content="https://divorcedoc.fr/icon-512.svg" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta
+      property="og:image:alt"
+      content="DivorceDoc — Simulateur de divorce en ligne"
+    />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta
+      name="twitter:title"
+      content="DivorceDoc — Simulateur Divorce Gratuit"
+    />
+    <meta
+      name="twitter:description"
+      content="Simulez gratuitement prestation compensatoire, pension alimentaire et liquidation. 100% confidentiel."
+    />
+    <meta name="twitter:image" content="https://divorcedoc.fr/icon-512.svg" />
+
+    <!-- Geo & Language -->
+    <meta name="geo.region" content="FR" />
+    <meta name="geo.placename" content="France" />
+    <meta name="language" content="French" />
+    <meta http-equiv="content-language" content="fr" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/icon-192.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+
+    <!-- Global JSON-LD: Organization + WebApplication -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://divorcedoc.fr/#organization",
+            "name": "DivorceDoc",
+            "url": "https://divorcedoc.fr",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://divorcedoc.fr/icon-512.svg",
+              "width": 512,
+              "height": 512
+            },
+            "description": "Simulateur de divorce en ligne gratuit et confidentiel. Calcul prestation compensatoire, pension alimentaire, liquidation."
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://divorcedoc.fr/#website",
+            "url": "https://divorcedoc.fr",
+            "name": "DivorceDoc",
+            "description": "Simulateur de divorce gratuit — prestation compensatoire, pension alimentaire, liquidation régime matrimonial",
+            "publisher": { "@id": "https://divorcedoc.fr/#organization" },
+            "inLanguage": "fr-FR"
+          },
+          {
+            "@type": "WebApplication",
+            "name": "DivorceDoc",
+            "url": "https://divorcedoc.fr",
+            "applicationCategory": "FinanceApplication",
+            "operatingSystem": "All",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "EUR"
+            },
+            "description": "Simulez gratuitement votre prestation compensatoire, pension alimentaire et liquidation du régime matrimonial.",
+            "inLanguage": "fr",
+            "browserRequirements": "Requires JavaScript and WebAssembly",
+            "featureList": [
+              "Calcul prestation compensatoire (méthodes Pilote et INSEE)",
+              "Calcul pension alimentaire (barème MJ 2026)",
+              "Liquidation régime matrimonial et calcul de soulte",
+              "Simulation reste à vivre post-divorce",
+              "OCR documents (Tesseract.js, traitement local)",
+              "Génération rapport PDF détaillé",
+              "Traitement 100% local — zéro donnée stockée"
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

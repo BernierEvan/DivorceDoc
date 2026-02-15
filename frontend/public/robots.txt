@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://divorcedoc.fr/sitemap.xml
+
+# Disallow app-internal routes that should not be indexed
+Disallow: /scanner
+Disallow: /validation
+Disallow: /dashboard
+Disallow: /export
+
+# Allow crawling of all public pages
+Allow: /guide
+Allow: /privacy
+Allow: /terms
+Allow: /methodology
+Allow: /glossary
+Allow: /profile
+Allow: /quiz

@@ -9,6 +9,7 @@ import {
   type FinancialData,
 } from "../services/legalEngine";
 import { pdfGenerator } from "../services/pdfGenerator";
+import { SEO } from "../components/SEO";
 
 interface ExportData {
   financial: FinancialData;
@@ -77,6 +78,12 @@ const ExportPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-(--color-deep-space) flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+      <SEO
+        title="Export du Rapport"
+        description="Téléchargez votre rapport de simulation de divorce."
+        path="/export"
+        noindex={true}
+      />
       {/* Background Grid */}
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5" />
       <div

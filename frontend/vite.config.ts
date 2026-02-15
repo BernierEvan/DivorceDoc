@@ -8,13 +8,59 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      includeAssets: [
+        "icon-192.svg",
+        "icon-512.svg",
+        "apple-touch-icon.svg",
+        "pdf.worker.min.mjs",
+      ],
       manifest: {
-        name: "DivorceDoc",
+        name: "DivorceDoc — Simulation du Divorce",
         short_name: "DivorceDoc",
-        description: "Legal Document Scanner & Calculator",
-        theme_color: "#ffffff",
+        description:
+          "Simulez votre prestation compensatoire, pension alimentaire et liquidation. Aucune donnée conservée.",
+        theme_color: "#020617",
+        background_color: "#020617",
+        display: "standalone",
+        orientation: "portrait",
+        scope: "/",
+        start_url: "/",
+        lang: "fr",
+        categories: ["finance", "utilities"],
+        icons: [
+          {
+            src: "/icon-192.svg",
+            sizes: "192x192",
+            type: "image/svg+xml",
+            purpose: "any",
+          },
+          {
+            src: "/icon-512.svg",
+            sizes: "512x512",
+            type: "image/svg+xml",
+            purpose: "any maskable",
+          },
+          {
+            src: "/apple-touch-icon.svg",
+            sizes: "180x180",
+            type: "image/svg+xml",
+            purpose: "apple touch icon",
+          },
+        ],
+        screenshots: [
+          {
+            src: "/icon-512.svg",
+            sizes: "512x512",
+            type: "image/svg+xml",
+            form_factor: "narrow",
+            label: "DivorceDoc - Accueil",
+          },
+        ],
       },
       workbox: {
+        globPatterns: ["**/*.{js,css,html,svg,png,woff2,mjs}"],
+        navigateFallback: "/index.html",
+        navigateFallbackAllowlist: [/^(?!\/__).*/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/tessdata\.projectnaptha\.com\/.*$/,
@@ -23,7 +69,7 @@ export default defineConfig({
               cacheName: "tesseract-languages",
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 Days
+                maxAgeSeconds: 60 * 60 * 24 * 30,
               },
             },
           },

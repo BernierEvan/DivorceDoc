@@ -1,8 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Users, HeartHandshake, ArrowRight } from "lucide-react";
+import {
+  Calendar,
+  Users,
+  HeartHandshake,
+  ArrowRight,
+  AlertTriangle,
+  X,
+} from "lucide-react";
 import { InfoTooltip } from "../components/InfoTooltip";
 import { AdUnit } from "../components/AdUnit";
+import { SEO, breadcrumbJsonLd } from "../components/SEO";
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,14 +19,22 @@ const ProfilePage: React.FC = () => {
   const [children, setChildren] = useState(0);
   const [regime, setRegime] = useState("community");
   const [custodyType, setCustodyType] = useState("classic");
+  const [showDateModal, setShowDateModal] = useState(false);
+  const [dateModalError, setDateModalError] = useState("");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleNext = () => {
     if (!date) {
-      alert("Veuillez entrer une date de mariage.");
+      setDateModalError("Veuillez entrer une date de mariage pour continuer.");
+      setShowDateModal(true);
       return;
     }
     if (new Date(date) > new Date()) {
-      alert("La date de mariage ne peut pas être dans le futur.");
+      setDateModalError("La date de mariage ne peut pas être dans le futur.");
+      setShowDateModal(true);
       return;
     }
 
@@ -30,8 +46,36 @@ const ProfilePage: React.FC = () => {
     navigate("/quiz");
   };
 
+  const handleModalConfirm = () => {
+    if (!date) {
+      setDateModalError("Veuillez entrer une date de mariage.");
+      return;
+    }
+    if (new Date(date) > new Date()) {
+      setDateModalError("La date de mariage ne peut pas être dans le futur.");
+      return;
+    }
+    setShowDateModal(false);
+    setDateModalError("");
+    // Save and navigate
+    localStorage.setItem(
+      "profileData",
+      JSON.stringify({ divorceType, date, children, regime, custodyType }),
+    );
+    navigate("/quiz");
+  };
+
   return (
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative overflow-hidden text-white">
+      <SEO
+        title="Configuration du Profil — Simulation Divorce"
+        description="Configurez votre profil pour la simulation de divorce : type de divorce, date de mariage, enfants, régime matrimonial et garde. Étape 1 du simulateur gratuit DivorceDoc."
+        path="/profile"
+        jsonLd={breadcrumbJsonLd([
+          { name: "Accueil", path: "/" },
+          { name: "Profil", path: "/profile" },
+        ])}
+      />
       {/* Background Ambience */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--color-plasma-cyan)]/10 rounded-full blur-[100px]" />
 
@@ -173,8 +217,83 @@ Altération du lien conjugal : le divorce est prononcé après une séparation d
         <AdUnit type="native" className="animate-fade-in delay-500" />
       </div>
 
+      {/* Date Modal */}
+      {showDateModal && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={() => {
+            setShowDateModal(false);
+            setDateModalError("");
+          }}
+        >
+          <div
+            className="bg-[var(--color-deep-space)] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-amber-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white">
+                  Date de mariage requise
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  setShowDateModal(false);
+                  setDateModalError("");
+                }}
+                className="text-gray-400 hover:text-white transition p-2 rounded-full hover:bg-white/10 cursor-pointer"
+                type="button"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-gray-300 leading-relaxed">
+                {dateModalError ||
+                  "Veuillez entrer votre date de mariage pour continuer la simulation."}
+              </p>
+              <div>
+                <label className="text-xs text-gray-400 mb-2 block">
+                  Date de mariage
+                </label>
+                <input
+                  type="date"
+                  value={date}
+                  max={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => {
+                    setDate(e.target.value);
+                    setDateModalError("");
+                  }}
+                  className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white focus:border-[var(--color-plasma-cyan)] outline-none"
+                />
+              </div>
+              <button
+                onClick={handleModalConfirm}
+                className="w-full bg-[var(--color-plasma-cyan)] hover:bg-cyan-300 text-[var(--color-deep-space)] font-bold py-3 rounded-xl transition-all flex items-center justify-center space-x-2 active:scale-95"
+              >
+                <span className="tracking-widest text-sm uppercase">
+                  Continuer
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
-      <div className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-[var(--color-deep-space)] to-transparent z-20">
+      <div
+        className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-[var(--color-deep-space)] to-transparent z-20"
+        style={{
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.5rem)",
+        }}
+      >
         <button
           onClick={handleNext}
           className="w-full bg-[var(--color-plasma-cyan)] hover:bg-cyan-300 text-[var(--color-deep-space)] font-bold py-5 rounded-2xl shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all flex items-center justify-center space-x-3 group active:scale-95"

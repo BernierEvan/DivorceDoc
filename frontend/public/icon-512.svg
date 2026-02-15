@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="80" fill="#0F172A"/>
+  <rect x="40" y="40" width="432" height="432" rx="64" fill="#020617"/>
+  <text x="256" y="320" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="800" font-size="260" fill="#14B8A6">D</text>
+  <rect x="146" y="370" width="220" height="8" rx="4" fill="#14B8A6" opacity="0.4"/>
+</svg>

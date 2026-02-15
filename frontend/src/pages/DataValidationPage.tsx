@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertTriangle, Check, Eye } from "lucide-react";
+import { SEO } from "../components/SEO";
 
 // Logigram Stage C: Safety Checks
 const SAFETY_LIMIT_INCOME = 100000; // 100k/month
@@ -241,6 +242,12 @@ const DataValidationPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-(--color-deep-space) flex flex-col text-white pb-24">
+      <SEO
+        title="Vérification des Données"
+        description="Vérifiez les données extraites de vos documents."
+        path="/validation"
+        noindex={true}
+      />
       {/* Split View Header - Thumbnail (Stage 4 UX) */}
       <div className="bg-black/40 h-32 relative border-b border-white/10 flex items-center justify-center overflow-hidden group">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
@@ -554,7 +561,12 @@ const DataValidationPage: React.FC = () => {
       </div>
 
       {/* Floating Action Bar */}
-      <div className="fixed bottom-0 left-0 w-full p-4 bg-black/80 backdrop-blur-md border-t border-white/10 flex justify-between items-center z-50">
+      <div
+        className="fixed bottom-0 left-0 w-full p-4 bg-black/80 backdrop-blur-md border-t border-white/10 flex justify-between items-center z-50"
+        style={{
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)",
+        }}
+      >
         <button
           onClick={() => navigate(-1)}
           className="p-4 text-gray-400 hover:text-white"

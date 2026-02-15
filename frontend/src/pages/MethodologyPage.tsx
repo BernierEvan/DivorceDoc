@@ -8,6 +8,7 @@ import {
   Database,
   ShieldCheck,
 } from "lucide-react";
+import { SEO, breadcrumbJsonLd } from "../components/SEO";
 
 const MethodologyPage: React.FC = () => {
   const navigate = useNavigate();
@@ -67,6 +68,16 @@ const MethodologyPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative overflow-hidden text-white font-sans">
+      <SEO
+        title="Méthodologie et Sources Juridiques — Code Civil, Barèmes 2026"
+        description="Transparence sur les sources juridiques et algorithmes de DivorceDoc : Code Civil (Art. 270-281, 371-2), barème pension alimentaire MJ 2026, méthodes Pilote et INSEE pour la prestation compensatoire."
+        path="/methodology"
+        type="article"
+        jsonLd={breadcrumbJsonLd([
+          { name: "Accueil", path: "/" },
+          { name: "Méthodologie", path: "/methodology" },
+        ])}
+      />
       {/* Background */}
       <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_0%_100%,_#1e1b4b_0%,_transparent_50%)] opacity-30 pointer-events-none" />
 

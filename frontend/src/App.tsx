@@ -1,5 +1,5 @@
-import React from "react";
-import { Routes, Route } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import ScannerPage from "./pages/ScannerPage";
 import DataValidationPage from "./pages/DataValidationPage";
@@ -15,11 +15,24 @@ import MethodologyPage from "./pages/MethodologyPage";
 import GlossaryPage from "./pages/GlossaryPage";
 import ThemeToggle from "./components/ThemeToggle";
 import Footer from "./components/Footer";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import OfflineIndicator from "./components/OfflineIndicator";
+
+const ScrollToTop: React.FC = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
 
 const App: React.FC = () => {
   return (
     <>
+      <ScrollToTop />
+      <OfflineIndicator />
       <ThemeToggle />
+      <PWAInstallPrompt />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/guide" element={<GuidePage />} />

@@ -9,6 +9,7 @@ import {
 } from "../services/imageProcessor";
 import { ocrWorker } from "../services/ocrWorker";
 import { errorSystem, type ErrorCode } from "../services/errorSystem";
+import { SEO } from "../components/SEO";
 
 interface ScanSessionItem {
   id: string;
@@ -312,6 +313,12 @@ const ScannerPage: React.FC = () => {
   if (!isMobile) {
     return (
       <div className="min-h-screen bg-(--bg-primary) p-8">
+        <SEO
+          title="Scanner de Documents"
+          description="Scannez vos documents pour la simulation de divorce."
+          path="/scanner"
+          noindex={true}
+        />
         {/* Hidden File Input */}
         <input
           type="file"
@@ -553,6 +560,12 @@ const ScannerPage: React.FC = () => {
   // Mobile View
   return (
     <div className="h-screen bg-black flex flex-col relative overflow-hidden">
+      <SEO
+        title="Scanner de Documents"
+        description="Scannez vos documents pour la simulation de divorce."
+        path="/scanner"
+        noindex={true}
+      />
       {/* Error Toast */}
       {errorMsg && (
         <div className="absolute top-24 left-0 right-0 z-50 flex justify-center animate-bounce-in">
@@ -582,7 +595,10 @@ const ScannerPage: React.FC = () => {
       />
 
       {/* Header */}
-      <div className="absolute top-0 w-full z-20 p-4 flex justify-between items-center bg-linear-to-b from-black/80 to-transparent">
+      <div
+        className="absolute top-0 w-full z-20 p-4 flex justify-between items-center bg-linear-to-b from-black/80 to-transparent"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
+      >
         <button
           onClick={() => navigate("/")}
           className="text-white/70 hover:text-white p-2 backdrop-blur-sm bg-white/5 rounded-full"
@@ -639,7 +655,12 @@ const ScannerPage: React.FC = () => {
       </div>
 
       {/* Controls Container */}
-      <div className="bg-(--bg-secondary)/90 backdrop-blur-xl border-t border-(--border-color) rounded-t-3xl p-6 pb-10 bottom-sheet z-30 relative shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+      <div
+        className="bg-(--bg-secondary)/90 backdrop-blur-xl border-t border-(--border-color) rounded-t-3xl p-6 bottom-sheet z-30 relative shadow-[0_-10px_40px_rgba(0,0,0,0.5)]"
+        style={{
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 2.5rem)",
+        }}
+      >
         {/* Page Count Indicator */}
         {pageCount > 0 && !imageSrc && (
           <div className="flex justify-center mb-4">

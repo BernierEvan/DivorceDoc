@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Briefcase, Home, Wallet, ArrowRight } from "lucide-react";
 import { InfoTooltip } from "../components/InfoTooltip";
+import { SEO, breadcrumbJsonLd } from "../components/SEO";
 
 const QuizPage: React.FC = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   // Default ages
   const [myAge, setMyAge] = useState(42);
   const [spouseAge, setSpouseAge] = useState(44);
@@ -43,6 +48,16 @@ const QuizPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative overflow-hidden text-white">
+      <SEO
+        title="Situation Personnelle — Simulation Divorce"
+        description="Renseignez vos âges, situation professionnelle, charges mensuelles et patrimoine immobilier pour affiner le calcul de prestation compensatoire et pension alimentaire."
+        path="/quiz"
+        jsonLd={breadcrumbJsonLd([
+          { name: "Accueil", path: "/" },
+          { name: "Profil", path: "/profile" },
+          { name: "Situation personnelle", path: "/quiz" },
+        ])}
+      />
       {/* Background Ambience */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-[var(--color-plasma-cyan)]/10 rounded-full blur-[100px]" />
 
@@ -251,7 +266,12 @@ const QuizPage: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-[var(--color-deep-space)] to-transparent z-20">
+      <div
+        className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-[var(--color-deep-space)] to-transparent z-20"
+        style={{
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.5rem)",
+        }}
+      >
         <button
           onClick={handleNext}
           className="w-full bg-[var(--color-plasma-cyan)] hover:bg-cyan-300 text-[var(--color-deep-space)] font-bold py-5 rounded-2xl shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all flex items-center justify-center space-x-3 group active:scale-95"

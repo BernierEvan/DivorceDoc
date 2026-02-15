@@ -11,12 +11,50 @@ import {
   Users,
   Lightbulb,
 } from "lucide-react";
+import { SEO, howToJsonLd, breadcrumbJsonLd } from "../components/SEO";
 
 const GuidePage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative overflow-hidden text-white font-sans">
+      <SEO
+        title="Guide de Préparation des Documents pour le Divorce"
+        description="Préparez vos documents pour une simulation de divorce précise : bulletins de paie, avis d'imposition, patrimoine immobilier, charges. Conseils photo et OCR."
+        path="/guide"
+        jsonLd={[
+          breadcrumbJsonLd([
+            { name: "Accueil", path: "/" },
+            { name: "Guide de préparation", path: "/guide" },
+          ]),
+          howToJsonLd(
+            "Préparer ses documents pour une simulation de divorce",
+            "Guide étape par étape pour rassembler et numériser les pièces nécessaires à une simulation précise de divorce (prestation compensatoire, pension alimentaire, liquidation).",
+            [
+              {
+                name: "Rassembler les justificatifs de revenus",
+                text: "Réunissez vos 3 derniers bulletins de paie, le bulletin de décembre et les 2 derniers avis d'imposition complets.",
+              },
+              {
+                name: "Préparer les documents patrimoniaux",
+                text: "Actes de propriété, tableaux d'amortissement (Capital Restant Dû), relevés d'épargne (Livrets, Assurance-vie, PEA).",
+              },
+              {
+                name: "Collecter les justificatifs de charges",
+                text: "Justificatifs de loyer, charges de copropriété, factures récurrentes et frais liés aux enfants.",
+              },
+              {
+                name: "Numériser les documents",
+                text: "Photographiez vos documents avec une bonne luminosité naturelle, sur une surface contrastée, en alignant les bords. Privilégiez les PDF numériques si possible.",
+              },
+              {
+                name: "Lancer la simulation",
+                text: "Importez vos documents dans le scanner DivorceDoc. L'OCR Tesseract.js extrait les données directement sur votre appareil.",
+              },
+            ],
+          ),
+        ]}
+      />
       {/* Background Ambience */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[var(--color-plasma-cyan)]/5 rounded-full blur-[100px] pointer-events-none" />
 

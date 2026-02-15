@@ -22,12 +22,22 @@ const ThemeToggle: React.FC = () => {
       root.classList.add("light");
       localStorage.setItem("theme", "light");
     }
+
+    // Update PWA theme-color meta tag
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute("content", isDark ? "#020617" : "#f8fafc");
+    }
   }, [isDark]);
 
   return (
     <button
       onClick={() => setIsDark(!isDark)}
-      className="fixed top-4 right-4 z-[9999] p-3 rounded-xl bg-(--bg-secondary) border border-(--border-color) shadow-lg hover:shadow-xl transition-all duration-300"
+      className="fixed top-4 right-4 z-[9999] p-3 rounded-xl bg-(--bg-secondary) border border-(--border-color) shadow-lg hover:shadow-xl transition-all duration-300 btn-compact"
+      style={{
+        top: "calc(env(safe-area-inset-top, 0px) + 1rem)",
+        right: "calc(env(safe-area-inset-right, 0px) + 1rem)",
+      }}
       aria-label={isDark ? "Passer en mode clair" : "Passer en mode sombre"}
     >
       {isDark ? (

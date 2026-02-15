@@ -5,19 +5,30 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="w-full py-12 mt-auto border-t border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300">
+    <footer
+      className="w-full py-12 mt-auto border-t border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300"
+      itemScope
+      itemType="https://schema.org/WPFooter"
+    >
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         <div className="flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex flex-col items-center md:items-start space-y-3">
             <span className="text-base font-bold text-[var(--text-primary)] tracking-wide">
-              DivorceDock
+              DivorceDoc
             </span>
             <p className="text-xs text-[var(--text-muted)] font-medium">
-              © {currentYear} Tous droits réservés.
+              © {currentYear} DivorceDoc. Tous droits réservés.
+            </p>
+            <p className="text-xs text-[var(--text-muted)] max-w-xs text-center md:text-left">
+              Simulateur de divorce gratuit — prestation compensatoire, pension
+              alimentaire, liquidation du régime matrimonial.
             </p>
           </div>
 
-          <nav className="flex flex-wrap justify-center md:justify-end gap-x-8 gap-y-3">
+          <nav
+            className="flex flex-wrap justify-center md:justify-end gap-x-8 gap-y-3"
+            aria-label="Navigation secondaire"
+          >
             <Link
               to="/guide"
               className="text-sm text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-colors duration-200 font-medium"
@@ -53,7 +64,8 @@ const Footer: React.FC = () => {
 
         <div className="mt-12 pt-6 border-t border-[var(--border-color)] text-center">
           <p className="text-xs text-[var(--text-muted)] opacity-70">
-            Conforme à l'AI Act européen - Transparence et responsabilité.
+            Conforme à l'AI Act européen — Transparence et responsabilité
+            algorithmique.
           </p>
         </div>
       </div>

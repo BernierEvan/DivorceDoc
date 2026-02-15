@@ -11,6 +11,7 @@ import {
   DollarSign,
   Flag,
 } from "lucide-react";
+import { SEO, breadcrumbJsonLd } from "../components/SEO";
 
 const TermsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -47,6 +48,15 @@ const TermsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative overflow-hidden text-white font-sans">
+      <SEO
+        title="Conditions Générales d'Utilisation (CGU)"
+        description="CGU de DivorceDoc : simulateur de divorce gratuit à vocation informative. Architecture stateless, aucun stockage, limitation de responsabilité."
+        path="/terms"
+        jsonLd={breadcrumbJsonLd([
+          { name: "Accueil", path: "/" },
+          { name: "CGU", path: "/terms" },
+        ])}
+      />
       {/* Background */}
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_100%_0%,_#1e1b4b_0%,_transparent_50%)] opacity-30 pointer-events-none" />
 

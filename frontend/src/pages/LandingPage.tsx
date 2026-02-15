@@ -1,9 +1,37 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { FileText, Shield, Zap } from "lucide-react";
 import { InfoTooltip } from "../components/InfoTooltip";
-
+import { SEO, faqJsonLd } from "../components/SEO";
 import { errorSystem } from "../services/errorSystem";
+
+const landingFaq = faqJsonLd([
+  {
+    question: "Comment fonctionne le simulateur de divorce DivorceDoc ?",
+    answer:
+      "DivorceDoc analyse vos documents (bulletins de paie, avis d'imposition) directement sur votre appareil grâce à l'OCR Tesseract.js. Aucune donnée n'est envoyée sur un serveur. L'outil calcule la prestation compensatoire, la pension alimentaire, la liquidation du régime matrimonial et le reste à vivre.",
+  },
+  {
+    question: "Le simulateur de divorce est-il gratuit ?",
+    answer:
+      "Oui, DivorceDoc est 100% gratuit. Le service est financé par la publicité (Google AdSense). Aucun compte n'est requis.",
+  },
+  {
+    question: "Mes données sont-elles en sécurité ?",
+    answer:
+      "Absolument. Toutes les analyses sont effectuées localement dans la mémoire vive de votre appareil. Aucune donnée n'est stockée ni transmise. Dès que vous fermez l'application, tout est effacé.",
+  },
+  {
+    question: "Comment est calculée la prestation compensatoire ?",
+    answer:
+      "DivorceDoc utilise deux méthodes doctrinales reconnues : la méthode Pilote (différentiel de revenus × durée du mariage × coefficient d'âge) et la méthode INSEE (analyse des unités de consommation). Les résultats sont croisés pour fournir une fourchette indicative.",
+  },
+  {
+    question: "Le résultat remplace-t-il un avocat ?",
+    answer:
+      "Non. DivorceDoc est un outil de simulation indicatif basé sur des barèmes publics (Ministère de la Justice, Code Civil). Il ne constitue pas un conseil juridique. Consultez un avocat spécialisé pour valider les résultats.",
+  },
+]);
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +44,12 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center relative overflow-hidden text-center transition-colors duration-300">
+      <SEO
+        title="Simulateur Divorce Gratuit — Prestation Compensatoire, Pension Alimentaire"
+        description="Simulez gratuitement votre prestation compensatoire, pension alimentaire et liquidation du régime matrimonial. Outil 100% confidentiel, traitement local, aucune donnée conservée. Calcul soulte et reste à vivre."
+        path="/"
+        jsonLd={landingFaq}
+      />
       {/* Background Ambience */}
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,_var(--bg-secondary)_0%,_transparent_70%)] opacity-50" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-[var(--accent-primary)] rounded-full blur-[150px] opacity-10 animate-pulse-glow" />
@@ -98,48 +132,59 @@ const LandingPage: React.FC = () => {
           </span>
         </button>
 
-        <button
-          onClick={() => navigate("/guide")}
+        <Link
+          to="/guide"
           className="mt-6 text-[var(--accent-primary)] hover:text-[var(--accent-hover)] text-xs uppercase tracking-widest font-bold border-b border-transparent hover:border-[var(--accent-primary)] transition-all pb-0.5"
         >
           Guide de préparation des documents
-        </button>
+        </Link>
 
-        <div className="mt-4 flex space-x-4">
-          <button
-            onClick={() => navigate("/privacy")}
+        <nav className="mt-4 flex space-x-4" aria-label="Liens légaux">
+          <Link
+            to="/privacy"
             className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-[10px] uppercase tracking-widest transition-colors"
           >
             Confidentialité
-          </button>
-          <span className="text-[var(--text-muted)]">•</span>
-          <button
-            onClick={() => navigate("/terms")}
+          </Link>
+          <span className="text-[var(--text-muted)]" aria-hidden="true">
+            •
+          </span>
+          <Link
+            to="/terms"
             className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-[10px] uppercase tracking-widest transition-colors"
           >
             CGU
-          </button>
-        </div>
+          </Link>
+        </nav>
 
-        <div className="mt-4 flex flex-col items-center space-y-2">
-          <button
-            onClick={() => navigate("/methodology")}
+        <nav
+          className="mt-4 flex flex-col items-center space-y-2"
+          aria-label="Ressources"
+        >
+          <Link
+            to="/methodology"
             className="text-[var(--accent-primary)]/70 hover:text-[var(--accent-primary)] text-[9px] uppercase tracking-widest transition-colors flex items-center justify-center space-x-1"
           >
             <span className="w-1 h-1 bg-[var(--accent-primary)] rounded-full animate-pulse"></span>
             <span>Sources & Méthodologie (AI Act)</span>
-          </button>
-          <button
-            onClick={() => navigate("/glossary")}
+          </Link>
+          <Link
+            to="/glossary"
             className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-[9px] uppercase tracking-widest transition-colors"
           >
             Lexique Juridique
-          </button>
-        </div>
+          </Link>
+        </nav>
       </div>
 
       {/* Bottom Leaderboard Ad */}
-      <div className="w-full h-16 bg-[var(--bg-tertiary)]/50 border-t border-[var(--border-color)] flex items-center justify-center z-20">
+      <div
+        className="w-full bg-[var(--bg-tertiary)]/50 border-t border-[var(--border-color)] flex items-center justify-center z-20"
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          minHeight: "4rem",
+        }}
+      >
         <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest">
           Google Ads Leaderboard
         </span>

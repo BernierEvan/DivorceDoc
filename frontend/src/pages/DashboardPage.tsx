@@ -24,6 +24,7 @@ import { legalEngine, type SimulationResult } from "../services/legalEngine";
 import { AdUnit } from "../components/AdUnit";
 import { InfoTooltip } from "../components/InfoTooltip";
 import { adManager } from "../services/adManager";
+import { SEO } from "../components/SEO";
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -66,8 +67,17 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col text-white pb-20 overflow-hidden">
+      <SEO
+        title="Résultats de la Simulation"
+        description="Visualisez les résultats de votre simulation de divorce."
+        path="/dashboard"
+        noindex={true}
+      />
       {/* Top Bar */}
-      <div className="bg-black/20 backdrop-blur-md border-b border-white/5 p-4 flex justify-between items-center sticky top-0 z-50">
+      <div
+        className="bg-black/20 backdrop-blur-md border-b border-white/5 p-4 flex justify-between items-center sticky top-0 z-50"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
+      >
         <button
           onClick={() => navigate("/")}
           className="p-2 rounded-full hover:bg-white/10"
@@ -156,8 +166,8 @@ const DashboardPage: React.FC = () => {
                   <span>Prestation Compensatoire</span>
                   <InfoTooltip content="La prestation compensatoire vise à compenser la disparité de niveau de vie entre les époux après le divorce. Elle est versée en capital (somme forfaitaire) par l'époux le plus aisé à celui qui subit une baisse de revenus." />
                 </h3>
-                <div className="flex items-baseline space-x-2">
-                  <span className="text-5xl font-bold text-[var(--color-plasma-cyan)] text-glow">
+                <div className="flex items-baseline space-x-2 flex-wrap">
+                  <span className="text-4xl sm:text-5xl font-bold text-[var(--color-plasma-cyan)] text-glow">
                     {calculations.compensatoryAllowance.toLocaleString()} €
                   </span>
                   <span className="text-sm text-gray-400">est.</span>

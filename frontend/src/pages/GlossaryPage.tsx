@@ -8,6 +8,7 @@ import {
   FileText,
   Activity,
 } from "lucide-react";
+import { SEO, breadcrumbJsonLd, faqJsonLd } from "../components/SEO";
 
 const GlossaryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -49,6 +50,45 @@ const GlossaryPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative overflow-hidden text-white font-sans">
+      <SEO
+        title="Lexique Juridique du Divorce — Définitions 2026"
+        description="Définitions claires des termes juridiques du divorce : prestation compensatoire, soulte, récompense, pension alimentaire (CEEE), reste à vivre, consentement mutuel, JAF, CRD, UC."
+        path="/glossary"
+        type="article"
+        jsonLd={[
+          breadcrumbJsonLd([
+            { name: "Accueil", path: "/" },
+            { name: "Lexique juridique", path: "/glossary" },
+          ]),
+          faqJsonLd([
+            {
+              question: "Qu'est-ce que la prestation compensatoire ?",
+              answer:
+                "La prestation compensatoire est un capital versé pour compenser la disparité de niveau de vie causée par le divorce. Elle est déterminée selon une fourchette jurisprudentielle (art. 270 à 281 du Code Civil).",
+            },
+            {
+              question: "Qu'est-ce que la soulte dans un divorce ?",
+              answer:
+                "La soulte est la somme versée par l'époux qui conserve un bien commun à l'autre époux. Elle se calcule généralement comme (Valeur du bien - Capital Restant Dû) / 2.",
+            },
+            {
+              question: "Qu'est-ce que le reste à vivre après un divorce ?",
+              answer:
+                "Le reste à vivre correspond au budget disponible après déduction de toutes les charges fixes (loyer, impôts, pension alimentaire). Il est comparé au seuil de pauvreté pour évaluer la situation financière post-divorce.",
+            },
+            {
+              question: "Que signifie JAF ?",
+              answer:
+                "JAF signifie Juge aux Affaires Familiales. C'est le magistrat compétent pour trancher les litiges liés au divorce, à la garde des enfants et aux prestations.",
+            },
+            {
+              question: "Qu'est-ce qu'une récompense en droit du divorce ?",
+              answer:
+                "La récompense est une correction comptable appliquée lorsque des fonds propres d'un époux (héritage, donation) ont financé un bien commun. Elle ajuste le partage final.",
+            },
+          ]),
+        ]}
+      />
       {/* Background */}
       <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_100%_0%,_#1e1b4b_0%,_transparent_50%)] opacity-30 pointer-events-none" />
 

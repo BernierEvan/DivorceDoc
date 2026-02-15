@@ -8,6 +8,7 @@ import {
   EyeOff,
   ServerOff,
 } from "lucide-react";
+import { SEO, breadcrumbJsonLd } from "../components/SEO";
 
 const PrivacyPage: React.FC = () => {
   const navigate = useNavigate();
@@ -36,6 +37,15 @@ const PrivacyPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative overflow-hidden text-white font-sans">
+      <SEO
+        title="Politique de Confidentialité — Privacy by Design"
+        description="DivorceDoc ne collecte aucune donnée personnelle. Traitement 100% local (Tesseract.js), RAM uniquement, zéro stockage Cloud. Conforme RGPD et AI Act."
+        path="/privacy"
+        jsonLd={breadcrumbJsonLd([
+          { name: "Accueil", path: "/" },
+          { name: "Confidentialité", path: "/privacy" },
+        ])}
+      />
       {/* Background */}
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_0%_0%,_#1e1b4b_0%,_transparent_50%)] opacity-30 pointer-events-none" />
 
