@@ -4,6 +4,11 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
 import "./index.css";
 
+// Block browser install prompt while keeping manifest for future Play Store (TWA)
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+});
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
