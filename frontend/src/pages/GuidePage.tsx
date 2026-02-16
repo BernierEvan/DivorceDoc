@@ -61,14 +61,20 @@ const GuidePage: React.FC = () => {
       <div className="p-6 pt-8 flex items-center justify-between z-10 sticky top-0 bg-[var(--color-deep-space)]/80 backdrop-blur-md border-b border-white/5">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition group"
+          className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition group flex items-center justify-center"
         >
           <ChevronLeft className="w-5 h-5 text-gray-300 group-hover:text-white" />
         </button>
         <h1 className="text-sm font-bold tracking-widest text-white uppercase text-glow">
           Guide de Préparation
         </h1>
-        <div className="w-9" /> {/* Spacer */}
+        <button
+          onClick={() => navigate("/")}
+          className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition group flex items-center justify-center"
+          title="Accueil"
+        >
+          <Home className="w-5 h-5 text-gray-300 group-hover:text-white" />
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-8 pb-32 space-y-12">

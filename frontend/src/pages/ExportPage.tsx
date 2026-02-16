@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Share2, FileLock, Power } from "lucide-react";
+import { Share2, FileLock, Power, ChevronLeft, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -84,6 +84,25 @@ const ExportPage: React.FC = () => {
         path="/export"
         noindex={true}
       />
+      {/* Navigation Header */}
+      <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-20">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition group flex items-center justify-center"
+        >
+          <ChevronLeft className="w-5 h-5 text-gray-300 group-hover:text-white" />
+        </button>
+        <span className="text-xs font-bold tracking-[0.2em] text-white uppercase text-glow">
+          Export
+        </span>
+        <button
+          onClick={() => navigate("/")}
+          className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition group flex items-center justify-center"
+          title="Accueil"
+        >
+          <Home className="w-5 h-5 text-gray-300 group-hover:text-white" />
+        </button>
+      </div>
       {/* Background Grid */}
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5" />
       <div

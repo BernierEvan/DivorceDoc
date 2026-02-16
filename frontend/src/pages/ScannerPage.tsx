@@ -11,6 +11,8 @@ import {
   ZoomIn,
   ZoomOut,
   Focus,
+  ChevronLeft,
+  Home,
 } from "lucide-react";
 import {
   imageProcessor,
@@ -510,11 +512,19 @@ const ScannerPage: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate(-1)}
               className="btn-ghost px-4 py-2 flex items-center gap-2"
             >
-              <X className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4" />
               Retour
+            </button>
+            <button
+              onClick={() => navigate("/")}
+              className="btn-ghost px-4 py-2 flex items-center gap-2"
+              title="Accueil"
+            >
+              <Home className="w-4 h-4" />
+              Accueil
             </button>
             {pageCount > 0 && (
               <button
@@ -777,15 +787,21 @@ const ScannerPage: React.FC = () => {
         style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
       >
         <button
-          onClick={() => navigate("/")}
-          className="text-white/70 hover:text-white p-2 backdrop-blur-sm bg-white/5 rounded-full"
+          onClick={() => navigate(-1)}
+          className="text-white/70 hover:text-white p-2 backdrop-blur-sm bg-white/5 rounded-full flex items-center justify-center"
         >
-          <X className="w-5 h-5" />
+          <ChevronLeft className="w-5 h-5" />
         </button>
         <span className="text-(--accent-primary) font-medium tracking-widest text-xs uppercase text-glow">
           {pageCount > 0 ? `${pageCount} page(s) scannee(s)` : "Scanner actif"}
         </span>
-        <div className="w-8"></div>
+        <button
+          onClick={() => navigate("/")}
+          className="text-white/70 hover:text-white p-2 backdrop-blur-sm bg-white/5 rounded-full flex items-center justify-center"
+          title="Accueil"
+        >
+          <Home className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Main View */}

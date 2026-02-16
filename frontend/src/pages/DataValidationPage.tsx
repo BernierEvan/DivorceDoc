@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertTriangle, Check, Eye } from "lucide-react";
+import { AlertTriangle, Check, Eye, ChevronLeft, Home } from "lucide-react";
 import { SEO } from "../components/SEO";
 
 // Logigram Stage C: Safety Checks
@@ -262,6 +262,25 @@ const DataValidationPage: React.FC = () => {
         path="/validation"
         noindex={true}
       />
+      {/* Navigation Header */}
+      <div className="p-4 flex items-center justify-between z-10 sticky top-0 bg-[var(--color-deep-space)]/90 backdrop-blur-xl border-b border-white/5">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition group flex items-center justify-center"
+        >
+          <ChevronLeft className="w-5 h-5 text-gray-300 group-hover:text-white" />
+        </button>
+        <span className="text-xs font-bold tracking-[0.2em] text-white uppercase text-glow">
+          Vérification des Données
+        </span>
+        <button
+          onClick={() => navigate("/")}
+          className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition group flex items-center justify-center"
+          title="Accueil"
+        >
+          <Home className="w-5 h-5 text-gray-300 group-hover:text-white" />
+        </button>
+      </div>
       {/* Split View Header - Thumbnail (Stage 4 UX) */}
       <div className="bg-black/40 h-32 relative border-b border-white/10 flex items-center justify-center overflow-hidden group">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />

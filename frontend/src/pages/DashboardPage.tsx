@@ -10,7 +10,7 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
-import { Download, ChevronLeft, Edit2, Scale } from "lucide-react";
+import { Download, ChevronLeft, Home, Edit2, Scale } from "lucide-react";
 import { legalEngine, type SimulationResult } from "../services/legalEngine";
 import { AdUnit } from "../components/AdUnit";
 import { InfoTooltip } from "../components/InfoTooltip";
@@ -69,15 +69,21 @@ const DashboardPage: React.FC = () => {
         style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
       >
         <button
-          onClick={() => navigate("/")}
-          className="p-2 rounded-full hover:bg-white/10"
+          onClick={() => navigate(-1)}
+          className="p-2 rounded-full hover:bg-white/10 group flex items-center justify-center"
         >
-          <ChevronLeft className="w-5 h-5 text-gray-400" />
+          <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-white" />
         </button>
         <h1 className="text-sm font-bold tracking-widest uppercase text-glow">
           Tableau de Bord
         </h1>
-        <div className="w-9" /> {/* spacer to balance chevron */}
+        <button
+          onClick={() => navigate("/")}
+          className="p-2 rounded-full hover:bg-white/10 group flex items-center justify-center"
+          title="Accueil"
+        >
+          <Home className="w-5 h-5 text-gray-400 group-hover:text-white" />
+        </button>
       </div>
 
       {/* Floating Export Button — mirrors ThemeToggle position */}

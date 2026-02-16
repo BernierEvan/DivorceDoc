@@ -33,9 +33,9 @@ const ThemeToggle: React.FC = () => {
   return (
     <button
       onClick={() => setIsDark(!isDark)}
-      className="fixed top-4 right-4 z-[9999] p-3 rounded-xl bg-(--bg-secondary) border border-(--border-color) shadow-lg hover:shadow-xl transition-all duration-300 btn-compact"
+      className="fixed bottom-4 right-4 z-[9999] p-3 rounded-xl bg-(--bg-secondary) border border-(--border-color) shadow-lg hover:shadow-xl transition-all duration-300 btn-compact"
       style={{
-        top: "calc(env(safe-area-inset-top, 0px) + 1rem)",
+        bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)",
         right: "calc(env(safe-area-inset-right, 0px) + 1rem)",
       }}
       aria-label={isDark ? "Passer en mode clair" : "Passer en mode sombre"}

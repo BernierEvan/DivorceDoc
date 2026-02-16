@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Briefcase, Home, Wallet, ArrowRight } from "lucide-react";
+import { User, Briefcase, Home, Wallet, ArrowRight, ChevronLeft } from "lucide-react";
 import { InfoTooltip } from "../components/InfoTooltip";
 import { SEO, breadcrumbJsonLd } from "../components/SEO";
 
@@ -63,10 +63,25 @@ const QuizPage: React.FC = () => {
 
       {/* Header & Progress */}
       <div className="p-6 pt-8 z-10">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition group flex items-center justify-center"
+          >
+            <ChevronLeft className="w-5 h-5 text-gray-300 group-hover:text-white" />
+          </button>
           <span className="text-xs font-bold tracking-[0.2em] text-gray-400">
             SITUATION PERSONNELLE
           </span>
+          <button
+            onClick={() => navigate("/")}
+            className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition group flex items-center justify-center"
+            title="Accueil"
+          >
+            <Home className="w-5 h-5 text-gray-300 group-hover:text-white" />
+          </button>
+        </div>
+        <div className="flex justify-end mb-6">
           <div className="flex space-x-1">
             <div className="w-8 h-1 bg-white/20 rounded-full" />
             <div className="w-8 h-1 bg-[var(--color-plasma-cyan)] rounded-full" />
