@@ -122,6 +122,7 @@ const DataValidationPage: React.FC = () => {
         (profile as any).children !== undefined
           ? String((profile as any).children)
           : "2",
+      childrenAges: (profile as any).childrenAges || ([] as number[]),
       divorceType: (profile as any).divorceType || "amiable",
       matrimonialRegime: (profile as any).regime || "community",
     };
@@ -203,11 +204,24 @@ const DataValidationPage: React.FC = () => {
       // New Fields Injection
       marriageDate: formData.marriageDate,
       childrenCount: parseInt(formData.childrenCount) || 0,
+      childrenAges: (formData.childrenAges || []).map(
+        (a: number) => Number(a) || 0,
+      ),
       divorceType: formData.divorceType,
       matrimonialRegime: formData.matrimonialRegime,
 
-      // From Profile/Quiz
-      marriageDuration: 0, // Calculated in engine from date
+      // From Profile/Quiz — Calculer la durée du mariage depuis la date
+      marriageDuration: (() => {
+        const dateStr = formData.marriageDate;
+        if (dateStr) {
+          const start = new Date(dateStr);
+          const now = new Date();
+          const diffYears =
+            (now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+          if (!isNaN(diffYears) && diffYears > 0) return Math.round(diffYears);
+        }
+        return 0;
+      })(),
       myAge: profileData.myAge || 42,
       spouseAge: profileData.spouseAge || 44,
       custodyType: profileData.custodyType || "classic",
@@ -517,13 +531,65 @@ const DataValidationPage: React.FC = () => {
           <input
             type="number"
             min="0"
+            max="10"
             value={formData.childrenCount}
-            onChange={(e) =>
-              setFormData({ ...formData, childrenCount: e.target.value })
-            }
+            onChange={(e) => {
+              const count = parseInt(e.target.value) || 0;
+              // Ajuster le tableau des âges à la nouvelle taille
+              const currentAges = formData.childrenAges || [];
+              const newAges = Array.from({ length: count }, (_, i) =>
+                i < currentAges.length ? currentAges[i] : 0,
+              );
+              setFormData({
+                ...formData,
+                childrenCount: e.target.value,
+                childrenAges: newAges,
+              });
+            }}
             className="bg-transparent text-2xl font-mono text-white w-full outline-none border-b border-transparent focus:border-(--color-plasma-cyan)"
           />
         </div>
+
+        {/* Children Ages */}
+        {parseInt(formData.childrenCount) > 0 && (
+          <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
+            <label className="text-xs uppercase tracking-widest text-gray-300 block">
+              Âge des enfants
+            </label>
+            <p className="text-[10px] text-gray-500">
+              L'âge détermine le poids UC (OCDE modifiée) : &lt;14 ans = 0.3 UC,
+              ≥14 ans = 0.5 UC
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {Array.from({
+                length: parseInt(formData.childrenCount) || 0,
+              }).map((_, i) => (
+                <div key={i} className="flex items-center space-x-2">
+                  <span className="text-xs text-gray-400 w-16 shrink-0">
+                    Enfant {i + 1}
+                  </span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="30"
+                    value={formData.childrenAges?.[i] ?? 0}
+                    onChange={(e) => {
+                      const newAges = [...(formData.childrenAges || [])];
+                      newAges[i] = parseInt(e.target.value) || 0;
+                      setFormData({ ...formData, childrenAges: newAges });
+                    }}
+                    className="bg-transparent text-lg font-mono text-white w-full outline-none border-b border-white/20 focus:border-(--color-plasma-cyan) text-center"
+                  />
+                  <span className="text-xs text-gray-500 shrink-0">
+                    ans (
+                    {(formData.childrenAges?.[i] ?? 0) >= 14 ? "0.5" : "0.3"}{" "}
+                    UC)
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Divorce Type */}
         <div className="p-4 rounded-xl bg-white/5 border border-white/10">

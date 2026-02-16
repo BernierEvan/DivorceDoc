@@ -1,7 +1,17 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 import { useNavigate } from "react-router-dom";
-import { Camera, RefreshCw, X, Check, Layers, ArrowRight } from "lucide-react";
+import {
+  Camera,
+  RefreshCw,
+  X,
+  Check,
+  Layers,
+  ArrowRight,
+  ZoomIn,
+  ZoomOut,
+  Focus,
+} from "lucide-react";
 import {
   imageProcessor,
   extractPdfText,
@@ -50,6 +60,157 @@ const ScannerPage: React.FC = () => {
     action?: string;
   } | null>(null);
 
+  // Camera Controls State
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [minZoom, setMinZoom] = useState(1);
+  const [maxZoom, setMaxZoom] = useState(1);
+  const [supportsZoom, setSupportsZoom] = useState(false);
+  const [supportsFocus, setSupportsFocus] = useState(false);
+  const [focusPoint, setFocusPoint] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const [torchOn, setTorchOn] = useState(false);
+  const [supportsTorch, setSupportsTorch] = useState(false);
+  const pinchStartDist = useRef(0);
+  const pinchStartZoom = useRef(1);
+  const viewfinderRef = useRef<HTMLDivElement>(null);
+
+  // ─── Camera capability detection ───
+  const getVideoTrack = useCallback((): MediaStreamTrack | null => {
+    const video = webcamRef.current?.video;
+    if (!video?.srcObject) return null;
+    const stream = video.srcObject as MediaStream;
+    return stream.getVideoTracks()[0] || null;
+  }, []);
+
+  const detectCapabilities = useCallback(() => {
+    const track = getVideoTrack();
+    if (!track) return;
+    const caps = track.getCapabilities?.() as any;
+    if (!caps) return;
+
+    // Zoom
+    if (caps.zoom) {
+      setMinZoom(caps.zoom.min ?? 1);
+      setMaxZoom(caps.zoom.max ?? 1);
+      setSupportsZoom((caps.zoom.max ?? 1) > 1);
+      setZoomLevel(caps.zoom.min ?? 1);
+    }
+
+    // Focus
+    if (caps.focusMode && (caps.focusMode as string[]).includes("manual")) {
+      setSupportsFocus(true);
+    }
+
+    // Torch
+    if (caps.torch) {
+      setSupportsTorch(true);
+    }
+  }, [getVideoTrack]);
+
+  // ─── Apply zoom ───
+  const applyZoom = useCallback(
+    (level: number) => {
+      const track = getVideoTrack();
+      if (!track) return;
+      const clamped = Math.min(Math.max(level, minZoom), maxZoom);
+      setZoomLevel(clamped);
+      track.applyConstraints({ advanced: [{ zoom: clamped } as any] });
+    },
+    [getVideoTrack, minZoom, maxZoom],
+  );
+
+  const handleZoomIn = () => applyZoom(zoomLevel + 0.5);
+  const handleZoomOut = () => applyZoom(zoomLevel - 0.5);
+
+  // ─── Tap to focus ───
+  const handleTapToFocus = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      const track = getVideoTrack();
+      if (!track || !supportsFocus) return;
+
+      const rect = viewfinderRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      let clientX: number, clientY: number;
+      if ("touches" in e) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
+      // Normalize to 0–1
+      const x = (clientX - rect.left) / rect.width;
+      const y = (clientY - rect.top) / rect.height;
+
+      setFocusPoint({ x: clientX - rect.left, y: clientY - rect.top });
+      setTimeout(() => setFocusPoint(null), 1200);
+
+      try {
+        track.applyConstraints({
+          advanced: [
+            {
+              focusMode: "manual",
+              pointsOfInterest: [{ x, y }],
+            } as any,
+          ],
+        });
+        // Re-enable continuous autofocus after a delay
+        setTimeout(() => {
+          try {
+            track.applyConstraints({
+              advanced: [{ focusMode: "continuous" } as any],
+            });
+          } catch {
+            /* ignore */
+          }
+        }, 2500);
+      } catch {
+        /* Browser doesn't support pointsOfInterest */
+      }
+    },
+    [getVideoTrack, supportsFocus],
+  );
+
+  // ─── Pinch to zoom (touch gestures) ───
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        pinchStartDist.current = Math.hypot(dx, dy);
+        pinchStartZoom.current = zoomLevel;
+      }
+    },
+    [zoomLevel],
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length === 2 && supportsZoom) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        const scale = dist / (pinchStartDist.current || 1);
+        applyZoom(pinchStartZoom.current * scale);
+      }
+    },
+    [supportsZoom, applyZoom],
+  );
+
+  // ─── Toggle torch ───
+  const toggleTorch = useCallback(() => {
+    const track = getVideoTrack();
+    if (!track) return;
+    const newVal = !torchOn;
+    setTorchOn(newVal);
+    track.applyConstraints({ advanced: [{ torch: newVal } as any] });
+  }, [getVideoTrack, torchOn]);
+
   useEffect(() => {
     const checkMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     setIsMobile(checkMobile);
@@ -59,6 +220,17 @@ const ScannerPage: React.FC = () => {
     localStorage.setItem("scanSession", "[]");
     setSessionItems([]);
   }, []);
+
+  // Detect camera capabilities once video starts playing
+  useEffect(() => {
+    const video = webcamRef.current?.video;
+    if (!video) return;
+    const onPlaying = () => detectCapabilities();
+    video.addEventListener("playing", onPlaying);
+    // Also try immediately in case it's already playing
+    if (!video.paused) detectCapabilities();
+    return () => video.removeEventListener("playing", onPlaying);
+  }, [detectCapabilities, isMobile, imageSrc]);
 
   const capture = useCallback(() => {
     if (webcamRef.current) {
@@ -305,8 +477,13 @@ const ScannerPage: React.FC = () => {
     }
   };
 
-  const videoConstraints = {
+  // Video constraints — environment camera with ideal high resolution
+  // Setting width/height as ideal (not exact) so the browser picks the best
+  // native orientation and resolution without mirroring or rotating.
+  const videoConstraints: MediaTrackConstraints = {
     facingMode: "environment",
+    width: { ideal: 1920 },
+    height: { ideal: 1080 },
   };
 
   // Desktop Import Interface
@@ -612,16 +789,49 @@ const ScannerPage: React.FC = () => {
       </div>
 
       {/* Main View */}
-      <div className="flex-1 flex items-center justify-center relative bg-black">
+      <div
+        className="flex-1 flex items-center justify-center relative bg-black"
+        ref={viewfinderRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onClick={(e) => {
+          // Single tap to focus (only when camera is live)
+          if (!imageSrc) handleTapToFocus(e);
+        }}
+      >
         {!imageSrc ? (
           <>
             <Webcam
               audio={false}
               ref={webcamRef}
               screenshotFormat="image/jpeg"
+              screenshotQuality={0.92}
               videoConstraints={videoConstraints}
-              className="w-full h-full object-cover opacity-80"
+              forceScreenshotSourceSize={false}
+              mirrored={false}
+              className="w-full h-full object-cover"
+              style={{
+                /* Ensure the video fills its container naturally without
+                   browser-induced rotation. object-fit:cover + no explicit
+                   width/height on the <video> lets the native orientation
+                   from the camera driver be preserved. */
+                transform: "none",
+              }}
             />
+
+            {/* Focus Indicator */}
+            {focusPoint && (
+              <div
+                className="absolute pointer-events-none z-30"
+                style={{
+                  left: focusPoint.x - 30,
+                  top: focusPoint.y - 30,
+                }}
+              >
+                <div className="w-15 h-15 border-2 border-yellow-400 rounded-lg animate-ping opacity-75" />
+                <div className="absolute inset-0 w-15 h-15 border-2 border-yellow-400 rounded-lg" />
+              </div>
+            )}
 
             {/* Scanning Grid */}
             <div
@@ -641,6 +851,96 @@ const ScannerPage: React.FC = () => {
                 <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-(--accent-primary)" />
               </div>
             </div>
+
+            {/* ─── Camera Controls (right side, like native camera) ─── */}
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-3">
+              {/* Zoom In */}
+              {supportsZoom && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleZoomIn();
+                    }}
+                    className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 active:scale-90 transition"
+                  >
+                    <ZoomIn className="w-5 h-5" />
+                  </button>
+
+                  {/* Zoom Level Indicator */}
+                  <div className="text-[10px] text-white/70 font-mono bg-black/40 px-2 py-0.5 rounded-full">
+                    {zoomLevel.toFixed(1)}×
+                  </div>
+
+                  {/* Zoom Out */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleZoomOut();
+                    }}
+                    className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 active:scale-90 transition"
+                  >
+                    <ZoomOut className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+
+              {/* Torch toggle */}
+              {supportsTorch && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleTorch();
+                  }}
+                  className={`w-10 h-10 rounded-full backdrop-blur-sm border flex items-center justify-center active:scale-90 transition ${
+                    torchOn
+                      ? "bg-yellow-400/30 border-yellow-400/60 text-yellow-400"
+                      : "bg-black/50 border-white/20 text-white/80"
+                  }`}
+                >
+                  {/* Simple flash icon */}
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Focus indicator */}
+              {supportsFocus && (
+                <div className="flex flex-col items-center gap-1 mt-1">
+                  <Focus className="w-4 h-4 text-white/40" />
+                  <span className="text-[8px] text-white/40 uppercase tracking-wider">
+                    Tap focus
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Zoom slider (bottom, horizontal) */}
+            {supportsZoom && maxZoom > 1 && (
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 bg-black/40 backdrop-blur-sm rounded-full px-3 py-1.5">
+                <span className="text-[9px] text-white/50 font-mono">1×</span>
+                <input
+                  type="range"
+                  min={minZoom}
+                  max={maxZoom}
+                  step={0.1}
+                  value={zoomLevel}
+                  onChange={(e) => applyZoom(parseFloat(e.target.value))}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-32 h-1 accent-cyan-400 appearance-none bg-white/20 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400"
+                />
+                <span className="text-[9px] text-white/50 font-mono">
+                  {maxZoom.toFixed(0)}×
+                </span>
+              </div>
+            )}
           </>
         ) : (
           // Review Capture

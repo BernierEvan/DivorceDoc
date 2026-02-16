@@ -77,16 +77,21 @@ const DashboardPage: React.FC = () => {
         <h1 className="text-sm font-bold tracking-widest uppercase text-glow">
           Tableau de Bord
         </h1>
-        <div className="flex space-x-2 mr-16">
-          {/* Export Button - Navigates to Export Page */}
-          <button
-            onClick={() => navigate("/export")}
-            className="p-2 rounded-full bg-(--color-plasma-cyan)/20 text-(--color-plasma-cyan) hover:bg-(--color-plasma-cyan) hover:text-black transition"
-          >
-            <Download className="w-5 h-5" />
-          </button>
-        </div>
+        <div className="w-9" /> {/* spacer to balance chevron */}
       </div>
+
+      {/* Floating Export Button — mirrors ThemeToggle position */}
+      <button
+        onClick={() => navigate("/export")}
+        className="fixed top-4 z-[9999] p-3 rounded-xl bg-(--bg-secondary) border border-(--border-color) shadow-lg hover:shadow-xl transition-all duration-300 btn-compact"
+        style={{
+          top: "calc(env(safe-area-inset-top, 0px) + 1rem)",
+          right: "calc(env(safe-area-inset-right, 0px) + 4rem)",
+        }}
+        aria-label="Télécharger le rapport"
+      >
+        <Download className="w-5 h-5 text-(--accent-primary)" />
+      </button>
 
       {/* Tabs */}
       <div className="mt-4 px-6">
@@ -169,7 +174,7 @@ const DashboardPage: React.FC = () => {
                   <div className="bg-black/20 p-3 rounded-lg border border-white/5 hover:border-[var(--color-plasma-cyan)]/30 transition-colors">
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-sm font-medium text-gray-300">
-                        Méthode Pilote
+                        Méthode du Tiers
                       </span>
                       <span className="font-mono text-[var(--color-plasma-cyan)]">
                         {calculations.details?.pilote.value.toLocaleString()} €
@@ -352,14 +357,14 @@ const DashboardPage: React.FC = () => {
             {/* Chart 1: Prestation Compensatoire — Pilote vs Insee */}
             <div className="glass-panel p-4 rounded-xl border border-white/10">
               <h3 className="text-[10px] uppercase tracking-widest text-gray-400 mb-4 text-center">
-                Prestation Compensatoire (Pilote vs Insee)
+                Prestation Compensatoire (Tiers Pondéré vs Insee)
               </h3>
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={[
                       {
-                        name: "Pilote",
+                        name: "Tiers",
                         value: calculations.details.pilote.value,
                         min: calculations.details.pilote.min,
                         max: calculations.details.pilote.max,

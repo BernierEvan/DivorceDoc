@@ -8,6 +8,7 @@ export interface FinancialData {
   myAge: number;
   spouseAge: number;
   childrenCount: number;
+  childrenAges?: number[]; // Âge de chaque enfant (pour calcul UC OCDE)
   custodyType: string;
   assetsValue: number;
   assetsCRD: number;
@@ -24,6 +25,7 @@ export interface SimulationResult {
   childSupport: number;
   childSupportPerChild: number;
   custodyTypeUsed: string;
+  marriageDurationUsed: number;
   liquidationShare: number;
   remainingLiveable: number;
   belowPovertyThreshold: boolean;
@@ -55,10 +57,33 @@ export interface SimulationResult {
 const RSA_SOLO = 645.5;
 const SEUIL_PAUVRETE_2026 = 1216; // €/mois
 const CHILD_SUPPORT_RATES: Record<string, Record<number, number>> = {
-  classic: { 1: 0.135, 2: 0.115, 3: 0.1 },
-  alternating: { 1: 0.09, 2: 0.078, 3: 0.067 },
-  reduced: { 1: 0.18, 2: 0.155, 3: 0.13 },
+  classic: { 1: 0.135, 2: 0.115, 3: 0.1, 4: 0.088, 5: 0.08, 6: 0.072 },
+  alternating: { 1: 0.09, 2: 0.078, 3: 0.067, 4: 0.059, 5: 0.053, 6: 0.048 },
+  reduced: { 1: 0.18, 2: 0.155, 3: 0.133, 4: 0.117, 5: 0.106, 6: 0.095 },
 };
+
+/**
+ * Calcule les UC enfants selon l'échelle OCDE modifiée :
+ *   - Enfant < 14 ans  → 0.3 UC
+ *   - Enfant ≥ 14 ans  → 0.5 UC
+ * Si childrenAges n'est pas fourni, tous les enfants sont supposés < 14 ans (0.3 UC).
+ */
+function computeChildrenUC(
+  childrenCount: number,
+  childrenAges?: number[],
+): number {
+  if (childrenCount <= 0) return 0;
+  if (!childrenAges || childrenAges.length === 0) {
+    return 0.3 * childrenCount; // Fallback : tous < 14
+  }
+  // Utiliser les âges fournis ; si moins d'âges que d'enfants, supposer < 14 pour les manquants
+  let uc = 0;
+  for (let i = 0; i < childrenCount; i++) {
+    const age = i < childrenAges.length ? childrenAges[i] : 0;
+    uc += age >= 14 ? 0.5 : 0.3;
+  }
+  return uc;
+}
 
 export const legalEngine = {
   calculate: (data: FinancialData): SimulationResult => {
@@ -74,8 +99,9 @@ export const legalEngine = {
     const payerIncome = beneficiaryIsMe ? data.spouseIncome : data.myIncome;
     const beneficiaryAge = beneficiaryIsMe ? data.myAge : data.spouseAge;
 
-    // --- METHODE PILOTE (Approche Temporelle) ---
-    // PC = DeltaAnnuel * (Duration / 2) * CoeffAge
+    // --- METHODE DU TIERS PONDERE (Approche Temporelle) ---
+    // Réf : aidefamille.fr — Méthode du tiers de la différence pondérée par la durée
+    // PC = (DeltaAnnuel / 3) * (Duration / 2) * CoeffAge
     const deltaMonthly = payerIncome - beneficiaryIncome;
     const deltaAnnual = deltaMonthly * 12;
 
@@ -97,32 +123,52 @@ export const legalEngine = {
 
     let pcPilote = 0;
     if (deltaAnnual > 0) {
-      pcPilote = deltaAnnual * (duration / 2) * ageCoeff;
+      pcPilote = (deltaAnnual / 3) * (duration / 2) * ageCoeff;
     }
 
     // Standard Deviation (+/- 10%) for Pilote Range
     const piloteMin = pcPilote * 0.9;
     const piloteMax = pcPilote * 1.1;
 
-    // --- METHODE INSEE (Unités de Consommation) ---
-    // 1. UC Avant Divorce (Ménage complet)
-    // Adulte 1 + Adulte 2 (0.5) + Enfants (0.3 each)
-    const ucBefore = 1 + 0.5 + 0.3 * data.childrenCount;
+    // --- APPROCHE NIVEAU DE VIE (Unités de Consommation OCDE/INSEE) ---
+    // Ref : Échelle d'équivalence OCDE modifiée (insee.fr/fr/metadonnees/definition/c1802)
+    // Cadre juridique : Art. 270-271, 275 C.civ.
+    //   - La PC compense la disparité de niveau de vie créée par le divorce
+    //   - Versements échelonnés : 8 ans max (Art. 275 C.civ.)
+    //   - La PC n'a pas pour objet d'égaliser les niveaux de vie (Cass. civ. 8 juil. 2015)
+    const custody = data.custodyType || "classic";
+
+    // 1. UC Avant Divorce (Ménage complet — Échelle OCDE modifiée)
+    //    1er adulte = 1 UC, 2e adulte = 0.5 UC
+    //    Enfant < 14 ans = 0.3 UC, Enfant ≥ 14 ans = 0.5 UC
+    const childrenUC = computeChildrenUC(data.childrenCount, data.childrenAges);
+    const ucBefore = 1 + 0.5 + childrenUC;
     const totalIncome = data.myIncome + data.spouseIncome;
     const standardLivingBefore = totalIncome / ucBefore;
 
     // 2. UC Après Divorce (Bénéficiaire)
-    // On suppose que le parent bénéficiaire a la charge principale
-    const ucAfter = 1 + 0.3 * data.childrenCount;
+    //    Garde alternée → enfants partagés entre les deux foyers (0.5 × UC enfant)
+    const childUcShare = custody === "alternating" ? 0.5 : 1;
+    const ucAfter = 1 + childrenUC * childUcShare;
     const standardLivingAfter = beneficiaryIncome / ucAfter;
 
-    // 3. Perte et Compensation
+    // 3. Disparité de niveau de vie
     const lossMonthly = Math.max(0, standardLivingBefore - standardLivingAfter);
-    // Range: 15% (Min) to 25% (Max) over 8 years (96 months)
-    // Mean at 20%
-    const pcInseeMin = lossMonthly * 96 * 0.15;
-    const pcInseeMax = lossMonthly * 96 * 0.25;
-    const pcInsee = lossMonthly * 96 * 0.2; // Mean
+
+    // 4. Capitalisation — « Méthode des 20% » (aidefamille.fr)
+    //    Réf : pratique courante avocats/magistrats
+    //    Période = min(durée du mariage, 8 ans) — Art. 275 C.civ.
+    //    La PC ne vise pas l'égalisation totale (Cass. civ. 8 juil. 2015)
+    //    Taux : 20% de la disparité (coefficient couramment retenu)
+    //      - Min  : 15% (approche conservatrice)
+    //      - Moyen: 20% (standard — méthode des 20%)
+    //      - Max  : 25% (fortes disparités / longs mariages)
+    const periodYears = Math.min(duration, 8);
+    const periodMonths = periodYears * 12;
+
+    const pcInseeMin = lossMonthly * periodMonths * 0.15;
+    const pcInsee = lossMonthly * periodMonths * 0.2;
+    const pcInseeMax = lossMonthly * periodMonths * 0.25;
 
     // Resultat final (Moyenne des Moyennes)
     const finalPC = Math.round((pcPilote + pcInsee) / 2);
@@ -135,13 +181,12 @@ export const legalEngine = {
 
     let paPerChild = 0;
     let paTotal = 0;
-    const custody = data.custodyType || "classic";
 
     if (data.childrenCount > 0) {
       const rRef = Math.max(0, payerIncome - RSA_SOLO);
 
-      // Clamp children count to 1-3 for rate lookup
-      const rateKey = Math.min(data.childrenCount, 3) as 1 | 2 | 3;
+      // Clamp children count to 1-6 for rate lookup (barème Ministère de la Justice)
+      const rateKey = Math.min(data.childrenCount, 6);
       const rateTable =
         CHILD_SUPPORT_RATES[custody] || CHILD_SUPPORT_RATES.classic;
       const rate = rateTable[rateKey] || 0.135;
@@ -151,17 +196,38 @@ export const legalEngine = {
     }
 
     // ---------------------------------------------------------
-    // 3. LIQUIDATION (Assets)
+    // 3. LIQUIDATION DU RÉGIME MATRIMONIAL
+    // Réf : Art. 1467-1475 C.civ. (liquidation et partage de la communauté)
     // ---------------------------------------------------------
     const netAsset = (data.assetsValue || 0) - (data.assetsCRD || 0);
     let soulteToPay = 0;
 
     if (data.matrimonialRegime === "separation") {
+      // SÉPARATION DE BIENS — pas de communauté, pas de récompenses.
+      // La soulte ne concerne que les biens en indivision (co-propriété).
+      // On suppose ici une indivision 50/50 sur les biens déclarés.
       soulteToPay = netAsset / 2;
     } else {
-      // COMMUNAUTE (Default)
-      const rewardsDiff = (data.rewardsBob || 0) - (data.rewardsAlice || 0);
-      soulteToPay = netAsset / 2 + rewardsDiff;
+      // COMMUNAUTÉ RÉDUITE AUX ACQUÊTS (régime légal par défaut)
+      // Art. 1467 : liquidation de la masse commune, active et passive.
+      // Art. 1468 : compte de récompenses pour chaque époux.
+      // Art. 1470 : balance des récompenses → prélèvement ou rapport.
+      // Art. 1475 : après prélèvements, le reliquat se partage par moitié.
+      //
+      // Formule complète :
+      //   Part(Alice) = R_CA + (M − R_CA − R_CB) / 2 = (M + R_CA − R_CB) / 2
+      //   Part(Bob)   = R_CB + (M − R_CA − R_CB) / 2 = (M + R_CB − R_CA) / 2
+      //
+      // La soulte (si Alice conserve le bien) = Part de Bob
+      //   Soulte = (M + R_CB − R_CA) / 2
+      //
+      // NB : Ce calcul simplifié ne prend en compte que les récompenses
+      //      dues PAR la communauté À chaque époux (apport propre / héritage).
+      //      Les récompenses dues PAR un époux À la communauté (emploi de
+      //      fonds communs pour un bien propre) ne sont pas modélisées ici.
+      const rewardsAlice = data.rewardsAlice || 0; // R_CA : communauté doit à Alice
+      const rewardsBob = data.rewardsBob || 0; // R_CB : communauté doit à Bob
+      soulteToPay = (netAsset + rewardsBob - rewardsAlice) / 2;
     }
 
     // ---------------------------------------------------------
@@ -187,6 +253,7 @@ export const legalEngine = {
       childSupport: Math.round(paTotal),
       childSupportPerChild: paPerChild,
       custodyTypeUsed: custody,
+      marriageDurationUsed: duration,
       liquidationShare: Math.round(soulteToPay),
       remainingLiveable: Math.round(remaining),
       belowPovertyThreshold: remaining < SEUIL_PAUVRETE_2026,
@@ -210,7 +277,7 @@ export const legalEngine = {
           min: Math.round(pcInseeMin),
           max: Math.round(pcInseeMax),
         },
-        formula: `Moyenne Globale Estimée`,
+        formula: `Méthode des 20% (UC OCDE/INSEE) — Période max 8 ans (Art. 275 C.civ.)`,
       },
     };
   },

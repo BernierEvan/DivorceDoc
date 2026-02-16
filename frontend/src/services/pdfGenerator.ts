@@ -108,6 +108,14 @@ export const pdfGenerator = {
       return 30;
     };
 
+    /** Saute de page si y dépasse la marge basse (20mm du bas) */
+    const checkPageBreak = (currentY: number, needed = 10): number => {
+      if (currentY + needed > pageHeight - 20) {
+        return newPage();
+      }
+      return currentY;
+    };
+
     const custodyLabel =
       results.custodyTypeUsed === "classic"
         ? "Classique"
@@ -129,7 +137,7 @@ export const pdfGenerator = {
 
     // A — Prestation Compensatoire
     y = drawSubTitle("A", "Prestation Compensatoire", y);
-    y = textBold("Méthode Pilote (Approche Temporelle)", 30, y, 9);
+    y = textBold("Méthode du Tiers Pondéré (Approche Temporelle)", 30, y, 9);
     y = textMuted(
       "Delta_Annuel = (Revenu_Payeur − Revenu_Bénéficiaire) × 12",
       30,
@@ -141,16 +149,29 @@ export const pdfGenerator = {
       y,
     );
     y = textMuted(
-      "PC_Pilote = Delta_Annuel × (Durée_Mariage / 2) × Coeff_Age",
+      "PC_Pilote = (Delta_Annuel / 3) × (Durée_Mariage / 2) × Coeff_Age",
       30,
       y,
     );
     y = textMuted("Fourchette : Min = PC × 0.9  |  Max = PC × 1.1", 30, y);
     y += 3;
     y = textBold("Méthode INSEE (Unités de Consommation)", 30, y, 9);
-    y = textMuted("UC_Avant = 1 + 0.5 + 0.3 × Nb_Enfants", 30, y);
+    y = textMuted(
+      "UC_Avant = 1 + 0.5 + Σ UC_Enfants  (échelle OCDE modifiée)",
+      30,
+      y,
+    );
+    y = textMuted(
+      "  Enfant < 14 ans = 0.3 UC  |  Enfant ≥ 14 ans = 0.5 UC",
+      30,
+      y,
+    );
     y = textMuted("Niveau_Vie_Avant = (Revenu_A + Revenu_B) / UC_Avant", 30, y);
-    y = textMuted("UC_Après = 1 + 0.3 × Nb_Enfants", 30, y);
+    y = textMuted(
+      "UC_Après = 1 + Σ UC_Enfants (× 0.5 si garde alternée)",
+      30,
+      y,
+    );
     y = textMuted("Niveau_Vie_Après = Revenu_Bénéficiaire / UC_Après", 30, y);
     y = textMuted(
       "Perte_Mensuelle = Max(0, Niveau_Vie_Avant − Niveau_Vie_Après)",
@@ -158,7 +179,12 @@ export const pdfGenerator = {
       y,
     );
     y = textMuted(
-      "PC_INSEE = Perte_Mensuelle × 96 mois × Taux (15% min / 20% moy / 25% max)",
+      "Période = Min(Durée_Mariage, 8) × 12 mois — Art. 275 C.civ.",
+      30,
+      y,
+    );
+    y = textMuted(
+      "PC_INSEE = Perte_Mensuelle × Période × Taux (15% min | 20% moy | 25% max)",
       30,
       y,
     );
@@ -193,13 +219,13 @@ export const pdfGenerator = {
     // C — Liquidation & Soulte
     y = drawSubTitle("C", "Liquidation & Soulte", y);
     y = textMuted("Patrimoine_Net = Valeur_Vénale − Capital_Restant_Dû", 30, y);
-    y = textMuted("Régime Communauté :", 30, y);
+    y = textMuted("Régime Communauté (Art. 1467-1475 C.civ.) :", 30, y);
     y = textMuted(
-      "  Soulte = Patrimoine_Net / 2 + (Récompense_Époux − Récompense_Utilisateur)",
+      "  Soulte = (Patrimoine_Net + Récompense_Époux − Récompense_Utilisateur) / 2",
       30,
       y,
     );
-    y = textMuted("Régime Séparation :", 30, y);
+    y = textMuted("Régime Séparation (indivision 50/50) :", 30, y);
     y = textMuted("  Soulte = Patrimoine_Net / 2", 30, y);
     y += 4;
 
@@ -236,11 +262,9 @@ export const pdfGenerator = {
       leftX,
       col1Y,
     );
-    col1Y = textMuted(
-      `• Durée du mariage : ${data.marriageDuration} ans`,
-      leftX,
-      col1Y,
-    );
+    const marriageDur =
+      results.marriageDurationUsed || data.marriageDuration || 0;
+    col1Y = textMuted(`• Durée du mariage : ${marriageDur} ans`, leftX, col1Y);
     if (data.marriageDate) {
       col1Y = textMuted(
         `• Date de mariage : ${data.marriageDate}`,
@@ -337,7 +361,7 @@ export const pdfGenerator = {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(COLOR_PRIMARY);
-    doc.text("Méthode Pilote", boxX, bY);
+    doc.text("Méthode du Tiers", boxX, bY);
     doc.text(
       `${results.details.pilote.value.toLocaleString()} €`,
       pageWidth - 30,
@@ -403,7 +427,7 @@ export const pdfGenerator = {
     if (beneficiaryAge >= 45 && beneficiaryAge < 55) ageCoeff = 1.2;
     if (beneficiaryAge >= 55) ageCoeff = 1.5;
 
-    y = textBold("Méthode Pilote — Calcul Détaillé", 25, y, 9);
+    y = textBold("Méthode du Tiers Pondéré — Calcul Détaillé", 25, y, 9);
     y = textMuted(
       `Bénéficiaire : ${beneficiaryIsMe ? "Utilisateur" : "Conjoint"} (revenu le plus faible)`,
       30,
@@ -424,14 +448,14 @@ export const pdfGenerator = {
       30,
       y,
     );
-    y = textMuted(`Durée du mariage : ${data.marriageDuration} ans`, 30, y);
+    y = textMuted(`Durée du mariage : ${marriageDur} ans`, 30, y);
     y = textMuted(
       `Coefficient d'âge (${beneficiaryAge} ans) : ${ageCoeff}`,
       30,
       y,
     );
     y = textMuted(
-      `PC_Pilote = ${deltaAnnual.toLocaleString()} × (${data.marriageDuration} / 2) × ${ageCoeff}`,
+      `PC_Pilote = (${deltaAnnual.toLocaleString()} / 3) × (${marriageDur} / 2) × ${ageCoeff}`,
       30,
       y,
     );
@@ -448,19 +472,74 @@ export const pdfGenerator = {
     );
     y += 5;
 
-    const ucBefore = 1 + 0.5 + 0.3 * data.childrenCount;
+    // Calcul UC enfants (OCDE modifiée : <14 → 0.3, ≥14 → 0.5)
+    const ages = data.childrenAges || [];
+    let childrenUC = 0;
+    for (let i = 0; i < data.childrenCount; i++) {
+      const age = i < ages.length ? ages[i] : 0;
+      childrenUC += age >= 14 ? 0.5 : 0.3;
+    }
+    const ucBefore = 1 + 0.5 + childrenUC;
     const totalIncomeAll = data.myIncome + data.spouseIncome;
     const nivVieBefore = totalIncomeAll / ucBefore;
-    const ucAfter = 1 + 0.3 * data.childrenCount;
+    const custody = data.custodyType || "classic";
+    const childUcShare = custody === "alternating" ? 0.5 : 1;
+    const ucAfter = 1 + childrenUC * childUcShare;
     const nivVieAfter = beneficiaryIncome / ucAfter;
     const lossMonthly = Math.max(0, nivVieBefore - nivVieAfter);
 
     y = textBold("Méthode INSEE — Calcul Détaillé", 25, y, 9);
-    y = textMuted(
-      `UC avant divorce : 1 + 0.5 + 0.3 × ${data.childrenCount} = ${ucBefore.toFixed(1)}`,
-      30,
-      y,
-    );
+    // Détail UC enfants par âge
+    if (data.childrenCount > 0 && data.childrenCount <= 4) {
+      // Format compact sur une ligne si ≤ 4 enfants
+      const ucDetailParts: string[] = [];
+      for (let i = 0; i < data.childrenCount; i++) {
+        const age = i < ages.length ? ages[i] : 0;
+        ucDetailParts.push(`E${i + 1}(${age}a→${age >= 14 ? "0.5" : "0.3"})`);
+      }
+      y = textMuted(
+        `UC avant divorce : 1 + 0.5 + [${ucDetailParts.join(" + ")}] = ${ucBefore.toFixed(1)}`,
+        30,
+        y,
+      );
+    } else if (data.childrenCount > 4 && data.childrenCount <= 7) {
+      // Plusieurs lignes pour 5-7 enfants
+      y = textMuted(
+        `UC avant divorce : 1 (adulte) + 0.5 (conjoint) + Σ enfants = ${ucBefore.toFixed(1)}`,
+        30,
+        y,
+      );
+      for (let i = 0; i < data.childrenCount; i++) {
+        y = checkPageBreak(y);
+        const age = i < ages.length ? ages[i] : 0;
+        y = textMuted(
+          `  Enfant ${i + 1} : ${age} ans → ${age >= 14 ? "0.5" : "0.3"} UC`,
+          35,
+          y,
+        );
+      }
+    } else if (data.childrenCount > 7) {
+      // Résumé global pour > 7 enfants (éviter de surcharger le document)
+      const nb14plus = ages.filter((a) => a >= 14).length;
+      const nbUnder14 = data.childrenCount - nb14plus;
+      y = textMuted(
+        `UC avant divorce : 1 + 0.5 + Σ ${data.childrenCount} enfants = ${ucBefore.toFixed(1)}`,
+        30,
+        y,
+      );
+      y = textMuted(
+        `  (${nbUnder14} enfant(s) < 14 ans × 0.3 + ${nb14plus} enfant(s) ≥ 14 ans × 0.5 = ${childrenUC.toFixed(1)} UC)`,
+        35,
+        y,
+      );
+    } else {
+      y = textMuted(
+        `UC avant divorce : 1 + 0.5 = ${ucBefore.toFixed(1)}  (pas d'enfants)`,
+        30,
+        y,
+      );
+    }
+    y = checkPageBreak(y);
     y = textMuted(
       `Revenus totaux du ménage : ${totalIncomeAll.toLocaleString()} € / mois`,
       30,
@@ -472,7 +551,7 @@ export const pdfGenerator = {
       y,
     );
     y = textMuted(
-      `UC après divorce : 1 + 0.3 × ${data.childrenCount} = ${ucAfter.toFixed(1)}`,
+      `UC après divorce : 1 + ${childrenUC.toFixed(1)}${childUcShare < 1 ? ` × ${childUcShare}` : ""} = ${ucAfter.toFixed(1)}`,
       30,
       y,
     );
@@ -486,8 +565,15 @@ export const pdfGenerator = {
       30,
       y,
     );
+    const periodYears = Math.min(marriageDur, 8);
+    const periodMonths = periodYears * 12;
     y = textMuted(
-      `PC_INSEE = ${Math.round(lossMonthly).toLocaleString()} × 96 × 0.20 = ${results.details.insee.value.toLocaleString()} €`,
+      `Période : Min(${marriageDur}, 8) × 12 = ${periodMonths} mois`,
+      30,
+      y,
+    );
+    y = textMuted(
+      `PC_INSEE = ${Math.round(lossMonthly).toLocaleString()} × ${periodMonths} × 0.20 = ${results.details.insee.value.toLocaleString()} €`,
       30,
       y,
     );
@@ -557,15 +643,22 @@ export const pdfGenerator = {
 
     const RSA_SOLO = 645.5;
     const rRef = Math.max(0, payerIncome - RSA_SOLO);
-    const rateKey = Math.min(data.childrenCount, 3);
+    const rateKey = Math.min(data.childrenCount, 6);
     const CHILD_SUPPORT_RATES: Record<string, Record<number, number>> = {
-      classic: { 1: 0.135, 2: 0.115, 3: 0.1 },
-      alternating: { 1: 0.09, 2: 0.078, 3: 0.067 },
-      reduced: { 1: 0.18, 2: 0.155, 3: 0.13 },
+      classic: { 1: 0.135, 2: 0.115, 3: 0.1, 4: 0.088, 5: 0.08, 6: 0.072 },
+      alternating: {
+        1: 0.09,
+        2: 0.078,
+        3: 0.067,
+        4: 0.059,
+        5: 0.053,
+        6: 0.048,
+      },
+      reduced: { 1: 0.18, 2: 0.155, 3: 0.133, 4: 0.117, 5: 0.106, 6: 0.095 },
     };
-    const custody = data.custodyType || "classic";
+    const custodyPA = data.custodyType || "classic";
     const rateTable =
-      CHILD_SUPPORT_RATES[custody] || CHILD_SUPPORT_RATES.classic;
+      CHILD_SUPPORT_RATES[custodyPA] || CHILD_SUPPORT_RATES.classic;
     const rate = rateTable[rateKey] || 0.135;
 
     y = textMuted(
@@ -692,37 +785,33 @@ export const pdfGenerator = {
     y += 2;
 
     if (data.matrimonialRegime === "separation") {
-      y = textMuted(`Soulte = Patrimoine_Net / 2`, 30, y);
+      y = textMuted(`Soulte = Patrimoine_Net / 2  (indivision 50/50)`, 30, y);
       y = textMuted(
         `Soulte = ${netAsset.toLocaleString()} / 2 = ${(netAsset / 2).toLocaleString()} €`,
         30,
         y,
       );
     } else {
-      const rewardsDiff = (data.rewardsBob || 0) - (data.rewardsAlice || 0);
+      const rewardsAlice = data.rewardsAlice || 0;
+      const rewardsBob = data.rewardsBob || 0;
       y = textMuted(
-        `Récompense utilisateur (A) : ${(data.rewardsAlice || 0).toLocaleString()} €`,
+        `Récompense utilisateur (A) : ${rewardsAlice.toLocaleString()} €`,
         30,
         y,
       );
       y = textMuted(
-        `Récompense époux (B) : ${(data.rewardsBob || 0).toLocaleString()} €`,
-        30,
-        y,
-      );
-      y = textMuted(
-        `Différentiel récompenses (B − A) : ${rewardsDiff.toLocaleString()} €`,
+        `Récompense époux (B) : ${rewardsBob.toLocaleString()} €`,
         30,
         y,
       );
       y += 2;
       y = textMuted(
-        `Soulte = Patrimoine_Net / 2 + (Récompense_B − Récompense_A)`,
+        `Art. 1467-1475 C.civ. : Soulte = (Pnet + Réc_B − Réc_A) / 2`,
         30,
         y,
       );
       y = textMuted(
-        `Soulte = ${netAsset.toLocaleString()} / 2 + ${rewardsDiff.toLocaleString()}`,
+        `Soulte = (${netAsset.toLocaleString()} + ${rewardsBob.toLocaleString()} − ${rewardsAlice.toLocaleString()}) / 2`,
         30,
         y,
       );
@@ -968,17 +1057,17 @@ export const pdfGenerator = {
 
     const pcItems = [
       {
-        label: "Pilote Min",
+        label: "Tiers Min",
         value: results.details.pilote.min,
         color: [20, 184, 166],
       },
       {
-        label: "Pilote",
+        label: "Tiers",
         value: results.details.pilote.value,
         color: [13, 148, 136],
       },
       {
-        label: "Pilote Max",
+        label: "Tiers Max",
         value: results.details.pilote.max,
         color: [15, 118, 110],
       },
