@@ -1,0 +1,68 @@
+Date : 2026-02-16 21:45:35
+Directory : c:\Users\berni\Projects\DivorceSite\frontend
+Total : 33 files,  2303 codes, 214 comments, 152 blanks, all 2669 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| TypeScript JSX |         25 |      1,968 |        137 |        129 |      2,234 |
+| PostCSS        |          1 |        250 |         32 |         23 |        305 |
+| HTML           |          1 |        139 |          9 |          6 |        154 |
+| XML            |          1 |         51 |          0 |          1 |         52 |
+| TypeScript     |          5 |       -105 |         36 |         -7 |        -76 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                             | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                |         33 |      2,303 |        214 |        152 |      2,669 |
+| . (Files)                                                                        |          2 |         49 |          9 |          6 |         64 |
+| public                                                                           |          1 |         51 |          0 |          1 |         52 |
+| src                                                                              |         30 |      2,203 |        205 |        145 |      2,553 |
+| src (Files)                                                                      |          3 |        263 |         33 |         25 |        321 |
+| src\components                                                                   |          7 |        421 |         67 |         45 |        533 |
+| src\pages                                                                        |         15 |      1,491 |         69 |         73 |      1,633 |
+| src\services                                                                     |          5 |         28 |         36 |          2 |         66 |
++----------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                         | language       | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| c:\Users\berni\Projects\DivorceSite\frontend\index.html                          | HTML           |        139 |          9 |          6 |        154 |
+| c:\Users\berni\Projects\DivorceSite\frontend\public\sitemap.xml                  | XML            |         51 |          0 |          1 |         52 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\App.tsx                         | TypeScript JSX |         10 |          0 |          1 |         11 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\components\AdUnit.tsx           | TypeScript JSX |          2 |          0 |          0 |          2 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\components\Footer.tsx           | TypeScript JSX |         12 |          0 |          0 |         12 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\components\GuidedModeToggle.tsx | TypeScript JSX |         97 |          9 |          7 |        113 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\components\GuidedTooltip.tsx    | TypeScript JSX |        124 |         30 |         17 |        171 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\components\OfflineIndicator.tsx | TypeScript JSX |          3 |          0 |          0 |          3 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\components\PWAInstallPrompt.tsx | TypeScript JSX |          1 |          0 |          0 |          1 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\components\SEO.tsx              | TypeScript JSX |        182 |         28 |         21 |        231 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\index.css                       | PostCSS        |        250 |         32 |         23 |        305 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\main.tsx                        | TypeScript JSX |          3 |          1 |          1 |          5 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\CalculationChoicePage.tsx | TypeScript JSX |        407 |         17 |         25 |        449 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\DashboardPage.tsx         | TypeScript JSX |         71 |          4 |          7 |         82 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\DataValidationPage.tsx    | TypeScript JSX |        -35 |         -4 |        -14 |        -53 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\DisclaimerPage.tsx        | TypeScript JSX |        202 |         10 |         16 |        228 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\ExportPage.tsx            | TypeScript JSX |         31 |          1 |          0 |         32 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\GlossaryPage.tsx          | TypeScript JSX |         47 |          0 |          0 |         47 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\GuidePage.tsx             | TypeScript JSX |         43 |          0 |          0 |         43 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\LandingPage.tsx           | TypeScript JSX |         46 |          1 |          1 |         48 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\MethodologyPage.tsx       | TypeScript JSX |         14 |          0 |          0 |         14 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\PrivacyPage.tsx           | TypeScript JSX |         16 |          0 |          0 |         16 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\ProfilePage.tsx           | TypeScript JSX |         94 |          0 |         -2 |         92 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\QuizPage.tsx              | TypeScript JSX |         38 |         -1 |          1 |         38 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\ScannerPage.tsx           | TypeScript JSX |        280 |         32 |         25 |        337 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\SimulationModePage.tsx    | TypeScript JSX |        220 |          9 |         14 |        243 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\pages\TermsPage.tsx             | TypeScript JSX |         17 |          0 |          0 |         17 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\services\guidedMode.tsx         | TypeScript JSX |         43 |          0 |          9 |         52 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\services\imageProcessor.ts      | TypeScript     |         -3 |          0 |         -1 |         -4 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\services\legalEngine.ts         | TypeScript     |         23 |         34 |          4 |         61 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\services\ocrWorker.ts           | TypeScript     |       -104 |         -4 |        -12 |       -120 |
+| c:\Users\berni\Projects\DivorceSite\frontend\src\services\pdfGenerator.ts        | TypeScript     |         69 |          6 |          2 |         77 |
+| c:\Users\berni\Projects\DivorceSite\frontend\vite.config.ts                      | TypeScript     |        -90 |          0 |          0 |        -90 |
+| Total                                                                            |                |      2,303 |        214 |        152 |      2,669 |
++----------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+

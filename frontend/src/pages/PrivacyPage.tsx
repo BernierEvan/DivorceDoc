@@ -37,10 +37,10 @@ const PrivacyPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative overflow-hidden text-white font-sans">
+    <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative text-white font-sans">
       <SEO
         title="Politique de Confidentialité — Privacy by Design"
-        description="DivorceDoc ne collecte aucune donnée personnelle. Traitement 100% local (Tesseract.js), RAM uniquement, zéro stockage Cloud. Conforme RGPD et AI Act."
+        description="DivorceDoc ne collecte aucune donnée personnelle. Traitement 100 % local, localStorage uniquement, zéro stockage Cloud. Conforme RGPD."
         path="/privacy"
         jsonLd={breadcrumbJsonLd([
           { name: "Accueil", path: "/" },
@@ -48,7 +48,7 @@ const PrivacyPage: React.FC = () => {
         ])}
       />
       {/* Background */}
-      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_0%_0%,_#1e1b4b_0%,_transparent_50%)] opacity-30 pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_0%_0%,_var(--accent-light)_0%,_transparent_50%)] opacity-30 pointer-events-none" />
 
       {/* Header */}
       <div className="p-6 pt-8 flex items-center justify-between z-10 sticky top-0 bg-[var(--color-deep-space)]/90 backdrop-blur-xl border-b border-white/5">
@@ -76,7 +76,7 @@ const PrivacyPage: React.FC = () => {
           <div className="inline-flex items-center justify-center p-4 bg-[var(--color-plasma-cyan)]/10 rounded-full mb-6 border border-[var(--color-plasma-cyan)]/20 animate-pulse-glow">
             <Shield className="w-8 h-8 text-[var(--color-plasma-cyan)]" />
           </div>
-          <h1 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+          <h1 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-muted)]">
             Privacy by Design
           </h1>
           <p className="text-sm text-gray-400 max-w-sm mx-auto">
@@ -90,7 +90,9 @@ const PrivacyPage: React.FC = () => {
             L'application a été conçue selon le principe du{" "}
             <strong>Privacy by Design</strong> (Protection de la vie privée dès
             la conception). Contrairement aux services classiques, nous avons
-            fait le choix technologique de supprimer le serveur de traitement.
+            fait le choix technologique de supprimer tout serveur de traitement.
+            Toutes les informations sont saisies manuellement et calculées
+            directement sur votre appareil.
           </p>
         </Section>
 
@@ -112,9 +114,16 @@ const PrivacyPage: React.FC = () => {
             A. Données de Simulation (Sensibles)
           </h3>
           <ul className="list-disc pl-4 space-y-1 mb-4 text-gray-400">
-            <li>Revenus, patrimoine, avis d'imposition.</li>
-            <li>Traitement : Exclusivement local via Tesseract.js.</li>
-            <li>Stockage : RAM uniquement. Persistance : 0 minute.</li>
+            <li>
+              Revenus, patrimoine, situation familiale, charges mensuelles.
+            </li>
+            <li>
+              Traitement : Exclusivement local (JavaScript côté navigateur).
+            </li>
+            <li>
+              Stockage : localStorage uniquement. Supprimé à la fermeture de
+              session ou manuellement.
+            </li>
           </ul>
 
           <h3 className="text-white font-bold mb-1">
@@ -129,10 +138,10 @@ const PrivacyPage: React.FC = () => {
         <Section title="4. Base Légale">
           <p>
             Le traitement de vos données de simulation repose sur votre{" "}
-            <strong>consentement explicite</strong> (Art. 6.1.a du RGPD),
-            recueilli au moment de l'importation de vos documents. Vous pouvez
-            retirer ce consentement à tout moment en fermant simplement
-            l'application.
+            <strong>consentement explicite</strong>, recueilli au moment de la
+            saisie de vos informations. Vous pouvez retirer ce consentement à
+            tout moment en fermant simplement l'application ou en effaçant les
+            données du navigateur.
           </p>
         </Section>
 
@@ -152,20 +161,21 @@ const PrivacyPage: React.FC = () => {
             <li className="flex items-center space-x-2">
               <div className="w-1.5 h-1.5 bg-[var(--color-plasma-cyan)] rounded-full" />
               <span>
-                <strong>Chiffrement Local :</strong> Opérations via API
-                sécurisées.
+                <strong>Traitement Local :</strong> Tous les calculs sont
+                exécutés dans votre navigateur.
               </span>
             </li>
             <li className="flex items-center space-x-2">
               <div className="w-1.5 h-1.5 bg-[var(--color-plasma-cyan)] rounded-full" />
               <span>
-                <strong>Isolation :</strong> Code sandboxé.
+                <strong>Isolation :</strong> Code sandboxé dans le navigateur.
               </span>
             </li>
             <li className="flex items-center space-x-2">
               <div className="w-1.5 h-1.5 bg-[var(--color-plasma-cyan)] rounded-full" />
               <span>
-                <strong>Sans Base de Données :</strong> Aucun stockage Cloud.
+                <strong>Sans Base de Données :</strong> Aucun stockage Cloud,
+                aucune transmission réseau de vos données.
               </span>
             </li>
           </ul>
@@ -174,7 +184,8 @@ const PrivacyPage: React.FC = () => {
         <Section title="7. Vos Droits (RGPD)">
           <ul className="space-y-2">
             <li>
-              <strong>Droit à l'oubli :</strong> Effectif dès fermeture session.
+              <strong>Droit à l'oubli :</strong> Effectif dès fermeture de
+              session ou suppression des données du navigateur.
             </li>
             <li>
               <strong>Droit à la portabilité :</strong> Via "Télécharger le
@@ -187,20 +198,7 @@ const PrivacyPage: React.FC = () => {
           </ul>
         </Section>
 
-        <Section title="8. Intelligence Artificielle Locale">
-          <div className="bg-white/5 p-3 rounded-lg border border-white/10">
-            <p className="text-xs">
-              Conformément au <strong>AI Act (2024)</strong> :
-            </p>
-            <ul className="list-disc pl-4 mt-2 space-y-1 text-xs text-gray-400">
-              <li>Extraction automatisée locale.</li>
-              <li>Décision finale par validation humaine.</li>
-              <li>Pas d'entraînement de modèles tiers.</li>
-            </ul>
-          </div>
-        </Section>
-
-        <Section title="9. Modifications">
+        <Section title="8. Modifications">
           <p>Toute mise à jour sera signalée par une notification in-app.</p>
         </Section>
 

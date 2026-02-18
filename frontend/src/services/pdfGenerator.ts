@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import type { SimulationResult, FinancialData } from "./legalEngine";
+import { getCalculationChoices } from "./divorceFormStore";
 
 // Design Standards
 const COLOR_PRIMARY = "#0F172A"; // Slate 900
@@ -126,125 +127,58 @@ export const pdfGenerator = {
     const beneficiaryIsMe = data.myIncome < data.spouseIncome;
     const isPayer = data.myIncome > data.spouseIncome;
 
+    // ── Calculation Choices ──────────────────────────────────
+    const choices = getCalculationChoices();
+    const hasChoices = choices.selectedCalcs.length > 0;
+    const hasPC =
+      !hasChoices || choices.selectedCalcs.includes("prestationCompensatoire");
+    const hasPA =
+      !hasChoices || choices.selectedCalcs.includes("pensionAlimentaire");
+    const hasLiq = !hasChoices || choices.selectedCalcs.includes("liquidation");
+    const hasRAV = !hasChoices || choices.selectedCalcs.includes("resteAVivre");
+
+    const pcMethods = choices.selectedMethods.prestationCompensatoire || [
+      "axelDepondt",
+      "pilote",
+      "insee",
+      "paBased",
+    ];
+    const showPilote = hasPC && pcMethods.includes("pilote");
+    const showInsee = hasPC && pcMethods.includes("insee");
+    const showPaBased = hasPC && pcMethods.includes("paBased");
+    const showAxelDepondt = hasPC && pcMethods.includes("axelDepondt");
+
+    // Derived flags for data display
+    const needsNetIncome =
+      showPilote || showInsee || showPaBased || hasPA || hasRAV;
+    const needsFamilyData = showInsee || showPaBased || hasPA;
+    const needsGrossIncome = showAxelDepondt;
+
+    // Dynamic PC average (only selected methods)
+    const activePCValues: number[] = [];
+    if (showAxelDepondt) activePCValues.push(results.details.axelDepondt.value);
+    if (showPilote) activePCValues.push(results.details.pilote.value);
+    if (showInsee) activePCValues.push(results.details.insee.value);
+    if (showPaBased) activePCValues.push(results.details.paBased.value);
+    const pcMainValue =
+      activePCValues.length > 0
+        ? Math.round(
+            activePCValues.reduce((a, b) => a + b, 0) / activePCValues.length,
+          )
+        : results.compensatoryAllowance;
+
+    // Dynamic section numbering
+    let sectionNum = 0;
+    const nextSection = () => String(++sectionNum);
+
     // ══════════════════════════════════════════════════════════
-    // PAGE 1 — MÉTHODOLOGIES & FORMULES (sans chiffres exacts)
+    // PAGE 1 — DONNÉES SAISIES PAR L'UTILISATEUR
     // ══════════════════════════════════════════════════════════
     drawWatermark();
     drawHeader();
     let y = 30;
 
-    y = drawSectionTitle("1", "Méthodologies & Calculs Utilisés", y);
-
-    // A — Prestation Compensatoire
-    y = drawSubTitle("A", "Prestation Compensatoire", y);
-    y = textBold("Méthode du Tiers Pondéré (Approche Temporelle)", 30, y, 9);
-    y = textMuted(
-      "Delta_Annuel = (Revenu_Payeur − Revenu_Bénéficiaire) × 12",
-      30,
-      y,
-    );
-    y = textMuted(
-      "Coeff_Age : < 45 ans → 1.0 | 45-54 ans → 1.2 | 55+ ans → 1.5",
-      30,
-      y,
-    );
-    y = textMuted(
-      "PC_Pilote = (Delta_Annuel / 3) × (Durée_Mariage / 2) × Coeff_Age",
-      30,
-      y,
-    );
-    y = textMuted("Fourchette : Min = PC × 0.9  |  Max = PC × 1.1", 30, y);
-    y += 3;
-    y = textBold("Méthode INSEE (Unités de Consommation)", 30, y, 9);
-    y = textMuted(
-      "UC_Avant = 1 + 0.5 + Σ UC_Enfants  (échelle OCDE modifiée)",
-      30,
-      y,
-    );
-    y = textMuted(
-      "  Enfant < 14 ans = 0.3 UC  |  Enfant ≥ 14 ans = 0.5 UC",
-      30,
-      y,
-    );
-    y = textMuted("Niveau_Vie_Avant = (Revenu_A + Revenu_B) / UC_Avant", 30, y);
-    y = textMuted(
-      "UC_Après = 1 + Σ UC_Enfants (× 0.5 si garde alternée)",
-      30,
-      y,
-    );
-    y = textMuted("Niveau_Vie_Après = Revenu_Bénéficiaire / UC_Après", 30, y);
-    y = textMuted(
-      "Perte_Mensuelle = Max(0, Niveau_Vie_Avant − Niveau_Vie_Après)",
-      30,
-      y,
-    );
-    y = textMuted(
-      "Période = Min(Durée_Mariage, 8) × 12 mois — Art. 275 C.civ.",
-      30,
-      y,
-    );
-    y = textMuted(
-      "PC_INSEE = Perte_Mensuelle × Période × Taux (15% min | 20% moy | 25% max)",
-      30,
-      y,
-    );
-    y += 3;
-    y = textBold("Résultat Final", 30, y, 9);
-    y = textMuted("PC_Finale = Moyenne(PC_Pilote, PC_INSEE)", 30, y);
-    y += 4;
-
-    // B — Pension Alimentaire
-    y = drawSubTitle("B", "Pension Alimentaire", y);
-    y = textMuted("Base = Revenu_Débiteur − RSA_Socle (645,50 €)", 30, y);
-    y = textMuted("Taux selon barème Ministère de la Justice 2026 :", 30, y);
-    y = textMuted(
-      "  Classique  → 1 enf: 13.5% | 2 enf: 11.5% | 3+ enf: 10%",
-      30,
-      y,
-    );
-    y = textMuted(
-      "  Alternée   → 1 enf: 9%    | 2 enf: 7.8%  | 3+ enf: 6.7%",
-      30,
-      y,
-    );
-    y = textMuted(
-      "  Réduite    → 1 enf: 18%   | 2 enf: 15.5% | 3+ enf: 13%",
-      30,
-      y,
-    );
-    y = textMuted("PA_par_enfant = Base × Taux", 30, y);
-    y = textMuted("PA_totale = PA_par_enfant × Nb_Enfants", 30, y);
-    y += 4;
-
-    // C — Liquidation & Soulte
-    y = drawSubTitle("C", "Liquidation & Soulte", y);
-    y = textMuted("Patrimoine_Net = Valeur_Vénale − Capital_Restant_Dû", 30, y);
-    y = textMuted("Régime Communauté (Art. 1467-1475 C.civ.) :", 30, y);
-    y = textMuted(
-      "  Soulte = (Patrimoine_Net + Récompense_Époux − Récompense_Utilisateur) / 2",
-      30,
-      y,
-    );
-    y = textMuted("Régime Séparation (indivision 50/50) :", 30, y);
-    y = textMuted("  Soulte = Patrimoine_Net / 2", 30, y);
-    y += 4;
-
-    // D — Reste à Vivre
-    y = drawSubTitle("D", "Reste à Vivre", y);
-    y = textMuted("Revenus = Revenu_Net + PA_Reçue", 30, y);
-    y = textMuted(
-      "Charges = Impôts + Loyer_Crédit + Charges_Fixes + PA_Versée",
-      30,
-      y,
-    );
-    y = textMuted("Reste_à_Vivre = Revenus − Charges", 30, y);
-    y = textMuted("Seuil de pauvreté 2026 : 1 216 € / mois", 30, y);
-
-    // ══════════════════════════════════════════════════════════
-    // PAGE 2 — DONNÉES SAISIES PAR L'UTILISATEUR
-    // ══════════════════════════════════════════════════════════
-    y = newPage();
-    y = drawSectionTitle("2", "Données Saisies par l'Utilisateur", y);
+    y = drawSectionTitle(nextSection(), "Données Saisies", y);
 
     const leftX = 25;
     const rightX = pageWidth / 2 + 10;
@@ -252,13 +186,9 @@ export const pdfGenerator = {
     // Col 1: Situation
     y = textBold("Situation Personnelle", leftX, y);
     let col1Y = y;
+    col1Y = textMuted(`• Âge du créancier : ${data.myAge} ans`, leftX, col1Y);
     col1Y = textMuted(
-      `• Âge de l'utilisateur : ${data.myAge} ans`,
-      leftX,
-      col1Y,
-    );
-    col1Y = textMuted(
-      `• Âge du conjoint : ${data.spouseAge} ans`,
+      `• Âge du débiteur : ${data.spouseAge} ans`,
       leftX,
       col1Y,
     );
@@ -272,20 +202,24 @@ export const pdfGenerator = {
         col1Y,
       );
     }
-    col1Y = textMuted(
-      `• Nombre d'enfants : ${data.childrenCount}`,
-      leftX,
-      col1Y,
-    );
-    col1Y = textMuted(`• Type de garde : ${custodyLabel}`, leftX, col1Y);
-    if (data.divorceType) {
+    if (data.divorceDate) {
       col1Y = textMuted(
-        `• Type de divorce : ${data.divorceType}`,
+        `• Date de divorce / séparation : ${data.divorceDate}`,
         leftX,
         col1Y,
       );
     }
-    if (data.matrimonialRegime) {
+    if (needsFamilyData) {
+      col1Y = textMuted(
+        `• Nombre d'enfants : ${data.childrenCount}`,
+        leftX,
+        col1Y,
+      );
+      if (data.childrenCount > 0) {
+        col1Y = textMuted(`• Type de garde : ${custodyLabel}`, leftX, col1Y);
+      }
+    }
+    if (hasLiq && data.matrimonialRegime) {
       const regimeLabel =
         data.matrimonialRegime === "separation"
           ? "Séparation de biens"
@@ -293,857 +227,823 @@ export const pdfGenerator = {
       col1Y = textMuted(`• Régime matrimonial : ${regimeLabel}`, leftX, col1Y);
     }
 
-    // Col 2: Finances
+    // Col 2: Finances (net income)
     let col2Y = y;
-    col2Y = textBold("Revenus & Charges Mensuelles", rightX, col2Y);
-    col2Y = textMuted(
-      `• Revenu net (utilisateur) : ${data.myIncome.toLocaleString()} €`,
-      rightX,
-      col2Y,
-    );
-    col2Y = textMuted(
-      `• Revenu net (conjoint) : ${data.spouseIncome.toLocaleString()} €`,
-      rightX,
-      col2Y,
-    );
-    col2Y = textMuted(
-      `• Impôts mensuels : ${(data.myTaxes || 0).toLocaleString()} €`,
-      rightX,
-      col2Y,
-    );
-    col2Y = textMuted(
-      `• Loyer / Crédit immobilier : ${(data.myRent || 0).toLocaleString()} €`,
-      rightX,
-      col2Y,
-    );
-    col2Y = textMuted(
-      `• Charges fixes : ${(data.myCharges || 0).toLocaleString()} €`,
-      rightX,
-      col2Y,
-    );
+    if (needsNetIncome) {
+      col2Y = textBold("Revenus & Charges Mensuelles", rightX, col2Y);
+      col2Y = textMuted(
+        `• Revenu net (créancier) : ${data.myIncome.toLocaleString()} €`,
+        rightX,
+        col2Y,
+      );
+      col2Y = textMuted(
+        `• Revenu net (débiteur) : ${data.spouseIncome.toLocaleString()} €`,
+        rightX,
+        col2Y,
+      );
+      if (hasRAV) {
+        col2Y = textMuted(
+          `• Impôts mensuels : ${(data.myTaxes || 0).toLocaleString()} €`,
+          rightX,
+          col2Y,
+        );
+        col2Y = textMuted(
+          `• Loyer / Crédit immobilier : ${(data.myRent || 0).toLocaleString()} €`,
+          rightX,
+          col2Y,
+        );
+        col2Y = textMuted(
+          `• Charges fixes : ${(data.myCharges || 0).toLocaleString()} €`,
+          rightX,
+          col2Y,
+        );
+      }
+    }
 
     y = Math.max(col1Y, col2Y) + 8;
 
-    y = textBold("Patrimoine Immobilier", leftX, y);
-    y = textMuted(
-      `• Valeur vénale du/des bien(s) : ${(data.assetsValue || 0).toLocaleString()} €`,
-      leftX,
-      y,
-    );
-    y = textMuted(
-      `• Capital restant dû (CRD) : ${(data.assetsCRD || 0).toLocaleString()} €`,
-      leftX,
-      y,
-    );
-    y = textMuted(
-      `• Récompense utilisateur : ${(data.rewardsAlice || 0).toLocaleString()} €`,
-      leftX,
-      y,
-    );
-    y = textMuted(
-      `• Récompense époux : ${(data.rewardsBob || 0).toLocaleString()} €`,
-      leftX,
-      y,
-    );
+    // Gross income (Calcul PC)
+    if (needsGrossIncome) {
+      y = checkPageBreak(y, 30);
+      y = textBold("Revenus Bruts (Calcul PC)", leftX, y);
+      const dGrossLabel =
+        data.debtorIncomeMode === "annual" ? "/ an" : "/ mois";
+      const cGrossLabel =
+        data.creditorIncomeMode === "annual" ? "/ an" : "/ mois";
+      y = textMuted(
+        `• Revenu brut débiteur : ${(data.debtorGrossIncome || 0).toLocaleString()} € ${dGrossLabel}`,
+        leftX,
+        y,
+      );
+      y = textMuted(
+        `• Revenu brut créancier : ${(data.creditorGrossIncome || 0).toLocaleString()} € ${cGrossLabel}`,
+        leftX,
+        y,
+      );
+      if (data.debtorPropertyValue) {
+        y = textMuted(
+          `• Patrimoine débiteur : ${data.debtorPropertyValue.toLocaleString()} € (rendement ${data.debtorPropertyYield || 0}%)`,
+          leftX,
+          y,
+        );
+      }
+      if (data.creditorPropertyValue) {
+        y = textMuted(
+          `• Patrimoine créancier : ${data.creditorPropertyValue.toLocaleString()} € (rendement ${data.creditorPropertyYield || 0}%)`,
+          leftX,
+          y,
+        );
+      }
+      y += 4;
+    }
+
+    // Patrimoine Immobilier (only for Liquidation)
+    if (hasLiq) {
+      y = checkPageBreak(y, 25);
+      y = textBold("Patrimoine Immobilier", leftX, y);
+      y = textMuted(
+        `• Valeur vénale du/des bien(s) : ${(data.assetsValue || 0).toLocaleString()} €`,
+        leftX,
+        y,
+      );
+      y = textMuted(
+        `• Capital restant dû (CRD) : ${(data.assetsCRD || 0).toLocaleString()} €`,
+        leftX,
+        y,
+      );
+      if (data.matrimonialRegime !== "separation") {
+        y = textMuted(
+          `• Récompense créancier : ${(data.rewardsAlice || 0).toLocaleString()} €`,
+          leftX,
+          y,
+        );
+        y = textMuted(
+          `• Récompense débiteur : ${(data.rewardsBob || 0).toLocaleString()} €`,
+          leftX,
+          y,
+        );
+      }
+    }
 
     // ══════════════════════════════════════════════════════════
-    // PAGE 3 — PRESTATION COMPENSATOIRE (détail chiffré)
+    // PRESTATION COMPENSATOIRE (détail chiffré) — conditional
     // ══════════════════════════════════════════════════════════
-    y = newPage();
-    y = drawSectionTitle("3", "Prestation Compensatoire", y);
-
-    // Summary box
-    doc.setFillColor(241, 245, 249);
-    doc.roundedRect(20, y, pageWidth - 40, 42, 3, 3, "F");
-
-    const boxX = 30;
-    let bY = y + 8;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(COLOR_PRIMARY);
-    doc.text("Méthode du Tiers", boxX, bY);
-    doc.text(
-      `${results.details.pilote.value.toLocaleString()} €`,
-      pageWidth - 30,
-      bY,
-      { align: "right" },
-    );
-    bY += 5;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(COLOR_MUTED);
-    doc.text(
-      `Min: ${results.details.pilote.min.toLocaleString()} €   —   Max: ${results.details.pilote.max.toLocaleString()} €`,
-      boxX,
-      bY,
-    );
-    bY += 8;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(COLOR_PRIMARY);
-    doc.text("Méthode INSEE", boxX, bY);
-    doc.text(
-      `${results.details.insee.value.toLocaleString()} €`,
-      pageWidth - 30,
-      bY,
-      { align: "right" },
-    );
-    bY += 5;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(COLOR_MUTED);
-    doc.text(
-      `Min: ${results.details.insee.min.toLocaleString()} €   —   Max: ${results.details.insee.max.toLocaleString()} €`,
-      boxX,
-      bY,
-    );
-    bY += 8;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(COLOR_ACCENT);
-    doc.text("Moyenne Estimée", boxX, bY);
-    doc.text(
-      `${results.compensatoryAllowance.toLocaleString()} €`,
-      pageWidth - 30,
-      bY,
-      { align: "right" },
-    );
-
-    y += 50;
-
-    // Détail des calculs
-    y = drawSubTitle("", "Détail des Calculs", y);
-
     const payerIncome = beneficiaryIsMe ? data.spouseIncome : data.myIncome;
     const beneficiaryIncome = beneficiaryIsMe
       ? data.myIncome
       : data.spouseIncome;
     const beneficiaryAge = beneficiaryIsMe ? data.myAge : data.spouseAge;
-    const deltaMonthly = payerIncome - beneficiaryIncome;
-    const deltaAnnual = deltaMonthly * 12;
-    let ageCoeff = 1.0;
-    if (beneficiaryAge >= 45 && beneficiaryAge < 55) ageCoeff = 1.2;
-    if (beneficiaryAge >= 55) ageCoeff = 1.5;
-
-    y = textBold("Méthode du Tiers Pondéré — Calcul Détaillé", 25, y, 9);
-    y = textMuted(
-      `Bénéficiaire : ${beneficiaryIsMe ? "Utilisateur" : "Conjoint"} (revenu le plus faible)`,
-      30,
-      y,
-    );
-    y = textMuted(
-      `Revenu Payeur : ${payerIncome.toLocaleString()} € / mois`,
-      30,
-      y,
-    );
-    y = textMuted(
-      `Revenu Bénéficiaire : ${beneficiaryIncome.toLocaleString()} € / mois`,
-      30,
-      y,
-    );
-    y = textMuted(
-      `Écart mensuel : ${deltaMonthly.toLocaleString()} €  →  Annuel : ${deltaAnnual.toLocaleString()} €`,
-      30,
-      y,
-    );
-    y = textMuted(`Durée du mariage : ${marriageDur} ans`, 30, y);
-    y = textMuted(
-      `Coefficient d'âge (${beneficiaryAge} ans) : ${ageCoeff}`,
-      30,
-      y,
-    );
-    y = textMuted(
-      `PC_Pilote = (${deltaAnnual.toLocaleString()} / 3) × (${marriageDur} / 2) × ${ageCoeff}`,
-      30,
-      y,
-    );
-    y = textBold(
-      `= ${results.details.pilote.value.toLocaleString()} €`,
-      30,
-      y,
-      9,
-    );
-    y = textMuted(
-      `Fourchette : ${results.details.pilote.min.toLocaleString()} € — ${results.details.pilote.max.toLocaleString()} €`,
-      30,
-      y,
-    );
-    y += 5;
-
-    // Calcul UC enfants (OCDE modifiée : <14 → 0.3, ≥14 → 0.5)
     const ages = data.childrenAges || [];
-    let childrenUC = 0;
-    for (let i = 0; i < data.childrenCount; i++) {
-      const age = i < ages.length ? ages[i] : 0;
-      childrenUC += age >= 14 ? 0.5 : 0.3;
-    }
-    const ucBefore = 1 + 0.5 + childrenUC;
-    const totalIncomeAll = data.myIncome + data.spouseIncome;
-    const nivVieBefore = totalIncomeAll / ucBefore;
-    const custody = data.custodyType || "classic";
-    const childUcShare = custody === "alternating" ? 0.5 : 1;
-    const ucAfter = 1 + childrenUC * childUcShare;
-    const nivVieAfter = beneficiaryIncome / ucAfter;
-    const lossMonthly = Math.max(0, nivVieBefore - nivVieAfter);
 
-    y = textBold("Méthode INSEE — Calcul Détaillé", 25, y, 9);
-    // Détail UC enfants par âge
-    if (data.childrenCount > 0 && data.childrenCount <= 4) {
-      // Format compact sur une ligne si ≤ 4 enfants
-      const ucDetailParts: string[] = [];
-      for (let i = 0; i < data.childrenCount; i++) {
-        const age = i < ages.length ? ages[i] : 0;
-        ucDetailParts.push(`E${i + 1}(${age}a→${age >= 14 ? "0.5" : "0.3"})`);
+    if (hasPC) {
+      y = newPage();
+      y = drawSectionTitle(nextSection(), "Prestation Compensatoire", y);
+
+      // Compute dynamic box height: 13px per method + 8px average line + padding
+      const pcMethodEntries: {
+        label: string;
+        detail: { value: number; min: number; max: number };
+      }[] = [];
+      if (showPilote)
+        pcMethodEntries.push({
+          label: "Méthode du Tiers",
+          detail: results.details.pilote,
+        });
+      if (showInsee)
+        pcMethodEntries.push({
+          label: "Méthode INSEE",
+          detail: results.details.insee,
+        });
+      if (showPaBased)
+        pcMethodEntries.push({
+          label: "Méthode Pension Alimentaire",
+          detail: results.details.paBased,
+        });
+      if (showAxelDepondt)
+        pcMethodEntries.push({
+          label: "Méthode Calcul PC",
+          detail: results.details.axelDepondt,
+        });
+
+      const boxHeight = pcMethodEntries.length * 13 + 16; // 13 per entry + padding + average line
+      doc.setFillColor(241, 245, 249);
+      doc.roundedRect(20, y, pageWidth - 40, boxHeight, 3, 3, "F");
+
+      const boxX = 30;
+      let bY = y + 8;
+
+      pcMethodEntries.forEach((entry) => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.setTextColor(COLOR_PRIMARY);
+        doc.text(entry.label, boxX, bY);
+        doc.text(
+          `${entry.detail.value.toLocaleString()} €`,
+          pageWidth - 30,
+          bY,
+          { align: "right" },
+        );
+        bY += 5;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(COLOR_MUTED);
+        doc.text(
+          `Min: ${entry.detail.min.toLocaleString()} €   —   Max: ${entry.detail.max.toLocaleString()} €`,
+          boxX,
+          bY,
+        );
+        bY += 8;
+      });
+
+      // Average line (only if multiple methods)
+      if (pcMethodEntries.length > 1) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(COLOR_ACCENT);
+        doc.text("Moyenne Estimée", boxX, bY);
+        doc.text(`${pcMainValue.toLocaleString()} €`, pageWidth - 30, bY, {
+          align: "right",
+        });
       }
-      y = textMuted(
-        `UC avant divorce : 1 + 0.5 + [${ucDetailParts.join(" + ")}] = ${ucBefore.toFixed(1)}`,
-        30,
-        y,
-      );
-    } else if (data.childrenCount > 4 && data.childrenCount <= 7) {
-      // Plusieurs lignes pour 5-7 enfants
-      y = textMuted(
-        `UC avant divorce : 1 (adulte) + 0.5 (conjoint) + Σ enfants = ${ucBefore.toFixed(1)}`,
-        30,
-        y,
-      );
-      for (let i = 0; i < data.childrenCount; i++) {
-        y = checkPageBreak(y);
-        const age = i < ages.length ? ages[i] : 0;
+
+      y += boxHeight + 8;
+
+      // Détails des informations
+      y = drawSubTitle("", "Détails des informations relatives aux calculs", y);
+
+      if (showPilote) {
+        y = textBold("Méthode du Tiers Pondéré", 25, y, 9);
         y = textMuted(
-          `  Enfant ${i + 1} : ${age} ans → ${age >= 14 ? "0.5" : "0.3"} UC`,
-          35,
+          `Bénéficiaire : ${beneficiaryIsMe ? "Créancier" : "Débiteur"} (revenu le plus faible)`,
+          30,
+          y,
+        );
+        y = textMuted(
+          `Revenu du payeur : ${payerIncome.toLocaleString()} € / mois`,
+          30,
+          y,
+        );
+        y = textMuted(
+          `Revenu du bénéficiaire : ${beneficiaryIncome.toLocaleString()} € / mois`,
+          30,
+          y,
+        );
+        y = textMuted(`Durée du mariage : ${marriageDur} ans`, 30, y);
+        y = textMuted(`Âge du bénéficiaire : ${beneficiaryAge} ans`, 30, y);
+        y += 5;
+      }
+
+      if (showInsee) {
+        y = checkPageBreak(y, 30);
+        y = textBold("Méthode INSEE (Unités de Consommation)", 25, y, 9);
+        y = textMuted(
+          `Revenus totaux du ménage : ${(data.myIncome + data.spouseIncome).toLocaleString()} € / mois`,
+          30,
+          y,
+        );
+        y = textMuted(`Nombre d'enfants : ${data.childrenCount}`, 30, y);
+        if (data.childrenCount > 0 && ages.length > 0) {
+          const agesStr = ages
+            .slice(0, data.childrenCount)
+            .map((a, i) => `E${i + 1}: ${a} ans`)
+            .join(", ");
+          y = textMuted(`Âges des enfants : ${agesStr}`, 30, y);
+        }
+        y = textMuted(`Type de garde : ${custodyLabel}`, 30, y);
+        y = textMuted(
+          `Revenu du bénéficiaire : ${beneficiaryIncome.toLocaleString()} € / mois`,
+          30,
+          y,
+        );
+        y += 5;
+      }
+
+      if (showPaBased) {
+        y = checkPageBreak(y, 20);
+        y = textBold("Méthode Pension Alimentaire", 25, y, 9);
+        y = textMuted(
+          `Pension alimentaire totale : ${results.childSupport.toLocaleString()} € / mois`,
+          30,
+          y,
+        );
+        y = textMuted(
+          `Calcul : ${results.childSupport.toLocaleString()} € × 12 × 8 = ${results.details.paBased.value.toLocaleString()} €`,
+          30,
+          y,
+        );
+        y = textMuted(`Intervalle coefficient : 6 à 10`, 30, y);
+        y += 5;
+      }
+
+      if (showAxelDepondt) {
+        y = checkPageBreak(y, 20);
+        y = textBold("Méthode Calcul PC", 25, y, 9);
+        y = textMuted(
+          `Capital : ${results.details.axelDepondt.value.toLocaleString()} € (±10%)`,
+          30,
+          y,
+        );
+        y = textMuted(
+          `Mensuel sur 8 ans : ${results.details.axelDepondt.monthlyOver8Years.toLocaleString()} € / mois`,
+          30,
+          y,
+        );
+        y = textMuted(
+          `Capacité d'épargne max débiteur : ${results.details.axelDepondt.debtorMaxSavingsCapital.toLocaleString()} €`,
+          30,
           y,
         );
       }
-    } else if (data.childrenCount > 7) {
-      // Résumé global pour > 7 enfants (éviter de surcharger le document)
-      const nb14plus = ages.filter((a) => a >= 14).length;
-      const nbUnder14 = data.childrenCount - nb14plus;
-      y = textMuted(
-        `UC avant divorce : 1 + 0.5 + Σ ${data.childrenCount} enfants = ${ucBefore.toFixed(1)}`,
-        30,
-        y,
-      );
-      y = textMuted(
-        `  (${nbUnder14} enfant(s) < 14 ans × 0.3 + ${nb14plus} enfant(s) ≥ 14 ans × 0.5 = ${childrenUC.toFixed(1)} UC)`,
-        35,
-        y,
-      );
-    } else {
-      y = textMuted(
-        `UC avant divorce : 1 + 0.5 = ${ucBefore.toFixed(1)}  (pas d'enfants)`,
-        30,
-        y,
-      );
-    }
-    y = checkPageBreak(y);
-    y = textMuted(
-      `Revenus totaux du ménage : ${totalIncomeAll.toLocaleString()} € / mois`,
-      30,
-      y,
-    );
-    y = textMuted(
-      `Niveau de vie avant : ${totalIncomeAll.toLocaleString()} / ${ucBefore.toFixed(1)} = ${Math.round(nivVieBefore).toLocaleString()} €`,
-      30,
-      y,
-    );
-    y = textMuted(
-      `UC après divorce : 1 + ${childrenUC.toFixed(1)}${childUcShare < 1 ? ` × ${childUcShare}` : ""} = ${ucAfter.toFixed(1)}`,
-      30,
-      y,
-    );
-    y = textMuted(
-      `Niveau de vie après : ${beneficiaryIncome.toLocaleString()} / ${ucAfter.toFixed(1)} = ${Math.round(nivVieAfter).toLocaleString()} €`,
-      30,
-      y,
-    );
-    y = textMuted(
-      `Perte mensuelle : Max(0, ${Math.round(nivVieBefore).toLocaleString()} − ${Math.round(nivVieAfter).toLocaleString()}) = ${Math.round(lossMonthly).toLocaleString()} €`,
-      30,
-      y,
-    );
-    const periodYears = Math.min(marriageDur, 8);
-    const periodMonths = periodYears * 12;
-    y = textMuted(
-      `Période : Min(${marriageDur}, 8) × 12 = ${periodMonths} mois`,
-      30,
-      y,
-    );
-    y = textMuted(
-      `PC_INSEE = ${Math.round(lossMonthly).toLocaleString()} × ${periodMonths} × 0.20 = ${results.details.insee.value.toLocaleString()} €`,
-      30,
-      y,
-    );
-    y = textBold(
-      `= ${results.details.insee.value.toLocaleString()} €`,
-      30,
-      y,
-      9,
-    );
-    y = textMuted(
-      `Fourchette : ${results.details.insee.min.toLocaleString()} € — ${results.details.insee.max.toLocaleString()} €`,
-      30,
-      y,
-    );
-    y += 5;
-
-    y = textBold("Moyenne Finale", 25, y, 9);
-    y = textMuted(
-      `(${results.details.pilote.value.toLocaleString()} + ${results.details.insee.value.toLocaleString()}) / 2 = ${results.compensatoryAllowance.toLocaleString()} €`,
-      30,
-      y,
-    );
+    } // end hasPC
 
     // ══════════════════════════════════════════════════════════
-    // PAGE 4 — PENSION ALIMENTAIRE (détail chiffré)
+    // PENSION ALIMENTAIRE (détail chiffré) — conditional
     // ══════════════════════════════════════════════════════════
-    y = newPage();
-    y = drawSectionTitle("4", "Pension Alimentaire", y);
+    if (hasPA) {
+      y = newPage();
+      y = drawSectionTitle(nextSection(), "Pension Alimentaire", y);
 
-    const paDirection = isPayer ? "à verser" : "à recevoir";
+      const paDirection = isPayer ? "à verser" : "à recevoir";
 
-    // Summary box
-    doc.setFillColor(241, 245, 249);
-    doc.roundedRect(20, y, pageWidth - 40, 30, 3, 3, "F");
-    bY = y + 8;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(COLOR_PRIMARY);
-    doc.text(`Pension Alimentaire (${paDirection})`, 30, bY);
-    doc.setTextColor(COLOR_ACCENT);
-    doc.text(
-      `${results.childSupport.toLocaleString()} € / mois`,
-      pageWidth - 30,
-      bY,
-      { align: "right" },
-    );
-    bY += 7;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(COLOR_MUTED);
-    doc.text(`Type de garde : ${custodyLabel}`, 30, bY);
-    bY += 5;
-    doc.text(`Nombre d'enfants : ${data.childrenCount}`, 30, bY);
-    if (results.childSupportPerChild > 0) {
+      // Summary box
+      doc.setFillColor(241, 245, 249);
+      doc.roundedRect(20, y, pageWidth - 40, 30, 3, 3, "F");
+      let bYpa = y + 8;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(COLOR_PRIMARY);
+      doc.text(`Pension Alimentaire (${paDirection})`, 30, bYpa);
+      doc.setTextColor(COLOR_ACCENT);
       doc.text(
-        `${results.childSupportPerChild.toLocaleString()} € / enfant`,
+        `${results.childSupport.toLocaleString()} € / mois`,
         pageWidth - 30,
-        bY,
+        bYpa,
         { align: "right" },
       );
-    }
+      bYpa += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(COLOR_MUTED);
+      doc.text(`Type de garde : ${custodyLabel}`, 30, bYpa);
+      bYpa += 5;
+      doc.text(`Nombre d'enfants : ${data.childrenCount}`, 30, bYpa);
+      if (results.childSupportPerChild > 0) {
+        doc.text(
+          `${results.childSupportPerChild.toLocaleString()} € / enfant`,
+          pageWidth - 30,
+          bYpa,
+          { align: "right" },
+        );
+      }
 
-    y += 38;
+      y += 38;
 
-    // Détail des calculs
-    y = drawSubTitle("", "Détail des Calculs", y);
+      // Détails des informations
+      y = drawSubTitle("", "Détails des informations relatives aux calculs", y);
 
-    const RSA_SOLO = 645.5;
-    const rRef = Math.max(0, payerIncome - RSA_SOLO);
-    const rateKey = Math.min(data.childrenCount, 6);
-    const CHILD_SUPPORT_RATES: Record<string, Record<number, number>> = {
-      classic: { 1: 0.135, 2: 0.115, 3: 0.1, 4: 0.088, 5: 0.08, 6: 0.072 },
-      alternating: {
-        1: 0.09,
-        2: 0.078,
-        3: 0.067,
-        4: 0.059,
-        5: 0.053,
-        6: 0.048,
-      },
-      reduced: { 1: 0.18, 2: 0.155, 3: 0.133, 4: 0.117, 5: 0.106, 6: 0.095 },
-    };
-    const custodyPA = data.custodyType || "classic";
-    const rateTable =
-      CHILD_SUPPORT_RATES[custodyPA] || CHILD_SUPPORT_RATES.classic;
-    const rate = rateTable[rateKey] || 0.135;
+      const RSA_SOLO = 645.5;
 
-    y = textMuted(
-      `Débiteur : ${isPayer ? "Utilisateur" : "Conjoint"} (revenu le plus élevé)`,
-      30,
-      y,
-    );
-    y = textMuted(
-      `Revenu du débiteur : ${payerIncome.toLocaleString()} € / mois`,
-      30,
-      y,
-    );
-    y = textMuted(`RSA Socle 2026 : ${RSA_SOLO} €`, 30, y);
-    y = textMuted(
-      `Base de référence = ${payerIncome.toLocaleString()} − ${RSA_SOLO} = ${rRef.toLocaleString()} €`,
-      30,
-      y,
-    );
-    y += 2;
-    y = textMuted(`Type de garde : ${custodyLabel}`, 30, y);
-    y = textMuted(
-      `Nombre d'enfants : ${data.childrenCount}  →  Taux applicable : ${(rate * 100).toFixed(1)}%`,
-      30,
-      y,
-    );
-    y += 2;
-    y = textMuted(
-      `PA par enfant = ${rRef.toLocaleString()} × ${(rate * 100).toFixed(1)}% = ${results.childSupportPerChild.toLocaleString()} €`,
-      30,
-      y,
-    );
-    y = textMuted(
-      `PA totale = ${results.childSupportPerChild.toLocaleString()} × ${data.childrenCount} = ${results.childSupport.toLocaleString()} € / mois`,
-      30,
-      y,
-    );
-    y += 4;
-
-    if (data.childrenCount === 0) {
       y = textMuted(
-        "Aucun enfant déclaré — Pension alimentaire non applicable.",
-        30,
-        y,
-      );
-    }
-
-    // ══════════════════════════════════════════════════════════
-    // PAGE 5 — LIQUIDATION & SOULTE (détail chiffré)
-    // ══════════════════════════════════════════════════════════
-    y = newPage();
-    y = drawSectionTitle("5", "Liquidation & Soulte", y);
-
-    const netAsset = (data.assetsValue || 0) - (data.assetsCRD || 0);
-    const soulteDirection =
-      results.liquidationShare > 0 ? "à verser" : "à recevoir";
-    const soulteAbs = Math.abs(results.liquidationShare);
-
-    // Summary box
-    doc.setFillColor(241, 245, 249);
-    doc.roundedRect(20, y, pageWidth - 40, 38, 3, 3, "F");
-    bY = y + 8;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(COLOR_PRIMARY);
-    doc.text(`Soulte (${soulteDirection})`, 30, bY);
-    doc.setTextColor(COLOR_ACCENT);
-    doc.text(`${soulteAbs.toLocaleString()} €`, pageWidth - 30, bY, {
-      align: "right",
-    });
-    bY += 7;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(COLOR_MUTED);
-    doc.text(
-      `Valeur vénale du/des bien(s) : ${(data.assetsValue || 0).toLocaleString()} €`,
-      30,
-      bY,
-    );
-    bY += 5;
-    doc.text(
-      `Capital restant dû : ${(data.assetsCRD || 0).toLocaleString()} €`,
-      30,
-      bY,
-    );
-    bY += 5;
-    doc.text(
-      `Récompense utilisateur : ${(data.rewardsAlice || 0).toLocaleString()} €`,
-      30,
-      bY,
-    );
-    doc.text(
-      `Récompense époux : ${(data.rewardsBob || 0).toLocaleString()} €`,
-      pageWidth - 30,
-      bY,
-      { align: "right" },
-    );
-
-    y += 46;
-
-    // Détail des calculs
-    y = drawSubTitle("", "Détail des Calculs", y);
-
-    const regime =
-      data.matrimonialRegime === "separation"
-        ? "Séparation de biens"
-        : "Communauté";
-    y = textMuted(`Régime matrimonial : ${regime}`, 30, y);
-    y = textMuted(
-      `Valeur vénale : ${(data.assetsValue || 0).toLocaleString()} €`,
-      30,
-      y,
-    );
-    y = textMuted(
-      `Capital restant dû (CRD) : ${(data.assetsCRD || 0).toLocaleString()} €`,
-      30,
-      y,
-    );
-    y = textMuted(
-      `Patrimoine net = ${(data.assetsValue || 0).toLocaleString()} − ${(data.assetsCRD || 0).toLocaleString()} = ${netAsset.toLocaleString()} €`,
-      30,
-      y,
-    );
-    y += 2;
-
-    if (data.matrimonialRegime === "separation") {
-      y = textMuted(`Soulte = Patrimoine_Net / 2  (indivision 50/50)`, 30, y);
-      y = textMuted(
-        `Soulte = ${netAsset.toLocaleString()} / 2 = ${(netAsset / 2).toLocaleString()} €`,
-        30,
-        y,
-      );
-    } else {
-      const rewardsAlice = data.rewardsAlice || 0;
-      const rewardsBob = data.rewardsBob || 0;
-      y = textMuted(
-        `Récompense utilisateur (A) : ${rewardsAlice.toLocaleString()} €`,
+        `Débiteur : ${isPayer ? "Créancier" : "Débiteur"} (revenu le plus élevé)`,
         30,
         y,
       );
       y = textMuted(
-        `Récompense époux (B) : ${rewardsBob.toLocaleString()} €`,
+        `Revenu du débiteur : ${payerIncome.toLocaleString()} € / mois`,
         30,
         y,
       );
+      y = textMuted(`RSA Socle 2026 (référence) : ${RSA_SOLO} €`, 30, y);
       y += 2;
-      y = textMuted(
-        `Art. 1467-1475 C.civ. : Soulte = (Pnet + Réc_B − Réc_A) / 2`,
-        30,
-        y,
-      );
-      y = textMuted(
-        `Soulte = (${netAsset.toLocaleString()} + ${rewardsBob.toLocaleString()} − ${rewardsAlice.toLocaleString()}) / 2`,
-        30,
-        y,
-      );
-      y = textBold(
-        `= ${results.liquidationShare.toLocaleString()} €  (${soulteDirection})`,
-        30,
-        y,
-        9,
-      );
-    }
+      y = textMuted(`Type de garde : ${custodyLabel}`, 30, y);
+      y = textMuted(`Nombre d'enfants : ${data.childrenCount}`, 30, y);
+      if (data.childrenCount > 0 && ages.length > 0) {
+        const agesStr = ages
+          .slice(0, data.childrenCount)
+          .map((a, i) => `E${i + 1}: ${a} ans`)
+          .join(", ");
+        y = textMuted(`Âges des enfants : ${agesStr}`, 30, y);
+      }
+      y += 4;
+
+      if (data.childrenCount === 0) {
+        y = textMuted(
+          "Aucun enfant déclaré — Pension alimentaire non applicable.",
+          30,
+          y,
+        );
+      }
+    } // end hasPA
 
     // ══════════════════════════════════════════════════════════
-    // PAGE 6 — RESTE À VIVRE
+    // LIQUIDATION & SOULTE (détail chiffré) — conditional
     // ══════════════════════════════════════════════════════════
-    y = newPage();
-    y = drawSectionTitle("6", "Reste à Vivre de l'Utilisateur", y);
+    if (hasLiq) {
+      y = newPage();
+      y = drawSectionTitle(nextSection(), "Liquidation & Soulte", y);
 
-    // Summary box
-    const rvColor = results.belowPovertyThreshold
-      ? [200, 100, 0]
-      : [20, 184, 166];
-    doc.setFillColor(241, 245, 249);
-    doc.roundedRect(20, y, pageWidth - 40, 18, 3, 3, "F");
-    bY = y + 12;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor(rvColor[0], rvColor[1], rvColor[2]);
-    doc.text(
-      `${results.remainingLiveable.toLocaleString()} € / mois`,
-      pageWidth / 2,
-      bY,
-      { align: "center" },
-    );
-    if (results.belowPovertyThreshold) {
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "italic");
+      const soulteDirection =
+        results.liquidationShare > 0 ? "à verser" : "à recevoir";
+      const soulteAbs = Math.abs(results.liquidationShare);
+
+      // Summary box
+      doc.setFillColor(241, 245, 249);
+      doc.roundedRect(20, y, pageWidth - 40, 38, 3, 3, "F");
+      let bYliq = y + 8;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(COLOR_PRIMARY);
+      doc.text(`Soulte (${soulteDirection})`, 30, bYliq);
+      doc.setTextColor(COLOR_ACCENT);
+      doc.text(`${soulteAbs.toLocaleString()} €`, pageWidth - 30, bYliq, {
+        align: "right",
+      });
+      bYliq += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(COLOR_MUTED);
       doc.text(
-        "Inférieur au seuil de pauvreté 2026 (1 216 € / mois)",
+        `Valeur vénale du/des bien(s) : ${(data.assetsValue || 0).toLocaleString()} €`,
+        30,
+        bYliq,
+      );
+      bYliq += 5;
+      doc.text(
+        `Capital restant dû : ${(data.assetsCRD || 0).toLocaleString()} €`,
+        30,
+        bYliq,
+      );
+      bYliq += 5;
+      doc.text(
+        `Récompense créancier : ${(data.rewardsAlice || 0).toLocaleString()} €`,
+        30,
+        bYliq,
+      );
+      doc.text(
+        `Récompense débiteur : ${(data.rewardsBob || 0).toLocaleString()} €`,
+        pageWidth - 30,
+        bYliq,
+        { align: "right" },
+      );
+
+      y += 46;
+
+      // Détails des informations
+      y = drawSubTitle("", "Détails des informations relatives aux calculs", y);
+
+      const regime =
+        data.matrimonialRegime === "separation"
+          ? "Séparation de biens"
+          : "Communauté réduite aux acquêts";
+      y = textMuted(`Régime matrimonial : ${regime}`, 30, y);
+      y = textMuted(
+        `Valeur vénale du/des bien(s) : ${(data.assetsValue || 0).toLocaleString()} €`,
+        30,
+        y,
+      );
+      y = textMuted(
+        `Capital restant dû (CRD) : ${(data.assetsCRD || 0).toLocaleString()} €`,
+        30,
+        y,
+      );
+      if (data.matrimonialRegime !== "separation") {
+        y = textMuted(
+          `Récompense créancier : ${(data.rewardsAlice || 0).toLocaleString()} €`,
+          30,
+          y,
+        );
+        y = textMuted(
+          `Récompense débiteur : ${(data.rewardsBob || 0).toLocaleString()} €`,
+          30,
+          y,
+        );
+      }
+    } // end hasLiq
+
+    // ══════════════════════════════════════════════════════════
+    // RESTE À VIVRE — conditional
+    // ══════════════════════════════════════════════════════════
+    if (hasRAV) {
+      y = newPage();
+      y = drawSectionTitle(nextSection(), "Reste à Vivre du Créancier", y);
+
+      // Summary box
+      const rvColor = results.belowPovertyThreshold
+        ? [200, 100, 0]
+        : [20, 184, 166];
+      doc.setFillColor(241, 245, 249);
+      doc.roundedRect(20, y, pageWidth - 40, 18, 3, 3, "F");
+      const bYrav = y + 12;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(rvColor[0], rvColor[1], rvColor[2]);
+      doc.text(
+        `${results.remainingLiveable.toLocaleString()} € / mois`,
         pageWidth / 2,
-        bY + 6,
+        bYrav,
         { align: "center" },
       );
-      y += 28;
-    } else {
-      y += 24;
-    }
+      if (results.belowPovertyThreshold) {
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "italic");
+        doc.text(
+          "Inférieur au seuil de pauvreté 2026 (1 216 € / mois)",
+          pageWidth / 2,
+          bYrav + 6,
+          { align: "center" },
+        );
+        y += 28;
+      } else {
+        y += 24;
+      }
 
-    // Détail des calculs
-    y = drawSubTitle("", "Détail des Calculs", y);
+      // Détails des informations relatives aux calculs
+      y = drawSubTitle("", "Détails des informations relatives aux calculs", y);
 
-    y = textBold("Revenus", 30, y, 9);
-    y = textMuted(`+ Revenu net : ${data.myIncome.toLocaleString()} €`, 30, y);
-    if (results.budget.paReceived > 0) {
-      y = textMuted(
-        `+ Pension alimentaire reçue : ${results.budget.paReceived.toLocaleString()} €`,
-        30,
-        y,
-      );
-    }
-    y = textMuted(
-      `= Total Revenus : ${results.budget.totalRevenus.toLocaleString()} €`,
-      30,
-      y,
-    );
-    y += 3;
+      y = textBold("Revenus", 30, y, 9);
+      y = textMuted(`Revenu net : ${data.myIncome.toLocaleString()} €`, 30, y);
+      if (results.budget.paReceived > 0) {
+        y = textMuted(
+          `Pension alimentaire reçue : ${results.budget.paReceived.toLocaleString()} €`,
+          30,
+          y,
+        );
+      }
+      y += 3;
 
-    y = textBold("Charges", 30, y, 9);
-    if (results.budget.taxes > 0) {
-      y = textMuted(
-        `− Impôts : ${results.budget.taxes.toLocaleString()} €`,
-        30,
-        y,
-      );
-    }
-    if (results.budget.rent > 0) {
-      y = textMuted(
-        `− Loyer / Crédit immobilier : ${results.budget.rent.toLocaleString()} €`,
-        30,
-        y,
-      );
-    }
-    if (results.budget.fixedCharges > 0) {
-      y = textMuted(
-        `− Charges fixes : ${results.budget.fixedCharges.toLocaleString()} €`,
-        30,
-        y,
-      );
-    }
-    if (results.budget.paPaid > 0) {
-      y = textMuted(
-        `− Pension alimentaire versée : ${results.budget.paPaid.toLocaleString()} €`,
-        30,
-        y,
-      );
-    }
-    y = textMuted(
-      `= Total Charges : ${results.budget.totalCharges.toLocaleString()} €`,
-      30,
-      y,
-    );
-    y += 3;
-
-    y = textBold("Résultat", 30, y, 9);
-    y = textMuted(
-      `Reste à Vivre = ${results.budget.totalRevenus.toLocaleString()} − ${results.budget.totalCharges.toLocaleString()} = ${results.remainingLiveable.toLocaleString()} € / mois`,
-      30,
-      y,
-    );
+      y = textBold("Charges", 30, y, 9);
+      if (results.budget.taxes > 0) {
+        y = textMuted(
+          `Impôts : ${results.budget.taxes.toLocaleString()} €`,
+          30,
+          y,
+        );
+      }
+      if (results.budget.rent > 0) {
+        y = textMuted(
+          `Loyer / Crédit immobilier : ${results.budget.rent.toLocaleString()} €`,
+          30,
+          y,
+        );
+      }
+      if (results.budget.fixedCharges > 0) {
+        y = textMuted(
+          `Charges fixes : ${results.budget.fixedCharges.toLocaleString()} €`,
+          30,
+          y,
+        );
+      }
+      if (results.budget.paPaid > 0) {
+        y = textMuted(
+          `Pension alimentaire versée : ${results.budget.paPaid.toLocaleString()} €`,
+          30,
+          y,
+        );
+      }
+    } // end hasRAV
 
     // ══════════════════════════════════════════════════════════
-    // PAGES 7+ — GRAPHIQUES
+    // GRAPHIQUES — conditional
     // ══════════════════════════════════════════════════════════
-    y = newPage();
-    y = drawSectionTitle("7", "Analyses Graphiques", y);
+    const showRevenueChart = needsNetIncome;
+    const showBudgetChart = hasRAV;
+    const showPCChart = hasPC && activePCValues.length > 0;
 
-    // A. Disparité Revenus
-    y = drawSubTitle("A", "Disparité des Revenus", y);
+    if (showRevenueChart || showBudgetChart || showPCChart) {
+      y = newPage();
+      y = drawSectionTitle(nextSection(), "Analyses Graphiques", y);
+      let chartLetter = "A";
+      const nextChartLetter = () => {
+        const letter = chartLetter;
+        chartLetter = String.fromCharCode(chartLetter.charCodeAt(0) + 1);
+        return letter;
+      };
 
-    const totalIncome = data.myIncome + data.spouseIncome;
-    const myShare = totalIncome > 0 ? data.myIncome / totalIncome : 0;
-    const spouseShare = totalIncome > 0 ? data.spouseIncome / totalIncome : 0;
-    const barWidth = 140;
-    const barHeight = 14;
-    const startX = 35;
+      // A. Disparité Revenus
+      if (showRevenueChart) {
+        y = drawSubTitle(nextChartLetter(), "Disparité des Revenus", y);
 
-    doc.setFillColor(20, 184, 166);
-    doc.rect(startX, y, barWidth * myShare, barHeight, "F");
-    doc.setFillColor(148, 163, 184);
-    doc.rect(
-      startX + barWidth * myShare,
-      y,
-      barWidth * spouseShare,
-      barHeight,
-      "F",
-    );
+        const totalIncome = data.myIncome + data.spouseIncome;
+        const myShare = totalIncome > 0 ? data.myIncome / totalIncome : 0;
+        const spouseShare =
+          totalIncome > 0 ? data.spouseIncome / totalIncome : 0;
+        const barWidth = 140;
+        const barHeight = 14;
+        const startX = 35;
 
-    doc.setFontSize(8);
-    doc.setTextColor(255, 255, 255);
-    if (myShare > 0.1) {
-      doc.text(
-        `${Math.round(myShare * 100)}%`,
-        startX + (barWidth * myShare) / 2,
-        y + 9,
-        { align: "center" },
-      );
-    }
-    if (spouseShare > 0.1) {
-      doc.text(
-        `${Math.round(spouseShare * 100)}%`,
-        startX + barWidth * myShare + (barWidth * spouseShare) / 2,
-        y + 9,
-        { align: "center" },
-      );
-    }
+        doc.setFillColor(20, 184, 166);
+        doc.rect(startX, y, barWidth * myShare, barHeight, "F");
+        doc.setFillColor(148, 163, 184);
+        doc.rect(
+          startX + barWidth * myShare,
+          y,
+          barWidth * spouseShare,
+          barHeight,
+          "F",
+        );
 
-    y += barHeight + 6;
-    doc.setFontSize(8);
-    doc.setFillColor(20, 184, 166);
-    doc.rect(startX, y, 4, 4, "F");
-    doc.setTextColor(COLOR_MUTED);
-    doc.text(
-      `Utilisateur (${data.myIncome.toLocaleString()} €)`,
-      startX + 6,
-      y + 3,
-    );
-    doc.setFillColor(148, 163, 184);
-    doc.rect(startX + 80, y, 4, 4, "F");
-    doc.text(
-      `Conjoint (${data.spouseIncome.toLocaleString()} €)`,
-      startX + 86,
-      y + 3,
-    );
+        doc.setFontSize(8);
+        doc.setTextColor(255, 255, 255);
+        if (myShare > 0.1) {
+          doc.text(
+            `${Math.round(myShare * 100)}%`,
+            startX + (barWidth * myShare) / 2,
+            y + 9,
+            { align: "center" },
+          );
+        }
+        if (spouseShare > 0.1) {
+          doc.text(
+            `${Math.round(spouseShare * 100)}%`,
+            startX + barWidth * myShare + (barWidth * spouseShare) / 2,
+            y + 9,
+            { align: "center" },
+          );
+        }
 
-    y += 18;
+        y += barHeight + 6;
+        doc.setFontSize(8);
+        doc.setFillColor(20, 184, 166);
+        doc.rect(startX, y, 4, 4, "F");
+        doc.setTextColor(COLOR_MUTED);
+        doc.text(
+          `Créancier (${data.myIncome.toLocaleString()} €)`,
+          startX + 6,
+          y + 3,
+        );
+        doc.setFillColor(148, 163, 184);
+        doc.rect(startX + 80, y, 4, 4, "F");
+        doc.text(
+          `Débiteur (${data.spouseIncome.toLocaleString()} €)`,
+          startX + 86,
+          y + 3,
+        );
 
-    // B. Budget Mensuel Estimé
-    y = drawSubTitle("B", "Budget Mensuel Post-Divorce", y);
+        y += 18;
+      } // end showRevenueChart
 
-    const budgetItems = [
-      {
-        label: "Revenus",
-        value: results.budget.totalRevenus,
-        color: [20, 184, 166],
-      },
-      { label: "Impôts", value: results.budget.taxes, color: [251, 146, 60] },
-      { label: "Logement", value: results.budget.rent, color: [239, 68, 68] },
-      {
-        label: "Charges",
-        value: results.budget.fixedCharges,
-        color: [168, 85, 247],
-      },
-      {
-        label: "PA versée",
-        value: results.budget.paPaid,
-        color: [244, 63, 94],
-      },
-      {
-        label: "Reste",
-        value: Math.max(0, results.remainingLiveable),
-        color: [99, 102, 241],
-      },
-    ].filter((i) => i.value > 0);
+      // B. Budget Mensuel Estimé
+      if (showBudgetChart) {
+        y = drawSubTitle(nextChartLetter(), "Budget Mensuel Post-Divorce", y);
 
-    const maxVal = Math.max(...budgetItems.map((i) => i.value)) || 1;
-    const chartHeight = 50;
-    const colWidth = budgetItems.length <= 4 ? 28 : 22;
-    const gap = budgetItems.length <= 4 ? 12 : 8;
-    const totalChartW =
-      budgetItems.length * colWidth + (budgetItems.length - 1) * gap;
-    let currentX = (pageWidth - totalChartW) / 2;
+        const budgetItems = [
+          {
+            label: "Revenus",
+            value: results.budget.totalRevenus,
+            color: [20, 184, 166],
+          },
+          {
+            label: "Impôts",
+            value: results.budget.taxes,
+            color: [251, 146, 60],
+          },
+          {
+            label: "Logement",
+            value: results.budget.rent,
+            color: [239, 68, 68],
+          },
+          {
+            label: "Charges",
+            value: results.budget.fixedCharges,
+            color: [168, 85, 247],
+          },
+          {
+            label: "PA versée",
+            value: results.budget.paPaid,
+            color: [244, 63, 94],
+          },
+          {
+            label: "Reste",
+            value: Math.max(0, results.remainingLiveable),
+            color: [99, 102, 241],
+          },
+        ].filter((i) => i.value > 0);
 
-    budgetItems.forEach((item) => {
-      const h = (item.value / maxVal) * chartHeight;
-      const topY = y + (chartHeight - h);
+        const maxVal = Math.max(...budgetItems.map((i) => i.value)) || 1;
+        const chartHeight = 50;
+        const colWidth = budgetItems.length <= 4 ? 28 : 22;
+        const gap = budgetItems.length <= 4 ? 12 : 8;
+        const totalChartW =
+          budgetItems.length * colWidth + (budgetItems.length - 1) * gap;
+        let currentX = (pageWidth - totalChartW) / 2;
 
-      doc.setFillColor(item.color[0], item.color[1], item.color[2]);
-      doc.rect(currentX, topY, colWidth, h, "F");
+        budgetItems.forEach((item) => {
+          const h = (item.value / maxVal) * chartHeight;
+          const topY = y + (chartHeight - h);
 
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(7);
-      doc.setTextColor(COLOR_PRIMARY);
-      doc.text(
-        `${item.value.toLocaleString()}€`,
-        currentX + colWidth / 2,
-        topY - 2,
-        { align: "center" },
-      );
+          doc.setFillColor(item.color[0], item.color[1], item.color[2]);
+          doc.rect(currentX, topY, colWidth, h, "F");
 
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(7);
-      doc.setTextColor(COLOR_MUTED);
-      doc.text(item.label, currentX + colWidth / 2, y + chartHeight + 5, {
-        align: "center",
-      });
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(7);
+          doc.setTextColor(COLOR_PRIMARY);
+          doc.text(
+            `${item.value.toLocaleString()}€`,
+            currentX + colWidth / 2,
+            topY - 2,
+            { align: "center" },
+          );
 
-      currentX += colWidth + gap;
-    });
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(7);
+          doc.setTextColor(COLOR_MUTED);
+          doc.text(item.label, currentX + colWidth / 2, y + chartHeight + 5, {
+            align: "center",
+          });
 
-    y += chartHeight + 20;
+          currentX += colWidth + gap;
+        });
 
-    // C. Prestation Compensatoire Comparaison
-    y = drawSubTitle("C", "Comparaison Prestation Compensatoire", y);
+        y += chartHeight + 20;
+      } // end showBudgetChart
 
-    const pcItems = [
-      {
-        label: "Tiers Min",
-        value: results.details.pilote.min,
-        color: [20, 184, 166],
-      },
-      {
-        label: "Tiers",
-        value: results.details.pilote.value,
-        color: [13, 148, 136],
-      },
-      {
-        label: "Tiers Max",
-        value: results.details.pilote.max,
-        color: [15, 118, 110],
-      },
-      {
-        label: "INSEE Min",
-        value: results.details.insee.min,
-        color: [99, 102, 241],
-      },
-      {
-        label: "INSEE",
-        value: results.details.insee.value,
-        color: [79, 70, 229],
-      },
-      {
-        label: "INSEE Max",
-        value: results.details.insee.max,
-        color: [67, 56, 202],
-      },
-    ];
+      // C. Prestation Compensatoire Comparaison
+      if (showPCChart) {
+        y = checkPageBreak(y, 80);
+        y = drawSubTitle(
+          nextChartLetter(),
+          "Comparaison Prestation Compensatoire",
+          y,
+        );
 
-    const maxPC = Math.max(...pcItems.map((i) => i.value)) || 1;
-    const pcBarH = 50;
-    const pcColW = 22;
-    const pcGap = 6;
-    const pcTotalW = pcItems.length * pcColW + (pcItems.length - 1) * pcGap;
-    currentX = (pageWidth - pcTotalW) / 2;
+        const pcItems: { label: string; value: number; color: number[] }[] = [];
+        if (showPilote) {
+          pcItems.push(
+            {
+              label: "Tiers Min",
+              value: results.details.pilote.min,
+              color: [20, 184, 166],
+            },
+            {
+              label: "Tiers",
+              value: results.details.pilote.value,
+              color: [13, 148, 136],
+            },
+            {
+              label: "Tiers Max",
+              value: results.details.pilote.max,
+              color: [15, 118, 110],
+            },
+          );
+        }
+        if (showInsee) {
+          pcItems.push(
+            {
+              label: "INSEE Min",
+              value: results.details.insee.min,
+              color: [99, 102, 241],
+            },
+            {
+              label: "INSEE",
+              value: results.details.insee.value,
+              color: [79, 70, 229],
+            },
+            {
+              label: "INSEE Max",
+              value: results.details.insee.max,
+              color: [67, 56, 202],
+            },
+          );
+        }
+        if (showPaBased) {
+          pcItems.push(
+            {
+              label: "PA Min",
+              value: results.details.paBased.min,
+              color: [245, 158, 11],
+            },
+            {
+              label: "PA",
+              value: results.details.paBased.value,
+              color: [234, 138, 0],
+            },
+            {
+              label: "PA Max",
+              value: results.details.paBased.max,
+              color: [217, 119, 6],
+            },
+          );
+        }
+        if (showAxelDepondt) {
+          pcItems.push(
+            {
+              label: "Cal. PC Min",
+              value: results.details.axelDepondt.min,
+              color: [168, 85, 247],
+            },
+            {
+              label: "Cal. PC",
+              value: results.details.axelDepondt.value,
+              color: [147, 51, 234],
+            },
+            {
+              label: "Cal. PC Max",
+              value: results.details.axelDepondt.max,
+              color: [126, 34, 206],
+            },
+          );
+        }
 
-    pcItems.forEach((item) => {
-      const h = (item.value / maxPC) * pcBarH;
-      const topY = y + (pcBarH - h);
+        const maxPC = Math.max(...pcItems.map((i) => i.value)) || 1;
+        const pcBarH = 50;
+        const pcColW = pcItems.length <= 6 ? 22 : 18;
+        const pcGap = pcItems.length <= 6 ? 8 : 4;
+        const pcTotalW = pcItems.length * pcColW + (pcItems.length - 1) * pcGap;
+        let currentX = (pageWidth - pcTotalW) / 2;
 
-      doc.setFillColor(item.color[0], item.color[1], item.color[2]);
-      doc.rect(currentX, topY, pcColW, h, "F");
+        pcItems.forEach((item) => {
+          const h = (item.value / maxPC) * pcBarH;
+          const topY = y + (pcBarH - h);
 
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(6);
-      doc.setTextColor(COLOR_PRIMARY);
-      doc.text(
-        `${item.value.toLocaleString()}€`,
-        currentX + pcColW / 2,
-        topY - 2,
-        { align: "center" },
-      );
+          doc.setFillColor(item.color[0], item.color[1], item.color[2]);
+          doc.rect(currentX, topY, pcColW, h, "F");
 
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(6);
-      doc.setTextColor(COLOR_MUTED);
-      doc.text(item.label, currentX + pcColW / 2, y + pcBarH + 4, {
-        align: "center",
-      });
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(6);
+          doc.setTextColor(COLOR_PRIMARY);
+          doc.text(
+            `${item.value.toLocaleString()}€`,
+            currentX + pcColW / 2,
+            topY - 2,
+            { align: "center" },
+          );
 
-      currentX += pcColW + pcGap;
-    });
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(6);
+          doc.setTextColor(COLOR_MUTED);
+          doc.text(item.label, currentX + pcColW / 2, y + pcBarH + 4, {
+            align: "center",
+          });
 
-    // Average line
-    const avgLineY =
-      y + pcBarH - (results.compensatoryAllowance / maxPC) * pcBarH;
-    doc.setDrawColor(239, 68, 68);
-    doc.setLineWidth(0.4);
-    doc.setLineDashPattern([2, 2], 0);
-    doc.line(
-      (pageWidth - pcTotalW) / 2 - 5,
-      avgLineY,
-      (pageWidth + pcTotalW) / 2 + 5,
-      avgLineY,
-    );
-    doc.setLineDashPattern([], 0);
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(239, 68, 68);
-    doc.text(
-      `Moyenne: ${results.compensatoryAllowance.toLocaleString()} €`,
-      pageWidth / 2,
-      avgLineY - 3,
-      { align: "center" },
-    );
+          currentX += pcColW + pcGap;
+        });
+
+        // Average line (only if multiple methods)
+        if (activePCValues.length > 1) {
+          const avgLineY = y + pcBarH - (pcMainValue / maxPC) * pcBarH;
+          doc.setDrawColor(239, 68, 68);
+          doc.setLineWidth(0.4);
+          doc.setLineDashPattern([2, 2], 0);
+          doc.line(
+            (pageWidth - pcTotalW) / 2 - 5,
+            avgLineY,
+            (pageWidth + pcTotalW) / 2 + 5,
+            avgLineY,
+          );
+          doc.setLineDashPattern([], 0);
+          doc.setFontSize(8);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(239, 68, 68);
+          doc.text(
+            `Moyenne: ${pcMainValue.toLocaleString()} €`,
+            pageWidth / 2,
+            avgLineY - 3,
+            { align: "center" },
+          );
+        }
+      } // end showPCChart
+    } // end graphs section
 
     // ── GLOBAL: Disclaimer + Footer on ALL pages ──
     const pageCount = doc.getNumberOfPages();

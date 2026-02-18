@@ -3,13 +3,12 @@ import { useNavigate, Link } from "react-router-dom";
 import { Shield } from "lucide-react";
 import { InfoTooltip } from "../components/InfoTooltip";
 import { SEO, faqJsonLd } from "../components/SEO";
-import { errorSystem } from "../services/errorSystem";
 
 const landingFaq = faqJsonLd([
   {
     question: `Comment fonctionne le simulateur de divorce "DivorceDoc" ?`,
     answer:
-      "DivorceDoc analyse vos documents (bulletins de paie, avis d'imposition) directement sur votre appareil grâce à l'OCR Tesseract.js. Aucune donnée n'est envoyée sur un serveur. L'outil calcule la prestation compensatoire, la pension alimentaire, la liquidation du régime matrimonial et le reste à vivre.",
+      "DivorceDoc vous permet de saisir manuellement vos informations financières (revenus, charges, patrimoine) pour simuler la prestation compensatoire, la pension alimentaire, la liquidation du régime matrimonial et le reste à vivre. Aucune donnée n'est envoyée sur un serveur.",
   },
   {
     question: "Le simulateur de divorce est-il gratuit ?",
@@ -36,12 +35,6 @@ const landingFaq = faqJsonLd([
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
 
-  React.useEffect(() => {
-    if (!errorSystem.checkWebAssembly()) {
-      alert(errorSystem.get("ENV_01").message);
-    }
-  }, []);
-
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center relative overflow-hidden text-center transition-colors duration-300">
       <SEO
@@ -55,22 +48,17 @@ const LandingPage: React.FC = () => {
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-[var(--accent-primary)] rounded-full blur-[150px] opacity-10 animate-pulse-glow" />
 
       {/* Header */}
-      <div className="z-20 flex items-center justify-between w-full p-6">
+      <div className="z-20 flex items-center w-full p-6">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-[var(--accent-primary)] rounded-lg flex items-center justify-center">
-            <span className="font-mono font-bold text-white">D</span>
+            <span className="font-mono font-bold" style={{ color: "#ffffff" }}>
+              D
+            </span>
           </div>
           <span className="text-[var(--text-primary)] font-bold tracking-wider">
             DivorceDoc
           </span>
         </div>
-        <button className="p-2 hover:bg-[var(--bg-tertiary)] rounded-full transition">
-          <div className="space-y-1.5">
-            <div className="w-6 h-0.5 bg-[var(--text-primary)]"></div>
-            <div className="w-6 h-0.5 bg-[var(--text-primary)]"></div>
-            <div className="w-6 h-0.5 bg-[var(--text-primary)]"></div>
-          </div>
-        </button>
       </div>
 
       <div className="z-10 flex flex-col items-center justify-center flex-1 w-full max-w-md p-6 pb-24">
@@ -99,11 +87,11 @@ const LandingPage: React.FC = () => {
           <p className="text-sm text-[var(--text-muted)] font-light">
             Aucun compte requis.{" "}
             <span className="text-[var(--accent-primary)] font-medium">
-              Vos documents ne quittent jamais cet appareil.
+              Vos informations ne quittent jamais cet appareil.
             </span>
           </p>
           <InfoTooltip
-            content="Grâce à la technologie Tesseract.js, l'analyse se fait dans la mémoire vive de votre téléphone. Dès que vous fermez l'app, tout est effacé."
+            content="Nous ne demandons aucun document. Vous insérer seulement les informations nécessaires et le calcul est fait en local. Dès que vous fermez l'app, tout est effacé. Aucune donnée personnelle n'est collectée ou stockée."
             label="Comment c'est possible ?"
           />
         </div>
@@ -120,17 +108,23 @@ const LandingPage: React.FC = () => {
 
         {/* Kinetic Button */}
         <button
-          onClick={() => navigate("/profile")}
+          onClick={() => navigate("/disclaimer")}
           className="relative group w-full bg-[var(--bg-secondary)] hover:bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)] text-[var(--accent-primary)] font-bold py-5 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[var(--bg-primary)]/10 to-transparent translate-x-[-100%] group-hover:animate-[warp-speed_0.5s_linear]" />
           <span className="relative flex items-center justify-center space-x-3 text-lg tracking-wider">
             <span>Démarrer ma simulation gratuite</span>
           </span>
-          <span className="relative text-[10px] block mt-1 opacity-70">
-            (Gratuit)
-          </span>
+          <span className="relative text-[10px] block mt-1 opacity-70"></span>
         </button>
+
+        {/* Mini Disclaimer */}
+        <div className="max-w-sm mx-auto mt-4 px-4 py-2.5 rounded-xl border border-amber-500/50 bg-amber-500/15">
+          <p className="text-xs font-semibold leading-relaxed text-center text-amber-500">
+            ⚠ Outil à caractère informatif uniquement — aucune valeur
+            juridique. Ne se substitue pas à l'avis d'un avocat ou d'un notaire.
+          </p>
+        </div>
 
         <Link
           to="/guide"
@@ -142,7 +136,7 @@ const LandingPage: React.FC = () => {
         <nav className="flex mt-4 space-x-4" aria-label="Liens légaux">
           <Link
             to="/privacy"
-            className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-[10px] uppercase tracking-widest transition-colors"
+            className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-sm uppercase tracking-widest transition-colors"
           >
             Confidentialité
           </Link>
@@ -151,7 +145,7 @@ const LandingPage: React.FC = () => {
           </span>
           <Link
             to="/terms"
-            className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-[10px] uppercase tracking-widest transition-colors"
+            className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-sm uppercase tracking-widest transition-colors"
           >
             CGU
           </Link>
@@ -163,14 +157,14 @@ const LandingPage: React.FC = () => {
         >
           <Link
             to="/methodology"
-            className="text-[var(--accent-primary)]/70 hover:text-[var(--accent-primary)] text-[9px] uppercase tracking-widest transition-colors flex items-center justify-center space-x-1"
+            className="text-[var(--accent-primary)]/70 hover:text-[var(--accent-primary)] text-sm uppercase tracking-widest transition-colors flex items-center justify-center space-x-1"
           >
             <span className="w-1 h-1 bg-[var(--accent-primary)] rounded-full animate-pulse"></span>
-            <span>Sources & Méthodologie (AI Act)</span>
+            <span>Sources & Méthodologie</span>
           </Link>
           <Link
             to="/glossary"
-            className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-[9px] uppercase tracking-widest transition-colors"
+            className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-sm uppercase tracking-widest transition-colors"
           >
             Lexique Juridique
           </Link>

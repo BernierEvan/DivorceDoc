@@ -65,7 +65,10 @@ const ExportPage: React.FC = () => {
           <div className="w-96 h-96 rounded-full bg-white blur-[100px] animate-pulse" />
         </div>
         <div className="absolute text-center z-20">
-          <p className="text-white font-bold tracking-widest text-xl uppercase mb-2">
+          <p
+            className="font-bold tracking-widest text-xl uppercase mb-2"
+            style={{ color: "#ffffff" }}
+          >
             Session Clôturée
           </p>
           <p className="text-(--color-plasma-cyan) text-xs">
@@ -77,7 +80,7 @@ const ExportPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-(--color-deep-space) flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+    <div className="min-h-screen bg-(--color-deep-space) flex flex-col items-center justify-center p-6 text-center relative">
       <SEO
         title="Export du Rapport"
         description="Téléchargez votre rapport de simulation de divorce."
@@ -109,8 +112,9 @@ const ExportPage: React.FC = () => {
         className="absolute inset-0"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)",
+            "linear-gradient(var(--border-color) 1px, transparent 1px), linear-gradient(90deg, var(--border-color) 1px, transparent 1px)",
           backgroundSize: "50px 50px",
+          opacity: 0.3,
         }}
       />
 
@@ -130,11 +134,12 @@ const ExportPage: React.FC = () => {
 
         <button
           onClick={generatePDF}
-          className="w-full bg-(--color-plasma-cyan) hover:bg-cyan-300 text-(--color-deep-space) font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.3)] mb-6 flex items-center justify-center space-x-2 transition transform active:scale-95"
+          className="w-full bg-(--color-plasma-cyan) hover:bg-(--accent-hover) text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.3)] mb-6 flex items-center justify-center space-x-2 transition transform active:scale-95"
+          style={{ color: "#ffffff" }}
         >
           <Share2 className="w-5 h-5" />
           <span className="uppercase tracking-widest text-xs">
-            Télécharger mon estimation
+            Télécharger l'estimation
           </span>
         </button>
 
@@ -172,13 +177,14 @@ const ExportPage: React.FC = () => {
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowExitModal(false)}
-                className="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider transition"
+                className="flex-1 py-3 rounded-xl bg-[var(--bg-tertiary)] hover:bg-[var(--border-color)] text-[var(--text-primary)] text-xs font-bold uppercase tracking-wider transition"
               >
                 Annuler
               </button>
               <button
                 onClick={confirmWipe}
-                className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold uppercase tracking-wider shadow-[0_0_20px_rgba(239,68,68,0.4)] transition"
+                className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-xs font-bold uppercase tracking-wider shadow-[0_0_20px_rgba(239,68,68,0.4)] transition"
+                style={{ color: "#ffffff" }}
               >
                 Tout Effacer
               </button>

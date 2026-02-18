@@ -1,5 +1,12 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&display=swap");
+
+@font-face {
+  font-family: "FS Rosa";
+  src: url("./assets/FS-Rosa-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ============================================
    HIGH CONTRAST DESIGN SYSTEM WITH DARK MODE
@@ -7,8 +14,8 @@
 
 :root {
   /* Light Mode - Requested Palette (Refined) */
-  --bg-primary: #f8fafc; /* Slate 50 - Softer than pure white/gray */
-  --bg-secondary: #ffffff;
+  --bg-primary: #f1f5f9; /* Slate 100 - Soft warm gray, easy on eyes */
+  --bg-secondary: #f8fafc; /* Slate 50 - Cards slightly lighter than page */
   --bg-tertiary: #e2e8f0;
 
   --text-primary: #1e293b; /* Slate 800 - Softer than pure black */
@@ -22,19 +29,8 @@
   --border-color: #cbd5e1; /* Slate 300 */
   --border-focus: #0d9488;
 
-  --alert-bg: #fff1f2;
-  --alert-text: #be123c; /* Rose 700 - Professional red */
-  --alert-border: #fecdd3;
-
-  --verify-bg: #fffbeb;
-  --verify-text: #b45309; /* Amber 700 */
-  --verify-border: #fde68a;
-
-  --success-bg: #ecfdf5;
-  --success-text: #047857; /* Emerald 700 */
-
   /* Glass effect (Subtle) */
-  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-bg: rgba(248, 250, 252, 0.95);
   --glass-border: rgba(226, 232, 240, 0.6);
 
   /* Legacy aliases used by pages */
@@ -62,17 +58,6 @@
     --border-color: #334155; /* Slate 700 */
     --border-focus: #14b8a6;
 
-    --alert-bg: #4c0519; /* Rose 950 */
-    --alert-text: #fb7185; /* Rose 400 */
-    --alert-border: #881337;
-
-    --verify-bg: #451a03; /* Amber 950 */
-    --verify-text: #fbbf24; /* Amber 400 */
-    --verify-border: #78350f;
-
-    --success-bg: #022c22; /* Emerald 950 */
-    --success-text: #34d399; /* Emerald 400 */
-
     --glass-bg: rgba(15, 23, 42, 0.95);
     --glass-border: rgba(51, 65, 85, 0.5);
 
@@ -85,8 +70,8 @@
 
 /* Manual light/dark mode class overrides */
 :root.light {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #ffffff;
+  --bg-primary: #f1f5f9;
+  --bg-secondary: #f8fafc;
   --bg-tertiary: #e2e8f0;
 
   --text-primary: #1e293b;
@@ -100,18 +85,7 @@
   --border-color: #cbd5e1;
   --border-focus: #0d9488;
 
-  --alert-bg: #fff1f2;
-  --alert-text: #be123c;
-  --alert-border: #fecdd3;
-
-  --verify-bg: #fffbeb;
-  --verify-text: #b45309;
-  --verify-border: #fde68a;
-
-  --success-bg: #ecfdf5;
-  --success-text: #047857;
-
-  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-bg: rgba(248, 250, 252, 0.95);
   --glass-border: rgba(226, 232, 240, 0.6);
 
   --color-deep-space: var(--bg-primary);
@@ -156,19 +130,273 @@
   --color-cosmic-dust: #020617;
 }
 
-/* Light mode overrides for legacy text utility classes */
+/* ============================================
+   LIGHT MODE: COMPREHENSIVE OVERRIDES
+   Fix visibility, contrast, and design in light mode
+   ============================================ */
+
+/* --- Text Colors --- */
+/* Override text-white except inside black backgrounds (overlays) */
 :root.light .text-white {
   color: var(--text-primary) !important;
 }
+/* Preserve white text inside intentionally dark containers */
+:root.light .bg-black .text-white,
+:root.light .bg-black.text-white,
+:root.light [class*="bg-black/"] .text-white,
+:root.light [class*="bg-black/"].text-white,
+:root.light .bg-red-500 .text-white,
+:root.light [class*="bg-red-500"].text-white,
+:root.light .bg-amber-600 .text-white {
+  color: #ffffff !important;
+}
+/* White text on accent backgrounds stays white */
+:root.light [class*="bg-\[var(--accent"] .text-white,
+:root.light [class*="bg-\[var(--color-plasma"] .text-white {
+  color: #ffffff !important;
+}
 :root.light .text-gray-100,
-:root.light .text-gray-200,
-:root.light .text-gray-300,
-:root.light .text-gray-400,
-:root.light .text-gray-500 {
+:root.light .text-gray-200 {
+  color: var(--text-primary) !important;
+}
+:root.light .text-gray-300 {
+  color: var(--text-secondary) !important;
+}
+:root.light .text-gray-400 {
   color: var(--text-muted) !important;
+}
+:root.light .text-gray-500 {
+  color: #475569 !important; /* Slate 600 — better contrast than default muted */
+}
+:root.light .text-gray-600 {
+  color: #475569 !important;
 }
 :root.light .text-blue-200 {
   color: var(--text-muted) !important;
+}
+:root.light .text-indigo-300 {
+  color: #4f46e5 !important; /* Indigo 600 */
+}
+/* Hover text overrides */
+:root.light .group-hover\:text-white:is(:where(.group):hover *) {
+  color: var(--text-primary) !important;
+}
+:root.light .hover\:text-white:hover {
+  color: var(--text-primary) !important;
+}
+
+/* White opacity text */
+:root.light .text-white\/60,
+:root.light .text-white\/70,
+:root.light .text-white\/80 {
+  color: var(--text-secondary) !important;
+}
+/* Preserve white opacity text in dark containers */
+:root.light .bg-black .text-white\/60,
+:root.light .bg-black .text-white\/70,
+:root.light .bg-black .text-white\/80,
+:root.light [class*="bg-black/"] .text-white\/60,
+:root.light [class*="bg-black/"] .text-white\/70,
+:root.light [class*="bg-black/"] .text-white\/80 {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* --- Background Colors (White Opacity → Tertiary) --- */
+:root.light .bg-white\/5 {
+  background-color: var(--bg-tertiary) !important;
+}
+:root.light .bg-white\/10 {
+  background-color: var(--bg-tertiary) !important;
+}
+:root.light .bg-white\/20 {
+  background-color: var(--bg-tertiary) !important;
+}
+:root.light .hover\:bg-white\/10:hover {
+  background-color: #cbd5e1 !important; /* Slate 300 */
+}
+:root.light .hover\:bg-white\/20:hover {
+  background-color: #cbd5e1 !important;
+}
+/* Preserve white-opacity bg inside dark containers (modal overlays) */
+:root.light .bg-black .bg-white\/5,
+:root.light [class*="bg-black/"] .bg-white\/5 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+:root.light .bg-black .bg-white\/10,
+:root.light [class*="bg-black/"] .bg-white\/10 {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* --- Background Colors (Black Opacity → Theme-aware) --- */
+:root.light .bg-black\/20 {
+  background-color: var(--bg-primary) !important;
+}
+:root.light .bg-black\/30 {
+  background-color: var(--bg-tertiary) !important;
+}
+:root.light .bg-black\/40 {
+  background-color: var(--bg-primary) !important;
+}
+:root.light .bg-black\/50 {
+  background-color: var(--bg-primary) !important;
+}
+:root.light .bg-black\/60 {
+  background-color: var(--bg-tertiary) !important;
+}
+:root.light .bg-black\/70 {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+:root.light .bg-black\/80 {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+:root.light .bg-black\/90 {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+:root.light .hover\:bg-black\/80:hover {
+  background-color: var(--bg-tertiary) !important;
+}
+:root.light .hover\:bg-black\/90:hover {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* --- Gray backgrounds (AdUnit etc.) --- */
+:root.light .bg-gray-900 {
+  background-color: var(--bg-tertiary) !important;
+}
+:root.light .bg-gray-800 {
+  background-color: var(--bg-tertiary) !important;
+}
+:root.light .bg-gray-700 {
+  background-color: #cbd5e1 !important; /* Slate 300 */
+}
+
+/* --- Indigo adjustments --- */
+:root.light .bg-indigo-900\/10 {
+  background-color: #eef2ff !important; /* Indigo 50 */
+}
+
+/* --- Border Colors (White/Black Opacity → Theme borders) --- */
+:root.light .border-white\/5 {
+  border-color: var(--border-color) !important;
+}
+:root.light .border-white\/10 {
+  border-color: var(--border-color) !important;
+}
+:root.light .border-white\/20 {
+  border-color: var(--border-color) !important;
+}
+/* Preserve borders in dark containers */
+:root.light .bg-black .border-white\/20,
+:root.light [class*="bg-black/"] .border-white\/20 {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* --- Dividers --- */
+:root.light .divide-white\/5 > * + * {
+  border-color: var(--border-color) !important;
+}
+
+/* --- Gradient Text Fix --- */
+:root.light .bg-gradient-to-r.from-white.to-gray-400 {
+  --tw-gradient-from: var(--text-primary) !important;
+  --tw-gradient-to: var(--text-muted) !important;
+  background-image: linear-gradient(
+    to right,
+    var(--text-primary),
+    var(--text-muted)
+  ) !important;
+}
+
+/* --- Preserve white text on colored backgrounds --- */
+:root.light .bg-red-500 .text-white,
+:root.light .bg-red-500.text-white,
+:root.light .bg-amber-600 .text-white,
+:root.light .bg-amber-600.text-white {
+  color: #ffffff !important;
+}
+
+/* --- Specific: implode/wipe animation stays dark --- */
+:root.light .animate-implode ~ * .text-white,
+:root.light [class*="bg-black"].h-screen .text-white {
+  color: #ffffff !important;
+}
+
+/* --- Glass panel in light mode: better shadow and border --- */
+:root.light .glass-panel {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05);
+}
+:root.light .glass-panel-hover:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* --- Light mode shadow glow replacement --- */
+:root.light .text-glow {
+  text-shadow: none;
+}
+
+/* --- Light mode pulse-glow is too flashy --- */
+:root.light .animate-pulse-glow {
+  animation: none;
+  box-shadow: 0 0 10px -5px var(--accent-primary);
+}
+
+/* --- Background radial gradients for dark-only ambience --- */
+:root.light [class*="bg-\[radial-gradient"] {
+  opacity: 0.15 !important;
+}
+
+/* --- Functional color contrast fixes --- */
+:root.light .text-green-400 {
+  color: #059669 !important;
+}
+:root.light .text-green-400\/70 {
+  color: #059669 !important;
+}
+:root.light .text-red-400 {
+  color: #dc2626 !important;
+}
+:root.light .text-red-400\/70 {
+  color: #dc2626 !important;
+}
+:root.light .text-orange-300 {
+  color: #c2410c !important;
+}
+:root.light .text-orange-400 {
+  color: #ea580c !important;
+}
+
+/* --- Inputs: visible borders and placeholders in light mode --- */
+:root.light input.bg-transparent:not(:focus),
+:root.light select.bg-transparent:not(:focus) {
+  border-color: var(--border-color) !important;
+}
+:root.light input.bg-transparent,
+:root.light select.bg-transparent {
+  border-bottom-width: 1px !important;
+  border-bottom-style: solid !important;
+}
+:root.light input.bg-transparent:focus,
+:root.light select.bg-transparent:focus {
+  border-bottom-color: var(--accent-primary) !important;
+}
+:root.light input::placeholder,
+:root.light textarea::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 0.7 !important;
+}
+
+/* --- Modal overlays: preserve dark backdrop text --- */
+:root.light .fixed.inset-0 .glass-panel .text-white,
+:root.light .fixed.inset-0 .bg-\[var\(--color-deep-space\)\] .text-white {
+  color: var(--text-primary) !important;
+}
+:root.light .fixed.inset-0 .glass-panel .text-gray-300,
+:root.light .fixed.inset-0 .bg-\[var\(--color-deep-space\)\] .text-gray-300 {
+  color: var(--text-secondary) !important;
 }
 
 @theme {
@@ -224,7 +452,7 @@
   h4,
   h5,
   h6 {
-    font-family: "Inter", system-ui, sans-serif;
+    font-family: "FS Rosa", system-ui, sans-serif;
     font-weight: 800;
     color: var(--text-primary);
   }
@@ -232,7 +460,7 @@
   code,
   pre,
   .font-mono {
-    font-family: "JetBrains Mono", monospace;
+    font-family: "FS Rosa", monospace;
   }
 
   /* Ensure good focus visibility */
@@ -263,84 +491,12 @@
     border-color: var(--border-focus);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   }
-
-  /* Card - adapts to theme */
-  .card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border-radius: var(--radius-default);
-  }
-
-  /* Primary Button - High contrast */
-  .btn-primary {
-    @apply px-6 py-3 font-semibold transition-all duration-200;
-    background-color: var(--accent-primary);
-    color: #ffffff;
-    border-radius: var(--radius-default);
-    border: 2px solid transparent;
-  }
-  .btn-primary:hover {
-    background-color: var(--accent-hover);
-    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
-  }
-  .btn-primary:focus-visible {
-    outline: 3px solid var(--accent-primary);
-    outline-offset: 2px;
-  }
-
-  /* Ghost Button - High contrast */
-  .btn-ghost {
-    @apply px-6 py-3 font-semibold transition-all duration-200;
-    background: transparent;
-    color: var(--text-primary);
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-default);
-  }
-  .btn-ghost:hover {
-    background-color: var(--bg-tertiary);
-    border-color: var(--text-primary);
-  }
-
-  /* Alert colors - High contrast */
-  .text-alert {
-    color: var(--alert-text);
-  }
-  .bg-alert {
-    background-color: var(--alert-bg);
-    border: 1px solid var(--alert-border);
-  }
-
-  .text-verify {
-    color: var(--verify-text);
-  }
-  .bg-verify {
-    background-color: var(--verify-bg);
-    border: 1px solid var(--verify-border);
-  }
-
-  .text-success {
-    color: var(--success-text);
-  }
-  .bg-success {
-    background-color: var(--success-bg);
-  }
-
-  .text-accent {
-    color: var(--accent-primary);
-  }
-  .bg-accent {
-    background-color: var(--accent-primary);
-  }
-
-  .text-muted {
-    color: var(--text-muted);
-  }
 }
 
 body {
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: "FS Rosa", system-ui, sans-serif;
   font-weight: 400;
+  font-size: 16px;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   overflow-x: hidden;
@@ -350,6 +506,23 @@ body {
     color 0.3s ease;
   -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
+}
+
+/* FS Rosa renders smaller than Inter — bump up small text sizes globally */
+[class*="text-\[10px\]"] {
+  font-size: 0.75rem !important; /* 12px instead of 10px */
+  line-height: 1.4 !important;
+}
+.text-xs {
+  font-size: 0.85rem !important; /* 13.6px instead of 12px */
+  line-height: 1.4 !important;
+}
+.text-sm {
+  font-size: 0.95rem !important; /* 15.2px instead of 14px */
+  line-height: 1.5 !important;
+}
+.text-base {
+  font-size: 1.05rem !important; /* 16.8px instead of 16px */
 }
 
 /* ============================================
@@ -397,6 +570,16 @@ body {
   }
 }
 
+/* Date picker icon white in dark mode */
+:root.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+}
+
 /* Touch-friendly minimum tap targets */
 @media (pointer: coarse) {
   button,
@@ -431,14 +614,12 @@ body {
     border-radius: 8px;
   }
 
-  .card {
-    border-radius: 8px;
-  }
-
-  .btn-primary,
-  .btn-ghost {
-    @apply px-4 py-3 text-sm;
-    width: 100%;
+  /* Smaller checkboxes on mobile */
+  input[type="checkbox"] {
+    width: 12px !important;
+    height: 12px !important;
+    min-width: 12px;
+    min-height: 12px;
   }
 }
 
@@ -497,6 +678,47 @@ body {
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out both;
+}
+
+/* ---- Guided Header Tour animations ---- */
+.guided-tour-backdrop {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+.guided-tour-ring {
+  box-shadow:
+    0 0 0 3px var(--accent-primary),
+    0 0 12px 4px rgba(20, 184, 166, 0.35);
+  animation: guidedTourPulse 1.8s ease-in-out infinite;
+}
+
+.guided-tour-tooltip {
+  animation: guidedTourSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes guidedTourPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 3px var(--accent-primary),
+      0 0 12px 4px rgba(20, 184, 166, 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 0 6px var(--accent-primary),
+      0 0 20px 8px rgba(20, 184, 166, 0.5);
+  }
+}
+
+@keyframes guidedTourSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .animate-bounce-in {

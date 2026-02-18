@@ -16,10 +16,10 @@ export const AdUnit: React.FC<AdUnitProps> = ({
     // AD_01 Sticky Bottom
     return (
       <div
-        className={`w-full h-[50px] bg-gray-900 border-t border-[var(--color-plasma-cyan)]/20 flex items-center justify-center relative overflow-hidden ${className}`}
+        className={`w-full h-[50px] bg-[var(--bg-tertiary)] border-t border-[var(--border-color)] flex items-center justify-center relative overflow-hidden ${className}`}
       >
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10" />
-        <p className="text-[9px] uppercase tracking-widest text-gray-500 z-10">
+        <p className="text-[9px] uppercase tracking-widest text-[var(--text-muted)] z-10">
           Publicité (320x50)
         </p>
       </div>
@@ -30,21 +30,23 @@ export const AdUnit: React.FC<AdUnitProps> = ({
     // AD_02 / AD_04 Native
     return (
       <div
-        className={`bg-white/5 border border-white/10 rounded-xl p-4 relative overflow-hidden ${className}`}
+        className={`bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl p-4 relative overflow-hidden ${className}`}
       >
         <div className="flex items-center space-x-2 mb-2">
           <span className="bg-yellow-500/20 text-yellow-500 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
             Ad
           </span>
-          <span className="text-gray-400 text-xs">Partenaire recommandé</span>
+          <span className="text-[var(--text-muted)] text-xs">
+            Partenaire recommandé
+          </span>
         </div>
         <div className="flex space-x-3">
-          <div className="w-12 h-12 bg-gray-700 rounded-lg shrink-0 animate-pulse" />
+          <div className="w-12 h-12 bg-[var(--bg-tertiary)] rounded-lg shrink-0 animate-pulse" />
           <div>
-            <p className="text-sm font-bold text-white leading-tight">
+            <p className="text-sm font-bold text-[var(--text-primary)] leading-tight">
               Crédit Rachat de Soulte
             </p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-[var(--text-muted)] mt-1">
               Calculez vos mensualités dès maintenant.
             </p>
           </div>
@@ -62,9 +64,9 @@ export const AdUnit: React.FC<AdUnitProps> = ({
     // AD_04 MPU
     return (
       <div
-        className={`w-[300px] h-[250px] mx-auto bg-gray-800 flex items-center justify-center border border-white/5 rounded-xl relative ${className}`}
+        className={`w-[300px] h-[250px] mx-auto bg-[var(--bg-tertiary)] flex items-center justify-center border border-[var(--border-color)] rounded-xl relative ${className}`}
       >
-        <span className="text-xs text-gray-500 uppercase tracking-widest">
+        <span className="text-xs text-[var(--text-muted)] uppercase tracking-widest">
           Publicité (300x250)
         </span>
       </div>

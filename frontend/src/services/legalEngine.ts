@@ -14,10 +14,30 @@ export interface FinancialData {
   assetsCRD: number;
   rewardsAlice: number; // Récompenses dues PAR la communauté À Alice
   rewardsBob: number; // Récompenses dues PAR la communauté À Bob
-  divorceType?: string;
   marriageDate?: string;
+  divorceDate?: string; // Date de divorce ou de séparation
   matrimonialRegime?: string;
   metadata?: any;
+
+  // Calcul PC method fields
+  debtorGrossIncome?: number; // C16/C17 — Revenus actuels avant impôts
+  debtorIncomeMode?: string; // "monthly" | "annual"
+  debtorChildContribution?: number;
+  debtorFutureIncome?: number;
+  debtorFutureChildContribution?: number;
+  debtorChangeDate?: string;
+  debtorPropertyValue?: number;
+  debtorPropertyYield?: number;
+  creditorGrossIncome?: number; // C30/C31 — Revenus actuels avant impôts
+  creditorIncomeMode?: string; // "monthly" | "annual"
+  creditorChildContribution?: number;
+  creditorFutureIncome?: number;
+  creditorFutureChildContribution?: number;
+  creditorChangeDate?: string;
+  creditorPropertyValue?: number;
+  creditorPropertyYield?: number;
+  creditorRetirementGapYears?: number;
+  creditorPreRetirementIncome?: number;
 }
 
 export interface SimulationResult {
@@ -49,6 +69,19 @@ export interface SimulationResult {
       min: number;
       max: number;
     };
+    paBased: {
+      value: number;
+      min: number;
+      max: number;
+    };
+    axelDepondt: {
+      value: number;
+      min: number;
+      max: number;
+      monthlyOver8Years: number;
+      debtorMaxSavingsCapital: number;
+      debtorMonthlySavings: number;
+    };
     formula?: string;
   };
 }
@@ -61,6 +94,16 @@ const CHILD_SUPPORT_RATES: Record<string, Record<number, number>> = {
   alternating: { 1: 0.09, 2: 0.078, 3: 0.067, 4: 0.059, 5: 0.053, 6: 0.048 },
   reduced: { 1: 0.18, 2: 0.155, 3: 0.133, 4: 0.117, 5: 0.106, 6: 0.095 },
 };
+
+/**
+ * Calcule la fraction d'année entre deux dates (identique à FRACTION.ANNEE Excel).
+ */
+function yearFrac(d1: string | Date, d2: string | Date): number {
+  const a = d1 instanceof Date ? d1 : new Date(d1);
+  const b = d2 instanceof Date ? d2 : new Date(d2);
+  if (isNaN(a.getTime()) || isNaN(b.getTime())) return 0;
+  return Math.abs(b.getTime() - a.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+}
 
 /**
  * Calcule les UC enfants selon l'échelle OCDE modifiée :
@@ -105,11 +148,11 @@ export const legalEngine = {
     const deltaMonthly = payerIncome - beneficiaryIncome;
     const deltaAnnual = deltaMonthly * 12;
 
-    // Calculate Duration from Date if available
+    // Calculate Duration from Dates if available
     let duration = data.marriageDuration;
     if (data.marriageDate) {
       const start = new Date(data.marriageDate);
-      const end = new Date();
+      const end = data.divorceDate ? new Date(data.divorceDate) : new Date();
       const diffTime = Math.abs(end.getTime() - start.getTime());
       const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
       if (!isNaN(diffYears)) {
@@ -132,10 +175,9 @@ export const legalEngine = {
 
     // --- APPROCHE NIVEAU DE VIE (Unités de Consommation OCDE/INSEE) ---
     // Ref : Échelle d'équivalence OCDE modifiée (insee.fr/fr/metadonnees/definition/c1802)
-    // Cadre juridique : Art. 270-271, 275 C.civ.
     //   - La PC compense la disparité de niveau de vie créée par le divorce
-    //   - Versements échelonnés : 8 ans max (Art. 275 C.civ.)
-    //   - La PC n'a pas pour objet d'égaliser les niveaux de vie (Cass. civ. 8 juil. 2015)
+    //   - Versements échelonnés : 8 ans max
+    //   - La PC n'a pas pour objet d'égaliser les niveaux de vie
     const custody = data.custodyType || "classic";
 
     // 1. UC Avant Divorce (Ménage complet — Échelle OCDE modifiée)
@@ -157,8 +199,8 @@ export const legalEngine = {
 
     // 4. Capitalisation — « Méthode des 20% » (aidefamille.fr)
     //    Réf : pratique courante avocats/magistrats
-    //    Période = min(durée du mariage, 8 ans) — Art. 275 C.civ.
-    //    La PC ne vise pas l'égalisation totale (Cass. civ. 8 juil. 2015)
+    //    Période = min(durée du mariage, 8 ans)
+    //    La PC ne vise pas l'égalisation totale
     //    Taux : 20% de la disparité (coefficient couramment retenu)
     //      - Min  : 15% (approche conservatrice)
     //      - Moyen: 20% (standard — méthode des 20%)
@@ -170,8 +212,190 @@ export const legalEngine = {
     const pcInsee = lossMonthly * periodMonths * 0.2;
     const pcInseeMax = lossMonthly * periodMonths * 0.25;
 
-    // Resultat final (Moyenne des Moyennes)
-    const finalPC = Math.round((pcPilote + pcInsee) / 2);
+    // --- METHODE BASÉE SUR LA PENSION ALIMENTAIRE ---
+    // Réf : Approche pratique avocats/magistrats
+    // PC = PA mensuelle × 12 × Coefficient (généralement 8)
+    //   - Min  : coefficient 6 (estimation basse)
+    //   - Moyen: coefficient 8 (standard)
+    //   - Max  : coefficient 10 (estimation haute)
+    // NB : Cette méthode n'est pertinente que s'il y a une PA > 0
+    // La PA est calculée juste après, donc on la pré-calcule ici
+    let prePaTotal = 0;
+    if (data.childrenCount > 0) {
+      const rRefPre = Math.max(0, payerIncome - RSA_SOLO);
+      const rateKeyPre = Math.min(data.childrenCount, 6);
+      const rateTablePre =
+        CHILD_SUPPORT_RATES[custody] || CHILD_SUPPORT_RATES.classic;
+      const ratePre = rateTablePre[rateKeyPre] || 0.135;
+      prePaTotal = Math.round(rRefPre * ratePre) * data.childrenCount;
+    }
+    const pcPaBasedMin = prePaTotal * 12 * 6;
+    const pcPaBased = prePaTotal * 12 * 8;
+    const pcPaBasedMax = prePaTotal * 12 * 10;
+
+    // --- MÉTHODE CALCUL PC (Approche Détaillée / Magistrat) ---
+    // Réf : Grille de calcul utilisée par les magistrats et avocats
+    // Utilise des revenus BRUTS (avant impôts), PAS les revenus nets.
+    //
+    // Le débiteur = celui qui gagne le plus (qui PAIE la PC).
+    // Le créancier = celui qui gagne le moins (qui REÇOIT la PC).
+    // Si l'utilisateur a saisi les revenus à l'envers, on intervertit
+    // automatiquement toutes les données débiteur ↔ créancier.
+
+    const refDateStr =
+      data.divorceDate || new Date().toISOString().split("T")[0];
+    const marriageDurExact = data.marriageDate
+      ? yearFrac(data.marriageDate, refDateStr)
+      : duration;
+
+    // --- Déterminer le sens : le « débiteur » doit être celui qui gagne le plus ---
+    const rawDGross = data.debtorGrossIncome || 0;
+    const rawDMonthly =
+      data.debtorIncomeMode === "annual" ? rawDGross / 12 : rawDGross;
+    const rawCGross = data.creditorGrossIncome || 0;
+    const rawCMonthly =
+      data.creditorIncomeMode === "annual" ? rawCGross / 12 : rawCGross;
+
+    const shouldSwap = rawCMonthly > rawDMonthly;
+
+    // Fonctions helper pour lire les bons champs après swap éventuel
+    const dGrossIncome = shouldSwap
+      ? data.creditorGrossIncome || 0
+      : data.debtorGrossIncome || 0;
+    const dIncomeMode = shouldSwap
+      ? data.creditorIncomeMode || "monthly"
+      : data.debtorIncomeMode || "monthly";
+    const dChildContribIn = shouldSwap
+      ? data.creditorChildContribution || 0
+      : data.debtorChildContribution || 0;
+    const dFutureIncIn = shouldSwap
+      ? data.creditorFutureIncome || 0
+      : data.debtorFutureIncome || 0;
+    const dFutureChildIn = shouldSwap
+      ? data.creditorFutureChildContribution || 0
+      : data.debtorFutureChildContribution || 0;
+    const dChangeDateIn = shouldSwap
+      ? data.creditorChangeDate || ""
+      : data.debtorChangeDate || "";
+    const dPropValueIn = shouldSwap
+      ? data.creditorPropertyValue || 0
+      : data.debtorPropertyValue || 0;
+    const dPropYieldIn = shouldSwap
+      ? data.creditorPropertyYield || 0
+      : data.debtorPropertyYield || 0;
+
+    const cGrossIncome = shouldSwap
+      ? data.debtorGrossIncome || 0
+      : data.creditorGrossIncome || 0;
+    const cIncomeMode = shouldSwap
+      ? data.debtorIncomeMode || "monthly"
+      : data.creditorIncomeMode || "monthly";
+    const cChildContribIn = shouldSwap
+      ? data.debtorChildContribution || 0
+      : data.creditorChildContribution || 0;
+    const cFutureIncIn = shouldSwap
+      ? data.debtorFutureIncome || 0
+      : data.creditorFutureIncome || 0;
+    const cFutureChildIn = shouldSwap
+      ? data.debtorFutureChildContribution || 0
+      : data.creditorFutureChildContribution || 0;
+    const cChangeDateIn = shouldSwap
+      ? data.debtorChangeDate || ""
+      : data.creditorChangeDate || "";
+    const cPropValueIn = shouldSwap
+      ? data.debtorPropertyValue || 0
+      : data.creditorPropertyValue || 0;
+    const cPropYieldIn = shouldSwap
+      ? data.debtorPropertyYield || 0
+      : data.creditorPropertyYield || 0;
+
+    // --- Revenus Débiteur (C16-C28) ---
+    // C17 = Revenus actuels mensuels avant impôts (brut)
+    const dMonthly =
+      dIncomeMode === "annual" ? dGrossIncome / 12 : dGrossIncome; // C17
+    const dChildContrib = dChildContribIn; // C18
+    const dC19 = dMonthly - dChildContrib; // C19
+
+    const dFutureIncome = dFutureIncIn; // C20
+    const dFutureChildContrib = dFutureChildIn; // C21
+    const dC22 = dFutureIncome > 0 ? dFutureIncome - dFutureChildContrib : dC19; // C22
+
+    let dC24 = dC19; // C24 = revenu mensuel moyen prévisible
+    if (dFutureIncome > 0 && dChangeDateIn) {
+      const yBefore = Math.max(
+        0,
+        Math.min(8, yearFrac(refDateStr, dChangeDateIn)),
+      );
+      dC24 = (yBefore * dC19 + (8 - yBefore) * dC22) / 8;
+    }
+
+    const dPropValue = dPropValueIn; // C25
+    const dPropYield = dPropYieldIn / 100; // C26 = A26/100
+    const dC27 = (dPropValue * dPropYield) / 12; // C27
+    const dC28 = dC27 + dC24; // C28 = revenu mensuel moyen prévisible corrigé
+
+    // --- Revenus Créancier (C30-C42) ---
+    // C31 = Revenus actuels mensuels avant impôts (brut)
+    const cMonthly =
+      cIncomeMode === "annual" ? cGrossIncome / 12 : cGrossIncome; // C31
+    const cChildContrib = cChildContribIn; // C32
+    const cC33 = cMonthly - cChildContrib; // C33
+
+    const cFutureIncome = cFutureIncIn; // C34
+    const cFutureChildContrib = cFutureChildIn; // C35
+    const cC36 = cFutureIncome > 0 ? cFutureIncome - cFutureChildContrib : cC33; // C36
+
+    let cC38 = cC33; // C38 = revenu mensuel moyen prévisible
+    if (cFutureIncome > 0 && cChangeDateIn) {
+      const yBefore = Math.max(
+        0,
+        Math.min(8, yearFrac(refDateStr, cChangeDateIn)),
+      );
+      cC38 = (yBefore * cC33 + (8 - yBefore) * cC36) / 8;
+    }
+
+    const cPropValue = cPropValueIn; // C39
+    const cPropYield = cPropYieldIn / 100; // C40 = A40/100
+    const cC41 = (cPropValue * cPropYield) / 12; // C41
+    const cC42 = cC41 + cC38; // C42 = revenu mensuel moyen prévisible corrigé
+
+    // --- Disparité (C44-C50) ---
+    const adC44 = dC28 - cC42; // C44 = différence mensuelle
+    const adC46 = adC44 * 0.6; // C46 = pondération × 0.6
+    const adC47 = adC46 * marriageDurExact; // C47 = disparité × durée mariage
+
+    // Coefficient d'âge (C49) — basé sur l'âge exact du créancier (celui qui reçoit la PC)
+    // Si on a inversé les rôles, le « vrai » créancier est le conjoint (spouseAge).
+    const creditorAgeExact = shouldSwap ? data.spouseAge || 0 : data.myAge || 0;
+    let adC49: number;
+    if (creditorAgeExact < 62) {
+      adC49 = 0.01 * creditorAgeExact + 0.82;
+    } else {
+      adC49 = -0.01 * creditorAgeExact + 2.06;
+    }
+    adC49 = Math.round(adC49 * 100) / 100;
+
+    const adC50 = adC49 * adC47; // C50 = disparité corrélée âge + durée
+
+    // --- Retraite (C51-C53) — données du vrai créancier (après swap éventuel) ---
+    const retGapYears = data.creditorRetirementGapYears || 0; // C51 (toujours saisi côté créancier UI)
+    const retPreIncome = data.creditorPreRetirementIncome || 0; // C52
+    const adC53 = retPreIncome * retGapYears; // C53
+
+    // --- Résultat Calcul PC (C56-C59) ---
+    const pcAxelDepondt = Math.max(0, adC53 + adC50); // C56
+    const adDebtorMaxSavings = 0.3 * 96 * dC24; // C57
+    const adMonthly8Y = pcAxelDepondt / (12 * 8); // C58
+    const adDebtorMonthlySavings = adDebtorMaxSavings / 96; // C59
+
+    const pcAxelMin = pcAxelDepondt * 0.9;
+    const pcAxelMax = pcAxelDepondt * 1.1;
+
+    // Resultat final (Moyenne des quatre méthodes)
+    const methodValues = [pcPilote, pcInsee, pcPaBased, pcAxelDepondt];
+    const finalPC = Math.round(
+      methodValues.reduce((a, b) => a + b, 0) / methodValues.length,
+    );
 
     // ---------------------------------------------------------
     // 2. CALCUL PENSION ALIMENTAIRE (PA)
@@ -197,7 +421,6 @@ export const legalEngine = {
 
     // ---------------------------------------------------------
     // 3. LIQUIDATION DU RÉGIME MATRIMONIAL
-    // Réf : Art. 1467-1475 C.civ. (liquidation et partage de la communauté)
     // ---------------------------------------------------------
     const netAsset = (data.assetsValue || 0) - (data.assetsCRD || 0);
     let soulteToPay = 0;
@@ -209,10 +432,6 @@ export const legalEngine = {
       soulteToPay = netAsset / 2;
     } else {
       // COMMUNAUTÉ RÉDUITE AUX ACQUÊTS (régime légal par défaut)
-      // Art. 1467 : liquidation de la masse commune, active et passive.
-      // Art. 1468 : compte de récompenses pour chaque époux.
-      // Art. 1470 : balance des récompenses → prélèvement ou rapport.
-      // Art. 1475 : après prélèvements, le reliquat se partage par moitié.
       //
       // Formule complète :
       //   Part(Alice) = R_CA + (M − R_CA − R_CB) / 2 = (M + R_CA − R_CB) / 2
@@ -277,7 +496,20 @@ export const legalEngine = {
           min: Math.round(pcInseeMin),
           max: Math.round(pcInseeMax),
         },
-        formula: `Méthode des 20% (UC OCDE/INSEE) — Période max 8 ans (Art. 275 C.civ.)`,
+        paBased: {
+          value: Math.round(pcPaBased),
+          min: Math.round(pcPaBasedMin),
+          max: Math.round(pcPaBasedMax),
+        },
+        axelDepondt: {
+          value: Math.round(pcAxelDepondt),
+          min: Math.round(pcAxelMin),
+          max: Math.round(pcAxelMax),
+          monthlyOver8Years: Math.round(adMonthly8Y),
+          debtorMaxSavingsCapital: Math.round(adDebtorMaxSavings),
+          debtorMonthlySavings: Math.round(adDebtorMonthlySavings),
+        },
+        formula: `Méthode des 20% (UC OCDE/INSEE) — Période max 8 ans`,
       },
     };
   },

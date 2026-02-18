@@ -1,0 +1,60 @@
+"filename", "language", "Docker", "Go Checksum File", "Go Module File", "Go", "TypeScript", "JSON with Comments", "JSON", "TypeScript JSX", "JavaScript", "XML", "PostCSS", "Markdown", "HTML", "comment", "blank", "total"
+"c:\Users\berni\Projects\DivorceSite\backend\Dockerfile", "Docker", 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 15
+"c:\Users\berni\Projects\DivorceSite\backend\go.mod", "Go Module File", 0, 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 41
+"c:\Users\berni\Projects\DivorceSite\backend\go.sum", "Go Checksum File", 0, 86, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 87
+"c:\Users\berni\Projects\DivorceSite\backend\main.go", "Go", 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 10, 53
+"c:\Users\berni\Projects\DivorceSite\frontend\Dockerfile", "Docker", -10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -6, -16
+"c:\Users\berni\Projects\DivorceSite\frontend\README.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -60, 0, 0, -14, -74
+"c:\Users\berni\Projects\DivorceSite\frontend\eslint.config.js", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, -22, 0, 0, 0, 0, 0, -2, -24
+"c:\Users\berni\Projects\DivorceSite\frontend\index.html", "HTML", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -164, -12, -11, -187
+"c:\Users\berni\Projects\DivorceSite\frontend\package-lock.json", "JSON", 0, 0, 0, 0, 0, 0, -9079, 0, 0, 0, 0, 0, 0, 0, -1, -9080
+"c:\Users\berni\Projects\DivorceSite\frontend\package.json", "JSON", 0, 0, 0, 0, 0, 0, -42, 0, 0, 0, 0, 0, 0, 0, -1, -43
+"c:\Users\berni\Projects\DivorceSite\frontend\postcss.config.js", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, -6, 0, 0, 0, 0, 0, -1, -7
+"c:\Users\berni\Projects\DivorceSite\frontend\public\apple-touch-icon.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, -5, 0, 0, 0, 0, -1, -6
+"c:\Users\berni\Projects\DivorceSite\frontend\public\icon-192.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, -6, 0, 0, 0, 0, -1, -7
+"c:\Users\berni\Projects\DivorceSite\frontend\public\icon-512.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, -6, 0, 0, 0, 0, -1, -7
+"c:\Users\berni\Projects\DivorceSite\frontend\public\pdf.worker.min.mjs", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, -2, 0, 0, 0, 0, -26, 0, -28
+"c:\Users\berni\Projects\DivorceSite\frontend\public\sitemap.xml", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, -51, 0, 0, 0, 0, -1, -52
+"c:\Users\berni\Projects\DivorceSite\frontend\public\vite.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, -1
+"c:\Users\berni\Projects\DivorceSite\frontend\src\App.css", "PostCSS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -37, 0, 0, 0, -6, -43
+"c:\Users\berni\Projects\DivorceSite\frontend\src\App.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -61, 0, 0, 0, 0, 0, 0, -6, -67
+"c:\Users\berni\Projects\DivorceSite\frontend\src\assets\react.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, -1
+"c:\Users\berni\Projects\DivorceSite\frontend\src\components\AdUnit.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -68, 0, 0, 0, 0, 0, -4, -6, -78
+"c:\Users\berni\Projects\DivorceSite\frontend\src\components\Footer.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -71, 0, 0, 0, 0, 0, 0, -6, -77
+"c:\Users\berni\Projects\DivorceSite\frontend\src\components\GuidedModeToggle.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -97, 0, 0, 0, 0, 0, -9, -7, -113
+"c:\Users\berni\Projects\DivorceSite\frontend\src\components\GuidedTooltip.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -124, 0, 0, 0, 0, 0, -30, -17, -171
+"c:\Users\berni\Projects\DivorceSite\frontend\src\components\InfoTooltip.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -85, 0, 0, 0, 0, 0, -3, -8, -96
+"c:\Users\berni\Projects\DivorceSite\frontend\src\components\OfflineIndicator.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -31, 0, 0, 0, 0, 0, 0, -6, -37
+"c:\Users\berni\Projects\DivorceSite\frontend\src\components\PWAInstallPrompt.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -77, 0, 0, 0, 0, 0, -2, -12, -91
+"c:\Users\berni\Projects\DivorceSite\frontend\src\components\SEO.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -182, 0, 0, 0, 0, 0, -28, -21, -231
+"c:\Users\berni\Projects\DivorceSite\frontend\src\components\ThemeToggle.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -46, 0, 0, 0, 0, 0, -1, -6, -53
+"c:\Users\berni\Projects\DivorceSite\frontend\src\index.css", "PostCSS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -643, 0, 0, -65, -104, -812
+"c:\Users\berni\Projects\DivorceSite\frontend\src\main.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -15, 0, 0, 0, 0, 0, -1, -3, -19
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\CalculationChoicePage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -407, 0, 0, 0, 0, 0, -17, -25, -449
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\DashboardPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -620, 0, 0, 0, 0, 0, -29, -31, -680
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\DataValidationPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -450, 0, 0, 0, 0, 0, -32, -41, -523
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\DisclaimerPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -202, 0, 0, 0, 0, 0, -10, -16, -228
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\ExportPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -177, 0, 0, 0, 0, 0, -7, -16, -200
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\GlossaryPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -225, 0, 0, 0, 0, 0, -7, -13, -245
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\GuidePage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -229, 0, 0, 0, 0, 0, -10, -13, -252
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\LandingPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -172, 0, 0, 0, 0, 0, -11, -17, -200
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\MethodologyPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -200, 0, 0, 0, 0, 0, -7, -13, -220
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\PrivacyPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -198, 0, 0, 0, 0, 0, -3, -18, -219
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\ProfilePage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -357, 0, 0, 0, 0, 0, -14, -18, -389
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\QuizPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -282, 0, 0, 0, 0, 0, -12, -18, -312
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\ScannerPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -925, 0, 0, 0, 0, 0, -58, -79, -1062
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\SimulationModePage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -220, 0, 0, 0, 0, 0, -9, -14, -243
+"c:\Users\berni\Projects\DivorceSite\frontend\src\pages\TermsPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -199, 0, 0, 0, 0, 0, -3, -16, -218
+"c:\Users\berni\Projects\DivorceSite\frontend\src\services\adManager.ts", "TypeScript", 0, 0, 0, 0, -26, 0, 0, 0, 0, 0, 0, 0, 0, -1, -5, -32
+"c:\Users\berni\Projects\DivorceSite\frontend\src\services\errorSystem.ts", "TypeScript", 0, 0, 0, 0, -118, 0, 0, 0, 0, 0, 0, 0, 0, -4, -9, -131
+"c:\Users\berni\Projects\DivorceSite\frontend\src\services\guidedMode.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, -43, 0, 0, 0, 0, 0, 0, -9, -52
+"c:\Users\berni\Projects\DivorceSite\frontend\src\services\imageProcessor.ts", "TypeScript", 0, 0, 0, 0, -326, 0, 0, 0, 0, 0, 0, 0, 0, -35, -64, -425
+"c:\Users\berni\Projects\DivorceSite\frontend\src\services\legalEngine.ts", "TypeScript", 0, 0, 0, 0, -182, 0, 0, 0, 0, 0, 0, 0, 0, -68, -29, -279
+"c:\Users\berni\Projects\DivorceSite\frontend\src\services\ocrWorker.ts", "TypeScript", 0, 0, 0, 0, -433, 0, 0, 0, 0, 0, 0, 0, 0, -25, -67, -525
+"c:\Users\berni\Projects\DivorceSite\frontend\src\services\pdfGenerator.ts", "TypeScript", 0, 0, 0, 0, -1054, 0, 0, 0, 0, 0, 0, 0, 0, -52, -92, -1198
+"c:\Users\berni\Projects\DivorceSite\frontend\tailwind.config.js", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, -7, 0, 0, 0, 0, -1, -1, -9
+"c:\Users\berni\Projects\DivorceSite\frontend\tsconfig.app.json", "JSON", 0, 0, 0, 0, 0, 0, -24, 0, 0, 0, 0, 0, 0, -2, -3, -29
+"c:\Users\berni\Projects\DivorceSite\frontend\tsconfig.json", "JSON with Comments", 0, 0, 0, 0, 0, -7, 0, 0, 0, 0, 0, 0, 0, 0, -1, -8
+"c:\Users\berni\Projects\DivorceSite\frontend\tsconfig.node.json", "JSON", 0, 0, 0, 0, 0, 0, -22, 0, 0, 0, 0, 0, 0, -2, -3, -27
+"c:\Users\berni\Projects\DivorceSite\frontend\vite.config.ts", "TypeScript", 0, 0, 0, 0, -6, 0, 0, 0, 0, 0, 0, 0, 0, -1, -2, -9
+"Total", "-", -2, 86, 38, 39, -2145, -7, -9167, -5763, -37, -70, -680, -60, -164, -597, -860, -19389

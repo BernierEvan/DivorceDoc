@@ -1,0 +1,6 @@
+"filename", "language", "Docker", "Go Checksum File", "Go Module File", "Go", "comment", "blank", "total"
+"c:\Users\berni\Projects\DivorceSite\backend\Dockerfile", "Docker", 8, 0, 0, 0, 0, 7, 15
+"c:\Users\berni\Projects\DivorceSite\backend\go.mod", "Go Module File", 0, 0, 38, 0, 0, 3, 41
+"c:\Users\berni\Projects\DivorceSite\backend\go.sum", "Go Checksum File", 0, 86, 0, 0, 0, 1, 87
+"c:\Users\berni\Projects\DivorceSite\backend\main.go", "Go", 0, 0, 0, 39, 4, 10, 53
+"Total", "-", 8, 86, 38, 39, 4, 21, 196

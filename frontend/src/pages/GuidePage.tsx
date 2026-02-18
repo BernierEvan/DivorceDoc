@@ -4,11 +4,13 @@ import {
   FileText,
   ChevronLeft,
   Shield,
-  Camera,
   CreditCard,
   Home,
   Users,
-  Lightbulb,
+  Calculator,
+  Landmark,
+  Wallet,
+  ClipboardList,
 } from "lucide-react";
 import { SEO, howToJsonLd, breadcrumbJsonLd } from "../components/SEO";
 
@@ -16,10 +18,10 @@ const GuidePage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative overflow-hidden text-white font-sans">
+    <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative text-white font-sans">
       <SEO
-        title="Guide de Préparation des Documents pour le Divorce"
-        description="Préparez vos documents pour une simulation de divorce précise : bulletins de paie, avis d'imposition, patrimoine immobilier, charges. Conseils photo et OCR."
+        title="Guide de Préparation — Informations Requises"
+        description="Préparez les informations nécessaires pour une simulation de divorce précise : revenus, patrimoine, charges, situation familiale. Guide par méthode de calcul."
         path="/guide"
         jsonLd={[
           breadcrumbJsonLd([
@@ -27,28 +29,28 @@ const GuidePage: React.FC = () => {
             { name: "Guide de préparation", path: "/guide" },
           ]),
           howToJsonLd(
-            "Préparer ses documents pour une simulation de divorce",
-            "Guide étape par étape pour rassembler et numériser les pièces nécessaires à une simulation précise de divorce (prestation compensatoire, pension alimentaire, liquidation).",
+            "Préparer ses informations pour une simulation de divorce",
+            "Guide étape par étape pour rassembler les informations nécessaires à une simulation précise de divorce (prestation compensatoire, pension alimentaire, liquidation).",
             [
               {
-                name: "Rassembler les justificatifs de revenus",
-                text: "Réunissez vos 3 derniers bulletins de paie, le bulletin de décembre et les 2 derniers avis d'imposition complets.",
+                name: "Rassembler les informations de base",
+                text: "Date de mariage, date prévisionnelle de divorce, dates de naissance des deux conjoints.",
               },
               {
-                name: "Préparer les documents patrimoniaux",
-                text: "Actes de propriété, tableaux d'amortissement (Capital Restant Dû), relevés d'épargne (Livrets, Assurance-vie, PEA).",
+                name: "Préparer les données de revenus",
+                text: "Revenus nets mensuels (pour les méthodes Tiers Pondéré, INSEE et PA Based) et/ou revenus bruts (pour la méthode Calcul PC).",
               },
               {
-                name: "Collecter les justificatifs de charges",
-                text: "Justificatifs de loyer, charges de copropriété, factures récurrentes et frais liés aux enfants.",
+                name: "Situation familiale",
+                text: "Nombre d'enfants, âge de chaque enfant et type de garde (classique, alternée ou réduite).",
               },
               {
-                name: "Numériser les documents",
-                text: "Photographiez vos documents avec une bonne luminosité naturelle, sur une surface contrastée, en alignant les bords. Privilégiez les PDF numériques si possible.",
+                name: "Patrimoine et charges",
+                text: "Valeur des biens immobiliers, Capital Restant Dû, montant des charges fixes, loyer, impôts mensuels.",
               },
               {
                 name: "Lancer la simulation",
-                text: "Importez vos documents dans le scanner DivorceDoc. L'OCR Tesseract.js extrait les données directement sur votre appareil.",
+                text: "Saisissez vos informations directement dans le simulateur. Toutes les données restent sur votre appareil.",
               },
             ],
           ),
@@ -61,7 +63,7 @@ const GuidePage: React.FC = () => {
       <div className="p-6 pt-8 flex items-center justify-between z-10 sticky top-0 bg-[var(--color-deep-space)]/80 backdrop-blur-md border-b border-white/5">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition group flex items-center justify-center"
+          className="flex items-center justify-center p-2 transition rounded-full bg-white/5 hover:bg-white/10 group"
         >
           <ChevronLeft className="w-5 h-5 text-gray-300 group-hover:text-white" />
         </button>
@@ -70,177 +72,291 @@ const GuidePage: React.FC = () => {
         </h1>
         <button
           onClick={() => navigate("/")}
-          className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition group flex items-center justify-center"
+          className="flex items-center justify-center p-2 transition rounded-full bg-white/5 hover:bg-white/10 group"
           title="Accueil"
         >
           <Home className="w-5 h-5 text-gray-300 group-hover:text-white" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-8 pb-32 space-y-12">
+      <div className="flex-1 px-6 py-8 pb-32 space-y-12 overflow-y-auto">
         {/* 1. Introduction */}
         <section className="animate-fade-in">
-          <h2 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-            Pourquoi bien préparer vos documents ?
+          <h2 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-muted)]">
+            Quelles informations préparer ?
           </h2>
-          <div className="glass-panel p-6 rounded-2xl border border-white/10">
-            <p className="text-sm text-gray-300 leading-relaxed mb-4">
-              Pour que notre simulateur puisse calculer avec précision votre
-              prestation compensatoire ou la liquidation de votre régime
-              matrimonial, il doit analyser des données réelles. En préparant
-              vos documents à l'avance, vous évitez les erreurs d'interprétation
-              et garantissez une simulation conforme à la jurisprudence
-              actuelle.
+          <div className="p-6 border glass-panel rounded-2xl border-white/10">
+            <p className="mb-4 text-sm leading-relaxed text-gray-300">
+              Notre simulateur fonctionne par <strong>saisie manuelle</strong>.
+              Les informations demandées dépendent des méthodes de calcul que
+              vous sélectionnerez. En les rassemblant à l'avance, vous gagnerez
+              du temps et obtiendrez des résultats plus fiables.
             </p>
             <div className="flex items-start space-x-3 bg-[var(--color-plasma-cyan)]/10 p-4 rounded-xl border border-[var(--color-plasma-cyan)]/20">
               <Shield className="w-5 h-5 text-[var(--color-plasma-cyan)] shrink-0 mt-0.5" />
               <p className="text-xs text-[var(--color-plasma-cyan)]">
-                <span className="font-bold uppercase tracking-wider block mb-1">
-                  Rappel Confidentialité
+                <span className="block mb-1 font-bold tracking-wider uppercase">
+                  100 % confidentiel
                 </span>
-                Tous les documents listés ci-dessous seront analysés directement
-                sur votre appareil. Rien ne sera envoyé sur nos serveurs.
+                Toutes les données sont traitées localement sur votre appareil.
+                Rien n'est envoyé sur nos serveurs, rien n'est stocké.
               </p>
             </div>
           </div>
         </section>
 
-        {/* 2. Liste exhaustive */}
-        <section className="animate-fade-in delay-100">
-          <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-6">
-            Liste des pièces
+        {/* 2. Informations par catégorie */}
+        <section className="delay-100 animate-fade-in">
+          <h3 className="mb-6 text-sm font-bold tracking-widest text-gray-500 uppercase">
+            Informations requises par catégorie
           </h3>
 
           <div className="grid gap-4">
-            {/* Category A */}
-            <div className="glass-panel p-5 rounded-2xl border border-white/10">
+            {/* Toutes méthodes */}
+            <div className="p-5 border glass-panel rounded-2xl border-white/10">
               <div className="flex items-center mb-4 space-x-3">
-                <div className="bg-indigo-500/20 p-2 rounded-lg">
-                  <CreditCard className="w-5 h-5 text-indigo-400" />
+                <div className="p-2 rounded-lg bg-blue-500/20">
+                  <ClipboardList className="w-5 h-5 text-blue-400" />
                 </div>
-                <h4 className="font-bold text-lg">Situation Pro & Revenus</h4>
+                <h4 className="text-lg font-bold">
+                  Base commune{" "}
+                  <span className="text-xs font-normal text-gray-500">
+                    (toutes les méthodes)
+                  </span>
+                </h4>
               </div>
-              <ul className="space-y-3 text-sm text-gray-300 pl-2 border-l-2 border-white/5">
+              <ul className="pl-2 space-y-3 text-sm text-gray-300 border-l-2 border-white/5">
                 <li>
-                  <strong className="text-white">Avis d'imposition</strong> (les
-                  2 derniers)
-                </li>
-                <li>
-                  <strong className="text-white">Bulletins de paie</strong> (3
-                  derniers + Décembre)
-                </li>
-                <li>Justificatifs de revenus fonciers ou mobiliers</li>
-              </ul>
-            </div>
-
-            {/* Category B */}
-            <div className="glass-panel p-5 rounded-2xl border border-white/10">
-              <div className="flex items-center mb-4 space-x-3">
-                <div className="bg-emerald-500/20 p-2 rounded-lg">
-                  <Home className="w-5 h-5 text-emerald-400" />
-                </div>
-                <h4 className="font-bold text-lg">Patrimoine & Actifs</h4>
-              </div>
-              <ul className="space-y-3 text-sm text-gray-300 pl-2 border-l-2 border-white/5">
-                <li>
-                  <strong className="text-white">Actes de propriété</strong>{" "}
-                  (Estimation biens immobiliers)
+                  <strong className="text-white">Date de mariage</strong>
                 </li>
                 <li>
                   <strong className="text-white">
-                    Tableaux d'amortissement
-                  </strong>{" "}
-                  (Capital Restant Dû)
+                    Date prévisionnelle du divorce
+                  </strong>
                 </li>
-                <li>Relevés d'épargne (Livrets, Assurance-vie, PEA)</li>
+                <li>
+                  <strong className="text-white">Dates de naissance</strong>{" "}
+                  (créancier et débiteur)
+                </li>
               </ul>
             </div>
 
-            {/* Category C & D */}
-            <div className="glass-panel p-5 rounded-2xl border border-white/10">
+            {/* Revenus nets */}
+            <div className="p-5 border glass-panel rounded-2xl border-white/10">
               <div className="flex items-center mb-4 space-x-3">
-                <div className="bg-orange-500/20 p-2 rounded-lg">
+                <div className="p-2 rounded-lg bg-indigo-500/20">
+                  <CreditCard className="w-5 h-5 text-indigo-400" />
+                </div>
+                <h4 className="text-lg font-bold">
+                  Revenus nets mensuels{" "}
+                  <span className="text-xs font-normal text-gray-500">
+                    (Tiers Pondéré, INSEE, PA Based)
+                  </span>
+                </h4>
+              </div>
+              <ul className="pl-2 space-y-3 text-sm text-gray-300 border-l-2 border-white/5">
+                <li>
+                  <strong className="text-white">
+                    Revenu net mensuel du créancier
+                  </strong>{" "}
+                  (Net Social)
+                </li>
+                <li>
+                  <strong className="text-white">
+                    Revenu net mensuel du débiteur
+                  </strong>
+                </li>
+              </ul>
+            </div>
+
+            {/* Revenus bruts & projections — Calcul PC */}
+            <div className="p-5 border glass-panel rounded-2xl border-white/10">
+              <div className="flex items-center mb-4 space-x-3">
+                <div className="p-2 rounded-lg bg-teal-500/20">
+                  <Calculator className="w-5 h-5 text-teal-400" />
+                </div>
+                <h4 className="text-lg font-bold">
+                  Projections financières{" "}
+                  <span className="text-xs font-normal text-gray-500">
+                    (Méthode Calcul PC)
+                  </span>
+                </h4>
+              </div>
+              <ul className="pl-2 space-y-3 text-sm text-gray-300 border-l-2 border-white/5">
+                <li>
+                  <strong className="text-white">Revenus bruts</strong>{" "}
+                  (mensuels ou annuels) — créancier et débiteur
+                </li>
+                <li>
+                  <strong className="text-white">
+                    Contributions enfants mensuelles
+                  </strong>
+                </li>
+                <li>
+                  Éventuelle{" "}
+                  <strong className="text-white">évolution de revenus</strong>{" "}
+                  (montant futur, date de changement)
+                </li>
+                <li>
+                  <strong className="text-white">
+                    Patrimoine non productif
+                  </strong>{" "}
+                  et rendement estimé (%)
+                </li>
+                <li>
+                  <strong className="text-white">
+                    Écart retraite du créancier
+                  </strong>{" "}
+                  (années sans cotisation + revenu pré-interruption)
+                </li>
+              </ul>
+            </div>
+
+            {/* Famille — INSEE / PA Based */}
+            <div className="p-5 border glass-panel rounded-2xl border-white/10">
+              <div className="flex items-center mb-4 space-x-3">
+                <div className="p-2 rounded-lg bg-orange-500/20">
                   <Users className="w-5 h-5 text-orange-400" />
                 </div>
-                <h4 className="font-bold text-lg">Charges & État Civil</h4>
+                <h4 className="text-lg font-bold">
+                  Situation familiale{" "}
+                  <span className="text-xs font-normal text-gray-500">
+                    (INSEE, PA Based, Pension Alimentaire)
+                  </span>
+                </h4>
               </div>
-              <ul className="space-y-3 text-sm text-gray-300 pl-2 border-l-2 border-white/5">
-                <li>Justificatifs de loyer / charges copropriété</li>
-                <li>Factures récurrentes & Frais enfants</li>
-                <li>Livret de famille & Contrat de mariage</li>
+              <ul className="pl-2 space-y-3 text-sm text-gray-300 border-l-2 border-white/5">
+                <li>
+                  <strong className="text-white">Nombre d'enfants</strong>
+                </li>
+                <li>
+                  <strong className="text-white">Âge de chaque enfant</strong>{" "}
+                  (détermine les unités de consommation OCDE)
+                </li>
+                <li>
+                  <strong className="text-white">Type de garde</strong>{" "}
+                  (classique, alternée ou réduite)
+                </li>
+              </ul>
+            </div>
+
+            {/* Liquidation */}
+            <div className="p-5 border glass-panel rounded-2xl border-white/10">
+              <div className="flex items-center mb-4 space-x-3">
+                <div className="p-2 rounded-lg bg-amber-500/20">
+                  <Landmark className="w-5 h-5 text-amber-400" />
+                </div>
+                <h4 className="text-lg font-bold">
+                  Patrimoine immobilier{" "}
+                  <span className="text-xs font-normal text-gray-500">
+                    (Liquidation / Soulte)
+                  </span>
+                </h4>
+              </div>
+              <ul className="pl-2 space-y-3 text-sm text-gray-300 border-l-2 border-white/5">
+                <li>
+                  <strong className="text-white">Régime matrimonial</strong>{" "}
+                  (communauté ou séparation de biens)
+                </li>
+                <li>
+                  <strong className="text-white">
+                    Valeur vénale du bien immobilier
+                  </strong>
+                </li>
+                <li>
+                  <strong className="text-white">Capital Restant Dû</strong>{" "}
+                  (CRD — crédit immobilier)
+                </li>
+                <li>
+                  <strong className="text-white">Récompenses</strong> (fonds
+                  propres ayant financé un bien commun — régime communauté
+                  uniquement)
+                </li>
+              </ul>
+            </div>
+
+            {/* Reste à Vivre */}
+            <div className="p-5 border glass-panel rounded-2xl border-white/10">
+              <div className="flex items-center mb-4 space-x-3">
+                <div className="p-2 rounded-lg bg-purple-500/20">
+                  <Wallet className="w-5 h-5 text-purple-400" />
+                </div>
+                <h4 className="text-lg font-bold">
+                  Budget & Charges{" "}
+                  <span className="text-xs font-normal text-gray-500">
+                    (Reste à Vivre)
+                  </span>
+                </h4>
+              </div>
+              <ul className="pl-2 space-y-3 text-sm text-gray-300 border-l-2 border-white/5">
+                <li>
+                  <strong className="text-white">Impôts mensuels</strong>
+                </li>
+                <li>
+                  <strong className="text-white">Loyer mensuel</strong>
+                </li>
+                <li>
+                  <strong className="text-white">
+                    Charges fixes mensuelles
+                  </strong>{" "}
+                  (énergie, assurance, télécoms…)
+                </li>
               </ul>
             </div>
           </div>
         </section>
 
-        {/* 3. Guide Technique */}
-        <section className="animate-fade-in delay-200">
-          <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-6">
-            Guide Technique (OCR)
+        {/* 3. Récapitulatif par preset */}
+        <section className="delay-200 animate-fade-in">
+          <h3 className="mb-6 text-sm font-bold tracking-widest text-gray-500 uppercase">
+            Que préparer selon votre choix ?
           </h3>
-          <div className="glass-panel p-6 rounded-2xl border border-white/10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Camera className="w-32 h-32" />
-            </div>
-            <ul className="space-y-4 relative z-10">
+          <div className="relative p-6 overflow-hidden border glass-panel rounded-2xl border-white/10">
+            <ul className="relative z-10 space-y-5">
               <li className="flex space-x-3">
-                <Lightbulb className="w-5 h-5 text-yellow-400 shrink-0" />
-                <p className="text-sm text-gray-300">
+                <FileText className="w-5 h-5 text-[var(--color-plasma-cyan)] shrink-0 mt-0.5" />
+                <div className="text-sm text-gray-300">
+                  <strong className="text-white block mb-0.5">Express</strong>
+                  Revenus nets + dates + âges. C'est tout.
+                </div>
+              </li>
+              <li className="flex space-x-3">
+                <FileText className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+                <div className="text-sm text-gray-300">
+                  <strong className="text-white block mb-0.5">Standard</strong>
+                  Revenus nets + dates + âges + enfants (nombre, âge, garde).
+                </div>
+              </li>
+              <li className="flex space-x-3">
+                <FileText className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
+                <div className="text-sm text-gray-300">
                   <strong className="text-white block mb-0.5">
-                    Luminosité
-                  </strong>{" "}
-                  Privilégiez la lumière naturelle. Évitez le flash.
-                </p>
+                    PC — Précision maximale
+                  </strong>
+                  Tout ci-dessus + revenus bruts, projections, patrimoine,
+                  retraite.
+                </div>
               </li>
               <li className="flex space-x-3">
-                <div className="w-5 h-5 border-2 border-gray-400 rounded shrink-0" />
-                <p className="text-sm text-gray-300">
-                  <strong className="text-white block mb-0.5">Cadrage</strong>{" "}
-                  Posez sur surface contrastée. Alignez les bords.
-                </p>
-              </li>
-              <li className="flex space-x-3">
-                <FileText className="w-5 h-5 text-[var(--color-plasma-cyan)] shrink-0" />
-                <p className="text-sm text-gray-300">
-                  <strong className="text-white block mb-0.5">Original</strong>{" "}
-                  Privilégiez les PDF numériques si possible.
-                </p>
+                <FileText className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                <div className="text-sm text-gray-300">
+                  <strong className="text-white block mb-0.5">
+                    Analyse complète
+                  </strong>
+                  Toutes les informations ci-dessus + patrimoine immobilier +
+                  charges/loyer/impôts.
+                </div>
               </li>
             </ul>
           </div>
         </section>
 
-        {/* 4. Check-list */}
-        <section className="animate-fade-in delay-300">
-          <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-6">
-            Check-list Finale
-          </h3>
-          <div className="space-y-3">
-            {[
-              "Mes 3 dernières fiches de paie",
-              "Dernier avis d'imposition complet",
-              "Montant approx. dettes communes",
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                className="flex items-center space-x-3 bg-white/5 p-4 rounded-xl border border-white/5"
-              >
-                <div className="w-5 h-5 rounded-full border border-[var(--color-plasma-cyan)] flex items-center justify-center">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[var(--color-plasma-cyan)] opacity-0 hover:opacity-100 transition duration-300 cursor-pointer" />
-                </div>
-                <span className="text-sm text-gray-300">{item}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 5. Note Sécurité */}
-        <section className="animate-fade-in delay-500 text-center px-4 pb-8">
-          <p className="text-xs text-gray-500 leading-relaxed max-w-xs mx-auto">
-            L'application ne stocke aucune des pièces. Une fois la session
-            fermée, la liste est inaccessible.
-            <br />
-            L'utilisation de documents falsifiés faussera les résultats.
+        {/* 4. Note */}
+        <section className="px-4 pb-8 text-center delay-500 animate-fade-in">
+          <p className="max-w-xs mx-auto text-xs leading-relaxed text-gray-500">
+            Toutes les informations sont saisies manuellement et traitées
+            uniquement sur votre appareil. Aucune donnée n'est envoyée ni
+            stockée sur un serveur.
           </p>
         </section>
       </div>

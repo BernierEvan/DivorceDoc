@@ -22,7 +22,10 @@ const OfflineIndicator: React.FC = () => {
       className="fixed top-0 left-0 right-0 z-[10000] flex justify-center"
       style={{ top: "env(safe-area-inset-top, 0px)" }}
     >
-      <div className="bg-amber-600 text-white px-4 py-1.5 rounded-b-xl flex items-center gap-2 shadow-lg text-xs font-medium">
+      <div
+        className="bg-amber-600 px-4 py-1.5 rounded-b-xl flex items-center gap-2 shadow-lg text-xs font-medium"
+        style={{ color: "#ffffff" }}
+      >
         <WifiOff className="w-3.5 h-3.5" />
         <span>Hors ligne — les données locales restent accessibles</span>
       </div>

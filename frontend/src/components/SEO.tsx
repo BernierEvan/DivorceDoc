@@ -145,43 +145,6 @@ export function SEO({
 //  PRE-BUILT JSON-LD SCHEMAS
 // ==========================================
 
-export const organizationJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: SITE_NAME,
-  url: SITE_URL,
-  logo: `${SITE_URL}/icon-512.svg`,
-  description: DEFAULT_DESCRIPTION,
-  sameAs: [],
-};
-
-export const webApplicationJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  name: SITE_NAME,
-  url: SITE_URL,
-  applicationCategory: "FinanceApplication",
-  operatingSystem: "All",
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "EUR",
-  },
-  description: DEFAULT_DESCRIPTION,
-  inLanguage: "fr",
-  browserRequirements: "Requires JavaScript. Requires WebAssembly.",
-  featureList: [
-    "Calcul prestation compensatoire",
-    "Calcul pension alimentaire",
-    "Liquidation régime matrimonial",
-    "Calcul soulte",
-    "Simulation reste à vivre",
-    "OCR documents (Tesseract.js)",
-    "Génération rapport PDF",
-    "Traitement 100% local",
-  ],
-};
-
 export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
   return {
     "@context": "https://schema.org",

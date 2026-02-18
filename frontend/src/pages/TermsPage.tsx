@@ -48,7 +48,7 @@ const TermsPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative overflow-hidden text-white font-sans">
+    <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative text-white font-sans">
       <SEO
         title="Conditions Générales d'Utilisation (CGU)"
         description="CGU de DivorceDoc : simulateur de divorce gratuit à vocation informative. Architecture stateless, aucun stockage, limitation de responsabilité."
@@ -59,7 +59,7 @@ const TermsPage: React.FC = () => {
         ])}
       />
       {/* Background */}
-      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_100%_0%,_#1e1b4b_0%,_transparent_50%)] opacity-30 pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_100%_0%,_var(--accent-light)_0%,_transparent_50%)] opacity-30 pointer-events-none" />
 
       {/* Header */}
       <div className="p-6 pt-8 flex items-center justify-between z-10 sticky top-0 bg-[var(--color-deep-space)]/90 backdrop-blur-xl border-b border-white/5">
@@ -87,7 +87,7 @@ const TermsPage: React.FC = () => {
           <div className="inline-flex items-center justify-center p-4 bg-[var(--color-plasma-cyan)]/10 rounded-full mb-6 border border-[var(--color-plasma-cyan)]/20 animate-pulse-glow">
             <Scale className="w-8 h-8 text-[var(--color-plasma-cyan)]" />
           </div>
-          <h1 className="mb-4 text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
+          <h1 className="mb-4 text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-muted)]">
             Conditions Générales d'Utilisation
           </h1>
           <p className="max-w-sm mx-auto text-sm text-gray-400">
@@ -98,12 +98,13 @@ const TermsPage: React.FC = () => {
         <Section title="1. Objet du Service" icon={Scale}>
           <p>
             La plateforme (ci-après "l'Application") propose un outil de
-            simulation automatisé permettant d'estimer les conséquences
-            financières d'un divorce.
+            simulation permettant d'estimer les conséquences financières d'un
+            divorce.
           </p>
           <p>
-            L'Application utilise une technologie d'OCR locale pour extraire des
-            données et générer des rapports de synthèse.
+            L'Application fonctionne par saisie manuelle des informations et
+            génère des rapports de synthèse entièrement en local sur votre
+            appareil.
           </p>
         </Section>
 
@@ -153,16 +154,16 @@ const TermsPage: React.FC = () => {
         <Section title="4. Responsabilité Utilisateur" icon={UserCheck}>
           <p>Vous êtes seul responsable de :</p>
           <ul className="pl-4 mt-2 space-y-1 list-disc">
-            <li>L'exactitude des documents importés.</li>
+            <li>L'exactitude des informations saisies.</li>
             <li>L'usage personnel (non commercial) du service.</li>
-            <li>La vérification humaine de chaque chiffre extrait.</li>
+            <li>La vérification humaine de chaque résultat.</li>
           </ul>
         </Section>
 
         <Section title="5. Limitation de Responsabilité" icon={ShieldOff}>
           <p>L'Éditeur n'est pas responsable :</p>
           <ul className="pl-4 mt-2 space-y-1 text-gray-400 list-disc">
-            <li>Des erreurs OCR (Tesseract.js).</li>
+            <li>Des erreurs de saisie par l'utilisateur.</li>
             <li>Des divergences avec les décisions judiciaires réelles.</li>
             <li>Des pertes de données par fermeture accidentelle.</li>
             <li>Des bugs liés à la publicité tierce.</li>

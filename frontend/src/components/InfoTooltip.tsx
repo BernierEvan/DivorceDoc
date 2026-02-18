@@ -23,7 +23,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({ content, label }) => {
   const modal = isOpen
     ? createPortal(
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
           style={{
             textTransform: "none",
             fontSize: "16px",
@@ -33,16 +33,16 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({ content, label }) => {
           onClick={() => setIsOpen(false)}
         >
           <div
-            className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl shadow-2xl w-full max-w-lg relative flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200"
+            className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl shadow-2xl w-full max-w-[calc(100vw-1.5rem)] sm:max-w-lg relative flex flex-col max-h-[80vh] sm:max-h-[85vh] animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-[var(--border-color)]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[var(--accent-primary)]/10 flex items-center justify-center shrink-0">
-                  <Info className="w-5 h-5 text-[var(--accent-primary)]" />
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[var(--border-color)]">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[var(--accent-primary)]/10 flex items-center justify-center shrink-0">
+                  <Info className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--accent-primary)]" />
                 </div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)]">
+                <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)]">
                   Information
                 </h3>
               </div>
@@ -60,8 +60,8 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({ content, label }) => {
             </div>
 
             {/* Content - Scrollable area */}
-            <div className="p-6 overflow-y-auto flex-1 min-h-0">
-              <p className="text-base text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap break-words normal-case">
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1 min-h-0">
+              <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap break-words normal-case">
                 {content}
               </p>
             </div>
