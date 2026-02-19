@@ -104,8 +104,8 @@ const TermsPage: React.FC = () => {
           <p>
             L'Application fonctionne par saisie manuelle des informations et
             réalise tous les calculs en local sur votre appareil. Des données
-            strictement nécessaires sont transmises à des tiers dans le cadre
-            de la publicité (Google) et de l'envoi de documents par e-mail.
+            strictement nécessaires sont transmises à des tiers dans le cadre de
+            la publicité (Google) et de l'envoi de documents par e-mail.
           </p>
         </Section>
 
@@ -186,15 +186,15 @@ const TermsPage: React.FC = () => {
 
         <Section title="7. Publicité & Monétisation" icon={DollarSign}>
           <p>
-            Le service est financé par <strong>Google AdSense / Google Tag Manager</strong>.
+            Le service est financé par{" "}
+            <strong>Google AdSense / Google Tag Manager</strong>.
           </p>
           <ul className="pl-4 mt-2 space-y-1 list-disc">
             <li>L'Utilisateur accepte l'exposition publicitaire.</li>
             <li>
               Des données de navigation (adresse IP, pages visitées, type
-              d'appareil) sont transmises à Google dans le cadre de la
-              diffusion publicitaire. Ces données sont limitées au strict
-              nécessaire.
+              d'appareil) sont transmises à Google dans le cadre de la diffusion
+              publicitaire. Ces données sont limitées au strict nécessaire.
             </li>
             <li>
               L'Éditeur peut restreindre l'accès en cas d'utilisation de
@@ -206,9 +206,9 @@ const TermsPage: React.FC = () => {
         <Section title="8. Protection des Données" icon={Flag}>
           <p>
             Vos données financières de simulation restent sur votre appareil.
-            Des données de navigation sont partagées avec Google (publicité)
-            et votre adresse e-mail peut être transmise pour l'envoi de
-            documents. Voir{" "}
+            Des données de navigation sont partagées avec Google (publicité) et
+            votre adresse e-mail peut être transmise pour l'envoi de documents.
+            Voir{" "}
             <a
               href="/privacy"
               className="text-[var(--color-plasma-cyan)] underline"

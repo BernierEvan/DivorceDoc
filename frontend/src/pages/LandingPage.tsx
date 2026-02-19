@@ -56,7 +56,7 @@ const LandingPage: React.FC = () => {
             </span>
           </div>
           <span className="text-[var(--text-primary)] font-bold tracking-wider">
-            DivorceDoc
+            DivorceSim
           </span>
         </div>
       </div>

@@ -107,7 +107,11 @@ const VersionChecker: React.FC = () => {
     // Did we already try a cache-busted navigate for this session?
     const alreadyTried = sessionStorage.getItem(RELOAD_FLAG) === "1";
 
-    if (isInitialCheck.current && !hasAttemptedReload.current && !alreadyTried) {
+    if (
+      isInitialCheck.current &&
+      !hasAttemptedReload.current &&
+      !alreadyTried
+    ) {
       // First load & version is stale → navigate with cache-bust.
       // We do NOT update localStorage yet. After the navigate:
       //   - If the fresh HTML loads → new code runs, hashes match → OK

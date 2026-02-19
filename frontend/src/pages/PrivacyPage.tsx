@@ -100,10 +100,10 @@ const PrivacyPage: React.FC = () => {
 
         <Section title="2. Responsable du Traitement">
           <p>
-            Pour les données de simulation, le responsable de traitement au
-            sens du RGPD est l'utilisateur lui-même sur son propre terminal.
-            Pour les données publicitaires et l'envoi d'e-mails, le responsable
-            de traitement est l'Éditeur.
+            Pour les données de simulation, le responsable de traitement au sens
+            du RGPD est l'utilisateur lui-même sur son propre terminal. Pour les
+            données publicitaires et l'envoi d'e-mails, le responsable de
+            traitement est l'Éditeur.
           </p>
           <p className="text-xs text-gray-500 mt-2">
             Pour la gestion des services tiers (Publicité) :<br />
@@ -133,18 +133,34 @@ const PrivacyPage: React.FC = () => {
             B. Données Publicitaires
           </h3>
           <ul className="list-disc pl-4 space-y-1 mb-4 text-gray-400">
-            <li>Cookies & Identifiants (Google AdSense / Google Tag Manager).</li>
-            <li>Données de navigation nécessaires au ciblage publicitaire (adresse IP, type d'appareil, pages visitées).</li>
-            <li>Ces données sont transmises à Google conformément à leur politique de confidentialité.</li>
+            <li>
+              Cookies & Identifiants (Google AdSense / Google Tag Manager).
+            </li>
+            <li>
+              Données de navigation nécessaires au ciblage publicitaire (adresse
+              IP, type d'appareil, pages visitées).
+            </li>
+            <li>
+              Ces données sont transmises à Google conformément à leur politique
+              de confidentialité.
+            </li>
           </ul>
 
           <h3 className="text-white font-bold mb-1">
             C. Données d'Envoi de Documents
           </h3>
           <ul className="list-disc pl-4 space-y-1 text-gray-400">
-            <li>Adresse e-mail (fournie volontairement pour recevoir un document).</li>
-            <li>Sélection des calculs demandés (type de document, pas les données financières).</li>
-            <li>Transmises à notre service d'envoi d'e-mails uniquement dans le but de délivrer le document.</li>
+            <li>
+              Adresse e-mail (fournie volontairement pour recevoir un document).
+            </li>
+            <li>
+              Sélection des calculs demandés (type de document, pas les données
+              financières).
+            </li>
+            <li>
+              Transmises à notre service d'envoi d'e-mails uniquement dans le
+              but de délivrer le document.
+            </li>
           </ul>
         </Section>
 
@@ -161,8 +177,8 @@ const PrivacyPage: React.FC = () => {
         <Section title="5. Destinataires & Transferts" icon={EyeOff}>
           <p>
             <strong>Données financières :</strong> Vos chiffres de simulation
-            (revenus, patrimoine, charges) restent sur votre appareil et ne
-            sont transmis à aucun tiers.
+            (revenus, patrimoine, charges) restent sur votre appareil et ne sont
+            transmis à aucun tiers.
           </p>
           <p>
             <strong>Publicité :</strong> Des données de navigation (adresse IP,
@@ -195,8 +211,8 @@ const PrivacyPage: React.FC = () => {
             <li className="flex items-center space-x-2">
               <div className="w-1.5 h-1.5 bg-[var(--color-plasma-cyan)] rounded-full" />
               <span>
-                <strong>Sans Base de Données :</strong> Aucun stockage Cloud
-                de vos données financières.
+                <strong>Sans Base de Données :</strong> Aucun stockage Cloud de
+                vos données financières.
               </span>
             </li>
             <li className="flex items-center space-x-2">

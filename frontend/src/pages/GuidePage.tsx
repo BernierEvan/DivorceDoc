@@ -98,9 +98,12 @@ const GuidePage: React.FC = () => {
                 <span className="block mb-1 font-bold tracking-wider uppercase">
                   Confidentialité
                 </span>
-                Tous les calculs de simulation sont réalisés localement sur votre appareil.
-                Le document récapitulatif est téléchargeable ou peut vous être envoyé par courriel (votre adresse e-mail est alors transmise à notre service d'envoi).
-                Des données strictement nécessaires sont partagées avec Google dans le cadre de la publicité.
+                Tous les calculs de simulation sont réalisés localement sur
+                votre appareil. Le document récapitulatif est téléchargeable ou
+                peut vous être envoyé par courriel (votre adresse e-mail est
+                alors transmise à notre service d'envoi). Des données
+                strictement nécessaires sont partagées avec Google dans le cadre
+                de la publicité.
               </p>
             </div>
           </div>
@@ -356,8 +359,8 @@ const GuidePage: React.FC = () => {
         <section className="px-4 pb-8 text-center delay-500 animate-fade-in">
           <p className="max-w-xs mx-auto text-xs leading-relaxed text-gray-500">
             Toutes les informations sont saisies manuellement et les calculs
-            sont réalisés sur votre appareil. Seules les données nécessaires
-            à la publicité (Google) et à l'envoi de documents par e-mail
+            sont réalisés sur votre appareil. Seules les données nécessaires à
+            la publicité (Google) et à l'envoi de documents par e-mail
             transitent par nos services.
           </p>
         </section>

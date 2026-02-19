@@ -295,8 +295,8 @@ const MethodologyPage: React.FC = () => {
         {/* 3. Conformité */}
         <Section title="3. Conformité RGPD" icon={ShieldCheck}>
           <p className="text-xs text-gray-400 mb-4">
-            L'application respecte le principe de minimisation des données.
-            Les calculs de simulation sont réalisés localement dans votre
+            L'application respecte le principe de minimisation des données. Les
+            calculs de simulation sont réalisés localement dans votre
             navigateur. Seules les données nécessaires à la publicité (Google)
             et à l'envoi de documents par e-mail transitent par des services
             tiers.
