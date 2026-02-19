@@ -20,6 +20,7 @@ import GlossaryPage from "./pages/GlossaryPage";
 import ThemeToggle from "./components/ThemeToggle";
 import Footer from "./components/Footer";
 import OfflineIndicator from "./components/OfflineIndicator";
+import VersionChecker from "./components/VersionChecker";
 import { GuidedModeProvider } from "./services/guidedMode";
 import { GuidedModeToggle } from "./components/GuidedModeToggle";
 
@@ -45,6 +46,7 @@ const App: React.FC = () => {
     <GuidedModeProvider>
       <ScrollToTop />
       <OfflineIndicator />
+      <VersionChecker />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route

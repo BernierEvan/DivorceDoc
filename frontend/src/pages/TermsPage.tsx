@@ -65,7 +65,7 @@ const TermsPage: React.FC = () => {
       <div className="p-6 pt-8 flex items-center justify-between z-10 sticky top-0 bg-[var(--color-deep-space)]/90 backdrop-blur-xl border-b border-white/5">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 transition rounded-full bg-white/5 hover:bg-white/10 group flex items-center justify-center"
+          className="flex items-center justify-center p-2 transition rounded-full bg-white/5 hover:bg-white/10 group"
         >
           <ChevronLeft className="w-5 h-5 text-gray-300 group-hover:text-white" />
         </button>
@@ -74,7 +74,7 @@ const TermsPage: React.FC = () => {
         </span>
         <button
           onClick={() => navigate("/")}
-          className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition group flex items-center justify-center"
+          className="flex items-center justify-center p-2 transition rounded-full bg-white/5 hover:bg-white/10 group"
           title="Accueil"
         >
           <Home className="w-5 h-5 text-gray-300 group-hover:text-white" />
