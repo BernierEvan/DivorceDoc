@@ -66,7 +66,7 @@ const GlossaryPage: React.FC = () => {
             {
               question: "Qu'est-ce que la prestation compensatoire ?",
               answer:
-                "La prestation compensatoire est un capital versé pour compenser la disparité de niveau de vie causée par le divorce (art. 270 à 281 du Code Civil). Elle est estimée via plusieurs méthodes (Calcul PC, Tiers Pondéré, INSEE, PA Based).",
+                "La prestation compensatoire est un capital versé pour compenser la disparité de niveau de vie causée par le divorce (art. 270 à 281 du Code Civil). Elle est estimée via plusieurs méthodes (Calcul PC, Tiers Pondéré, INSEE, PA Based). Les calculs sont réalisés localement sur votre appareil.",
             },
             {
               question: "Qu'est-ce que la soulte dans un divorce ?",

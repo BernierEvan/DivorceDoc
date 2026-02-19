@@ -50,7 +50,7 @@ const GuidePage: React.FC = () => {
               },
               {
                 name: "Lancer la simulation",
-                text: "Saisissez vos informations directement dans le simulateur. Toutes les données restent sur votre appareil.",
+                text: "Saisissez vos informations directement dans le simulateur. Les calculs sont réalisés localement sur votre appareil.",
               },
             ],
           ),
@@ -96,10 +96,11 @@ const GuidePage: React.FC = () => {
               <Shield className="w-5 h-5 text-[var(--color-plasma-cyan)] shrink-0 mt-0.5" />
               <p className="text-xs text-[var(--color-plasma-cyan)]">
                 <span className="block mb-1 font-bold tracking-wider uppercase">
-                  100 % confidentiel
+                  Confidentialité
                 </span>
-                Toutes les données sont traitées localement sur votre appareil.
-                Rien n'est envoyé sur nos serveurs, rien n'est stocké.
+                Tous les calculs de simulation sont réalisés localement sur votre appareil.
+                Le document récapitulatif est téléchargeable ou peut vous être envoyé par courriel (votre adresse e-mail est alors transmise à notre service d'envoi).
+                Des données strictement nécessaires sont partagées avec Google dans le cadre de la publicité.
               </p>
             </div>
           </div>
@@ -354,9 +355,10 @@ const GuidePage: React.FC = () => {
         {/* 4. Note */}
         <section className="px-4 pb-8 text-center delay-500 animate-fade-in">
           <p className="max-w-xs mx-auto text-xs leading-relaxed text-gray-500">
-            Toutes les informations sont saisies manuellement et traitées
-            uniquement sur votre appareil. Aucune donnée n'est envoyée ni
-            stockée sur un serveur.
+            Toutes les informations sont saisies manuellement et les calculs
+            sont réalisés sur votre appareil. Seules les données nécessaires
+            à la publicité (Google) et à l'envoi de documents par e-mail
+            transitent par nos services.
           </p>
         </section>
       </div>

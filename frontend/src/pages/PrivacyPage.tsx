@@ -40,7 +40,7 @@ const PrivacyPage: React.FC = () => {
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative text-white font-sans">
       <SEO
         title="Politique de Confidentialité — Privacy by Design"
-        description="DivorceDoc ne collecte aucune donnée personnelle. Traitement 100 % local, localStorage uniquement, zéro stockage Cloud. Conforme RGPD."
+        description="DivorceDoc : calculs 100 % locaux, données publicitaires Google limitées au strict nécessaire, envoi de documents par e-mail sur demande. Conforme RGPD."
         path="/privacy"
         jsonLd={breadcrumbJsonLd([
           { name: "Accueil", path: "/" },
@@ -80,8 +80,9 @@ const PrivacyPage: React.FC = () => {
             Privacy by Design
           </h1>
           <p className="text-sm text-gray-400 max-w-sm mx-auto">
-            Votre vie privée est garantie par l'absence physique de vos données
-            sur nos systèmes.
+            Vos données de simulation restent sur votre appareil. Seules les
+            données strictement nécessaires à la publicité et à l'envoi de
+            documents transitent par des services tiers.
           </p>
         </div>
 
@@ -89,18 +90,20 @@ const PrivacyPage: React.FC = () => {
           <p>
             L'application a été conçue selon le principe du{" "}
             <strong>Privacy by Design</strong> (Protection de la vie privée dès
-            la conception). Contrairement aux services classiques, nous avons
-            fait le choix technologique de supprimer tout serveur de traitement.
-            Toutes les informations sont saisies manuellement et calculées
-            directement sur votre appareil.
+            la conception). Tous les calculs de simulation sont réalisés
+            directement sur votre appareil, sans serveur de traitement.
+            Toutefois, certaines données transitent par des services tiers :
+            données nécessaires à la publicité (Google Ads) et adresse e-mail
+            pour l'envoi de documents sur votre demande.
           </p>
         </Section>
 
         <Section title="2. Responsable du Traitement">
           <p>
-            Puisque l'application ne collecte aucune donnée personnelle sur ses
-            serveurs, le responsable de traitement au sens du RGPD est
-            l'utilisateur lui-même sur son propre terminal.
+            Pour les données de simulation, le responsable de traitement au
+            sens du RGPD est l'utilisateur lui-même sur son propre terminal.
+            Pour les données publicitaires et l'envoi d'e-mails, le responsable
+            de traitement est l'Éditeur.
           </p>
           <p className="text-xs text-gray-500 mt-2">
             Pour la gestion des services tiers (Publicité) :<br />
@@ -127,11 +130,21 @@ const PrivacyPage: React.FC = () => {
           </ul>
 
           <h3 className="text-white font-bold mb-1">
-            B. Données Techniques & Pub
+            B. Données Publicitaires
+          </h3>
+          <ul className="list-disc pl-4 space-y-1 mb-4 text-gray-400">
+            <li>Cookies & Identifiants (Google AdSense / Google Tag Manager).</li>
+            <li>Données de navigation nécessaires au ciblage publicitaire (adresse IP, type d'appareil, pages visitées).</li>
+            <li>Ces données sont transmises à Google conformément à leur politique de confidentialité.</li>
+          </ul>
+
+          <h3 className="text-white font-bold mb-1">
+            C. Données d'Envoi de Documents
           </h3>
           <ul className="list-disc pl-4 space-y-1 text-gray-400">
-            <li>Cookies & Identifiants (Google AdSense/AdMob).</li>
-            <li>Données de navigation anonymisées.</li>
+            <li>Adresse e-mail (fournie volontairement pour recevoir un document).</li>
+            <li>Sélection des calculs demandés (type de document, pas les données financières).</li>
+            <li>Transmises à notre service d'envoi d'e-mails uniquement dans le but de délivrer le document.</li>
           </ul>
         </Section>
 
@@ -147,12 +160,20 @@ const PrivacyPage: React.FC = () => {
 
         <Section title="5. Destinataires & Transferts" icon={EyeOff}>
           <p>
-            <strong>Données financières :</strong> AUCUN tiers n'a accès à vos
-            chiffres. Ni l'éditeur, ni Google, ni aucune autorité.
+            <strong>Données financières :</strong> Vos chiffres de simulation
+            (revenus, patrimoine, charges) restent sur votre appareil et ne
+            sont transmis à aucun tiers.
           </p>
           <p>
-            <strong>Publicité :</strong> Publicités non personnalisées par
-            défaut, sauf consentement aux cookies.
+            <strong>Publicité :</strong> Des données de navigation (adresse IP,
+            pages visitées, type d'appareil) sont partagées avec Google dans le
+            cadre de la diffusion publicitaire. Ces données sont strictement
+            limitées au nécessaire.
+          </p>
+          <p>
+            <strong>Envoi de documents :</strong> Si vous demandez l'envoi d'un
+            document par e-mail, votre adresse e-mail et le type de document
+            choisi sont transmis à notre service d'envoi.
           </p>
         </Section>
 
@@ -161,8 +182,8 @@ const PrivacyPage: React.FC = () => {
             <li className="flex items-center space-x-2">
               <div className="w-1.5 h-1.5 bg-[var(--color-plasma-cyan)] rounded-full" />
               <span>
-                <strong>Traitement Local :</strong> Tous les calculs sont
-                exécutés dans votre navigateur.
+                <strong>Traitement Local :</strong> Tous les calculs de
+                simulation sont exécutés dans votre navigateur.
               </span>
             </li>
             <li className="flex items-center space-x-2">
@@ -174,8 +195,15 @@ const PrivacyPage: React.FC = () => {
             <li className="flex items-center space-x-2">
               <div className="w-1.5 h-1.5 bg-[var(--color-plasma-cyan)] rounded-full" />
               <span>
-                <strong>Sans Base de Données :</strong> Aucun stockage Cloud,
-                aucune transmission réseau de vos données.
+                <strong>Sans Base de Données :</strong> Aucun stockage Cloud
+                de vos données financières.
+              </span>
+            </li>
+            <li className="flex items-center space-x-2">
+              <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full" />
+              <span>
+                <strong>Transmissions limitées :</strong> Données publicitaires
+                (Google) et adresse e-mail (envoi de documents) uniquement.
               </span>
             </li>
           </ul>
@@ -204,9 +232,10 @@ const PrivacyPage: React.FC = () => {
 
         <div className="mt-12 p-6 border-t border-white/10 text-center">
           <p className="text-xs text-gray-500 italic">
-            "En utilisant l’application, vous restez maître de vos informations
-            du début à la fin. Notre modèle économique repose sur votre
-            attention (publicité) et non sur la revente de votre intimité."
+            "Vos données financières restent sur votre appareil. Notre modèle
+            économique repose sur la publicité (données de navigation partagées
+            avec Google) et non sur la revente de vos informations personnelles
+            sensibles."
           </p>
         </div>
       </div>

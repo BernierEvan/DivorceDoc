@@ -3,7 +3,7 @@ import { useEffect } from "react";
 const SITE_NAME = "DivorceDoc";
 const SITE_URL = "https://divorcedoc.fr";
 const DEFAULT_DESCRIPTION =
-  "Simulez gratuitement votre prestation compensatoire, pension alimentaire et liquidation du régime matrimonial. 100% confidentiel, aucune donnée conservée.";
+  "Simulez gratuitement votre prestation compensatoire, pension alimentaire et liquidation du régime matrimonial. Calculs locaux et confidentiels.";
 const DEFAULT_IMAGE = `${SITE_URL}/icon-512.svg`;
 const LOCALE = "fr_FR";
 

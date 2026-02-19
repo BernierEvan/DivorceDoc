@@ -296,15 +296,17 @@ const MethodologyPage: React.FC = () => {
         <Section title="3. Conformité RGPD" icon={ShieldCheck}>
           <p className="text-xs text-gray-400 mb-4">
             L'application respecte le principe de minimisation des données.
-            Toutes les informations sont saisies manuellement et traitées
-            exclusivement dans votre navigateur.
+            Les calculs de simulation sont réalisés localement dans votre
+            navigateur. Seules les données nécessaires à la publicité (Google)
+            et à l'envoi de documents par e-mail transitent par des services
+            tiers.
           </p>
           <Table
             headers={["Principe", "Mise en œuvre"]}
             rows={[
               [
                 "Minimisation (Art. 5.1.c)",
-                "Architecture locale : aucune donnée n'est transmise à nos serveurs.",
+                "Calculs locaux. Seules les données publicitaires (Google) et l'adresse e-mail (envoi de documents) sont transmises.",
               ],
               [
                 "Transparence",

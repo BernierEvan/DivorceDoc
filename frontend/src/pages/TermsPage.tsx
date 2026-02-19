@@ -51,7 +51,7 @@ const TermsPage: React.FC = () => {
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative text-white font-sans">
       <SEO
         title="Conditions Générales d'Utilisation (CGU)"
-        description="CGU de DivorceDoc : simulateur de divorce gratuit à vocation informative. Architecture stateless, aucun stockage, limitation de responsabilité."
+        description="CGU de DivorceDoc : simulateur de divorce gratuit à vocation informative. Calculs locaux, publicité Google, envoi de documents par e-mail."
         path="/terms"
         jsonLd={breadcrumbJsonLd([
           { name: "Accueil", path: "/" },
@@ -103,8 +103,9 @@ const TermsPage: React.FC = () => {
           </p>
           <p>
             L'Application fonctionne par saisie manuelle des informations et
-            génère des rapports de synthèse entièrement en local sur votre
-            appareil.
+            réalise tous les calculs en local sur votre appareil. Des données
+            strictement nécessaires sont transmises à des tiers dans le cadre
+            de la publicité (Google) et de l'envoi de documents par e-mail.
           </p>
         </Section>
 
@@ -141,12 +142,18 @@ const TermsPage: React.FC = () => {
               <strong>Gratuité :</strong> Service financé par la publicité.
             </li>
             <li>
-              <strong>Architecture Locale :</strong> Traitement intégral sur
-              votre appareil.
+              <strong>Architecture Locale :</strong> Calculs de simulation
+              réalisés intégralement sur votre appareil.
             </li>
             <li>
-              <strong>Absence de Stockage :</strong> La fermeture de session
-              entraîne la suppression irréversible des données.
+              <strong>Transmissions limitées :</strong> Des données de
+              navigation sont partagées avec Google (publicité). Votre adresse
+              e-mail est transmise si vous demandez l'envoi d'un document.
+            </li>
+            <li>
+              <strong>Stockage local :</strong> Les données saisies sont
+              conservées dans le navigateur (localStorage) et peuvent être
+              supprimées à tout moment.
             </li>
           </ul>
         </Section>
@@ -179,10 +186,16 @@ const TermsPage: React.FC = () => {
 
         <Section title="7. Publicité & Monétisation" icon={DollarSign}>
           <p>
-            Le service est financé par <strong>Google AdSense/AdMob</strong>.
+            Le service est financé par <strong>Google AdSense / Google Tag Manager</strong>.
           </p>
           <ul className="pl-4 mt-2 space-y-1 list-disc">
             <li>L'Utilisateur accepte l'exposition publicitaire.</li>
+            <li>
+              Des données de navigation (adresse IP, pages visitées, type
+              d'appareil) sont transmises à Google dans le cadre de la
+              diffusion publicitaire. Ces données sont limitées au strict
+              nécessaire.
+            </li>
             <li>
               L'Éditeur peut restreindre l'accès en cas d'utilisation de
               bloqueur de publicité.
@@ -192,15 +205,17 @@ const TermsPage: React.FC = () => {
 
         <Section title="8. Protection des Données" icon={Flag}>
           <p>
-            Aucune donnée personnelle sensible n'est collectée par l'Éditeur
-            (RGPD). Voir{" "}
+            Vos données financières de simulation restent sur votre appareil.
+            Des données de navigation sont partagées avec Google (publicité)
+            et votre adresse e-mail peut être transmise pour l'envoi de
+            documents. Voir{" "}
             <a
               href="/privacy"
               className="text-[var(--color-plasma-cyan)] underline"
             >
               Politique de Confidentialité
-            </a>
-            .
+            </a>{" "}
+            pour le détail.
           </p>
         </Section>
 

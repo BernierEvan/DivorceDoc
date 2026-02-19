@@ -8,7 +8,7 @@ const landingFaq = faqJsonLd([
   {
     question: `Comment fonctionne le simulateur de divorce "DivorceDoc" ?`,
     answer:
-      "DivorceDoc vous permet de saisir manuellement vos informations financières (revenus, charges, patrimoine) pour simuler la prestation compensatoire, la pension alimentaire, la liquidation du régime matrimonial et le reste à vivre. Aucune donnée n'est envoyée sur un serveur.",
+      "DivorceDoc vous permet de saisir manuellement vos informations financières (revenus, charges, patrimoine) pour simuler la prestation compensatoire, la pension alimentaire, la liquidation du régime matrimonial et le reste à vivre. Les calculs sont réalisés localement sur votre appareil.",
   },
   {
     question: "Le simulateur de divorce est-il gratuit ?",
@@ -18,7 +18,7 @@ const landingFaq = faqJsonLd([
   {
     question: "Mes données sont-elles en sécurité ?",
     answer:
-      "Absolument. Toutes les analyses sont effectuées localement dans la mémoire vive de votre appareil. Aucune donnée n'est stockée ni transmise. Dès que vous fermez l'application, tout est effacé.",
+      "Oui, vos données financières de simulation sont traitées localement sur votre appareil. Des données de navigation sont partagées avec Google (publicité) et votre adresse e-mail peut être transmise si vous demandez l'envoi d'un document.",
   },
   {
     question: "Comment est calculée la prestation compensatoire ?",
@@ -39,7 +39,7 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center relative overflow-hidden text-center transition-colors duration-300">
       <SEO
         title="Simulateur Divorce Gratuit — Prestation Compensatoire, Pension Alimentaire"
-        description="Simulez gratuitement votre prestation compensatoire, pension alimentaire et liquidation du régime matrimonial. Outil 100% confidentiel, traitement local, aucune donnée conservée. Calcul soulte et reste à vivre."
+        description="Simulez gratuitement votre prestation compensatoire, pension alimentaire et liquidation du régime matrimonial. Calculs locaux et confidentiels. Calcul soulte et reste à vivre."
         path="/"
         jsonLd={landingFaq}
       />
@@ -87,11 +87,11 @@ const LandingPage: React.FC = () => {
           <p className="text-sm text-[var(--text-muted)] font-light">
             Aucun compte requis.{" "}
             <span className="text-[var(--accent-primary)] font-medium">
-              Vos informations ne quittent jamais cet appareil.
+              Vos informations restent en sécurité.
             </span>
           </p>
           <InfoTooltip
-            content="Nous ne demandons aucun document. Vous insérer seulement les informations nécessaires et le calcul est fait en local. Dès que vous fermez l'app, tout est effacé. Aucune donnée personnelle n'est collectée ou stockée."
+            content="Nous ne demandons aucun document. Vous insérer seulement les informations nécessaires et le calcul est fait en local. Dès que vous fermez l'app, tout est effacé."
             label="Comment c'est possible ?"
           />
         </div>

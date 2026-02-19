@@ -62,7 +62,7 @@ export const pdfGenerator = {
       doc.text(`ID: ${sessionHash}`, pageWidth - 20, 10, { align: "right" });
       doc.text(dateStr, pageWidth - 20, 14, { align: "right" });
       doc.setTextColor(156, 163, 175);
-      doc.text("Aucune donnée conservée sur serveur", pageWidth - 20, 19, {
+      doc.text("Calculs réalisés localement", pageWidth - 20, 19, {
         align: "right",
       });
     };
