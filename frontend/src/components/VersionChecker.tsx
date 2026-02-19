@@ -3,13 +3,16 @@ import { useEffect, useRef, useState, useCallback } from "react";
 /**
  * VersionChecker — detects new site deployments and reloads the page.
  *
- * How it works:
- *  1. On mount, fetches /version.json?_t=<timestamp> (cache-busted).
+ * Cross-browser compatible (Chrome, Firefox, Safari, Edge):
+ *
+ *  1. On mount, fetches /version.json with aggressive cache-busting:
+ *     - URL query param `?_t=<timestamp>` (defeats CDN / proxy caches)
+ *     - `cache: "no-store"` (Chrome/Edge)
+ *     - `pragma: no-cache` + `cache-control: no-cache` headers (Firefox/Safari)
  *  2. Compares the buildHash with the one stored in localStorage ("appBuildHash").
  *  3. First visit   → stores the hash, does nothing.
- *  4. Hash changed   → auto-reloads the page so the browser fetches the new
- *                       index.html (which references the new hashed assets).
- *  5. While the tab stays open, re-checks every 5 minutes.
+ *  4. Hash changed   → hard-reloads the page (bypasses browser cache).
+ *  5. While the tab stays open, re-checks every 5 minutes + on tab focus.
  *     If a new version is found mid-session, shows a non-intrusive banner
  *     instead of auto-reloading (to avoid data-loss if the user is typing).
  *
@@ -25,52 +28,86 @@ interface VersionInfo {
   buildHash: string;
 }
 
+/**
+ * Fetch version.json with maximum cache-busting for all browsers.
+ * Firefox ignores `cache: "no-store"` in some cases, so we also set
+ * explicit no-cache headers and use a unique URL each time.
+ */
+async function fetchVersionJson(): Promise<VersionInfo | null> {
+  try {
+    const url = `/version.json?_t=${Date.now()}&_r=${Math.random().toString(36).slice(2)}`;
+    const res = await fetch(url, {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        Pragma: "no-cache",
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+      },
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as VersionInfo;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Force a hard reload that bypasses the browser cache.
+ * - `location.reload(true)` is deprecated but still works in Firefox/Safari
+ *   to force a server fetch (bypassing BFCache and HTTP cache).
+ * - For browsers that ignore it, we navigate to a cache-busted URL which
+ *   forces the server to deliver fresh index.html.
+ */
+function hardReload(): void {
+  try {
+    // Try the deprecated forceReload flag — Firefox and Safari still honor it
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window.location as any).reload(true);
+  } catch {
+    // Fallback: navigate to a cache-busted version of the current URL
+    const url = new URL(window.location.href);
+    url.searchParams.set("_refresh", Date.now().toString());
+    window.location.replace(url.toString());
+  }
+}
+
 const VersionChecker: React.FC = () => {
   const [showBanner, setShowBanner] = useState(false);
-  // Tracks whether this is the initial check (on page load) vs a periodic one
   const isInitialCheck = useRef(true);
-  // Guard against double-reload
   const hasReloaded = useRef(false);
 
   const checkVersion = useCallback(async () => {
-    try {
-      const res = await fetch(`/version.json?_t=${Date.now()}`, {
-        cache: "no-store",
-      });
-      if (!res.ok) return;
-      const data: VersionInfo = await res.json();
-      const newHash = data.buildHash;
-      const storedHash = localStorage.getItem(STORAGE_KEY);
+    const data = await fetchVersionJson();
+    if (!data) return;
 
-      if (!storedHash) {
-        // First visit ever — just store the hash.
-        localStorage.setItem(STORAGE_KEY, newHash);
-        isInitialCheck.current = false;
-        return;
-      }
+    const newHash = data.buildHash;
+    const storedHash = localStorage.getItem(STORAGE_KEY);
 
-      if (storedHash === newHash) {
-        // Same version — nothing to do.
-        isInitialCheck.current = false;
-        return;
-      }
-
-      // New version detected!
+    if (!storedHash) {
+      // First visit ever — just store the hash.
       localStorage.setItem(STORAGE_KEY, newHash);
-
-      if (isInitialCheck.current && !hasReloaded.current) {
-        // Page just loaded and the version is stale → auto-reload silently.
-        // After reload, the stored hash will match, so no loop.
-        hasReloaded.current = true;
-        window.location.reload();
-        return;
-      }
-
-      // Mid-session update → show a banner rather than disrupting the user.
-      setShowBanner(true);
-    } catch {
-      // Network error — silently ignore (offline, etc.)
+      isInitialCheck.current = false;
+      return;
     }
+
+    if (storedHash === newHash) {
+      // Same version — nothing to do.
+      isInitialCheck.current = false;
+      return;
+    }
+
+    // New version detected!
+    localStorage.setItem(STORAGE_KEY, newHash);
+
+    if (isInitialCheck.current && !hasReloaded.current) {
+      // Page just loaded and the version is stale → hard-reload silently.
+      hasReloaded.current = true;
+      hardReload();
+      return;
+    }
+
+    // Mid-session update → show a banner rather than disrupting the user.
+    setShowBanner(true);
   }, []);
 
   useEffect(() => {
@@ -83,7 +120,20 @@ const VersionChecker: React.FC = () => {
       checkVersion();
     }, CHECK_INTERVAL_MS);
 
-    return () => clearInterval(interval);
+    // Also check when the user returns to this tab (covers mobile browsers
+    // that aggressively cache pages in BFCache / back-forward cache).
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        isInitialCheck.current = false;
+        checkVersion();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [checkVersion]);
 
   if (!showBanner) return null;
@@ -98,7 +148,7 @@ const VersionChecker: React.FC = () => {
     >
       <span>🔄 Une nouvelle version est disponible.</span>
       <button
-        onClick={() => window.location.reload()}
+        onClick={() => hardReload()}
         className="rounded-lg bg-white/20 hover:bg-white/30 px-3 py-1
           text-white font-semibold transition-colors"
       >
