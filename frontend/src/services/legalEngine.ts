@@ -1,8 +1,5 @@
 export interface FinancialData {
   myIncome: number;
-  myCharges: number;
-  myTaxes: number; // Impôts mensuels
-  myRent: number; // Loyer ou crédit immobilier mensuel
   spouseIncome: number;
   marriageDuration: number;
   myAge: number;
@@ -10,13 +7,8 @@ export interface FinancialData {
   childrenCount: number;
   childrenAges?: number[]; // Âge de chaque enfant (pour calcul UC OCDE)
   custodyType: string;
-  assetsValue: number;
-  assetsCRD: number;
-  rewardsAlice: number; // Récompenses dues PAR la communauté À Alice
-  rewardsBob: number; // Récompenses dues PAR la communauté À Bob
   marriageDate?: string;
   divorceDate?: string; // Date de divorce ou de séparation
-  matrimonialRegime?: string;
   metadata?: any;
 
   // Calcul PC method fields
@@ -42,22 +34,8 @@ export interface FinancialData {
 
 export interface SimulationResult {
   compensatoryAllowance: number;
-  childSupport: number;
-  childSupportPerChild: number;
   custodyTypeUsed: string;
   marriageDurationUsed: number;
-  liquidationShare: number;
-  remainingLiveable: number;
-  belowPovertyThreshold: boolean;
-  budget: {
-    totalRevenus: number; // myIncome + paReceived
-    totalCharges: number; // taxes + rent + charges + paPaid
-    taxes: number;
-    rent: number;
-    fixedCharges: number;
-    paPaid: number;
-    paReceived: number;
-  };
   details: {
     pilote: {
       value: number;
@@ -65,11 +43,6 @@ export interface SimulationResult {
       max: number;
     };
     insee: {
-      value: number;
-      min: number;
-      max: number;
-    };
-    paBased: {
       value: number;
       min: number;
       max: number;
@@ -85,15 +58,6 @@ export interface SimulationResult {
     formula?: string;
   };
 }
-
-// Barème Ministère de la Justice 2026
-const RSA_SOLO = 645.5;
-const SEUIL_PAUVRETE_2026 = 1216; // €/mois
-const CHILD_SUPPORT_RATES: Record<string, Record<number, number>> = {
-  classic: { 1: 0.135, 2: 0.115, 3: 0.1, 4: 0.088, 5: 0.08, 6: 0.072 },
-  alternating: { 1: 0.09, 2: 0.078, 3: 0.067, 4: 0.059, 5: 0.053, 6: 0.048 },
-  reduced: { 1: 0.18, 2: 0.155, 3: 0.133, 4: 0.117, 5: 0.106, 6: 0.095 },
-};
 
 /**
  * Calcule la fraction d'année entre deux dates (identique à FRACTION.ANNEE Excel).
@@ -211,27 +175,6 @@ export const legalEngine = {
     const pcInseeMin = lossMonthly * periodMonths * 0.15;
     const pcInsee = lossMonthly * periodMonths * 0.2;
     const pcInseeMax = lossMonthly * periodMonths * 0.25;
-
-    // --- METHODE BASÉE SUR LA PENSION ALIMENTAIRE ---
-    // Réf : Approche pratique avocats/magistrats
-    // PC = PA mensuelle × 12 × Coefficient (généralement 8)
-    //   - Min  : coefficient 6 (estimation basse)
-    //   - Moyen: coefficient 8 (standard)
-    //   - Max  : coefficient 10 (estimation haute)
-    // NB : Cette méthode n'est pertinente que s'il y a une PA > 0
-    // La PA est calculée juste après, donc on la pré-calcule ici
-    let prePaTotal = 0;
-    if (data.childrenCount > 0) {
-      const rRefPre = Math.max(0, payerIncome - RSA_SOLO);
-      const rateKeyPre = Math.min(data.childrenCount, 6);
-      const rateTablePre =
-        CHILD_SUPPORT_RATES[custody] || CHILD_SUPPORT_RATES.classic;
-      const ratePre = rateTablePre[rateKeyPre] || 0.135;
-      prePaTotal = Math.round(rRefPre * ratePre) * data.childrenCount;
-    }
-    const pcPaBasedMin = prePaTotal * 12 * 6;
-    const pcPaBased = prePaTotal * 12 * 8;
-    const pcPaBasedMax = prePaTotal * 12 * 10;
 
     // --- MÉTHODE CALCUL PC (Approche Détaillée / Magistrat) ---
     // Réf : Grille de calcul utilisée par les magistrats et avocats
@@ -391,100 +334,16 @@ export const legalEngine = {
     const pcAxelMin = pcAxelDepondt * 0.9;
     const pcAxelMax = pcAxelDepondt * 1.1;
 
-    // Resultat final (Moyenne des quatre méthodes)
-    const methodValues = [pcPilote, pcInsee, pcPaBased, pcAxelDepondt];
+    // Resultat final (Moyenne des trois méthodes)
+    const methodValues = [pcPilote, pcInsee, pcAxelDepondt];
     const finalPC = Math.round(
       methodValues.reduce((a, b) => a + b, 0) / methodValues.length,
     );
 
-    // ---------------------------------------------------------
-    // 2. CALCUL PENSION ALIMENTAIRE (PA)
-    // Barème Ministère de la Justice — Table de Référence 2026
-    // PA = (Revenu_Débiteur − RSA_Socle) × Taux × NbEnfants
-    // ---------------------------------------------------------
-
-    let paPerChild = 0;
-    let paTotal = 0;
-
-    if (data.childrenCount > 0) {
-      const rRef = Math.max(0, payerIncome - RSA_SOLO);
-
-      // Clamp children count to 1-6 for rate lookup (barème Ministère de la Justice)
-      const rateKey = Math.min(data.childrenCount, 6);
-      const rateTable =
-        CHILD_SUPPORT_RATES[custody] || CHILD_SUPPORT_RATES.classic;
-      const rate = rateTable[rateKey] || 0.135;
-
-      paPerChild = Math.round(rRef * rate);
-      paTotal = paPerChild * data.childrenCount;
-    }
-
-    // ---------------------------------------------------------
-    // 3. LIQUIDATION DU RÉGIME MATRIMONIAL
-    // ---------------------------------------------------------
-    const netAsset = (data.assetsValue || 0) - (data.assetsCRD || 0);
-    let soulteToPay = 0;
-
-    if (data.matrimonialRegime === "separation") {
-      // SÉPARATION DE BIENS — pas de communauté, pas de récompenses.
-      // La soulte ne concerne que les biens en indivision (co-propriété).
-      // On suppose ici une indivision 50/50 sur les biens déclarés.
-      soulteToPay = netAsset / 2;
-    } else {
-      // COMMUNAUTÉ RÉDUITE AUX ACQUÊTS (régime légal par défaut)
-      //
-      // Formule complète :
-      //   Part(Alice) = R_CA + (M − R_CA − R_CB) / 2 = (M + R_CA − R_CB) / 2
-      //   Part(Bob)   = R_CB + (M − R_CA − R_CB) / 2 = (M + R_CB − R_CA) / 2
-      //
-      // La soulte (si Alice conserve le bien) = Part de Bob
-      //   Soulte = (M + R_CB − R_CA) / 2
-      //
-      // NB : Ce calcul simplifié ne prend en compte que les récompenses
-      //      dues PAR la communauté À chaque époux (apport propre / héritage).
-      //      Les récompenses dues PAR un époux À la communauté (emploi de
-      //      fonds communs pour un bien propre) ne sont pas modélisées ici.
-      const rewardsAlice = data.rewardsAlice || 0; // R_CA : communauté doit à Alice
-      const rewardsBob = data.rewardsBob || 0; // R_CB : communauté doit à Bob
-      soulteToPay = (netAsset + rewardsBob - rewardsAlice) / 2;
-    }
-
-    // ---------------------------------------------------------
-    // 4. RESTE A VIVRE (BUDGET)
-    // Reste = ΣRevenus − ΣCharges
-    // Revenus = RevenuNet + PA reçue
-    // Charges = Impôts + Loyer/Crédit + Charges fixes + PA versée
-    // ---------------------------------------------------------
-    const isPayer = data.myIncome > data.spouseIncome;
-    const paPaid = isPayer ? paTotal : 0;
-    const paReceived = isPayer ? 0 : paTotal;
-
-    const taxes = data.myTaxes || 0;
-    const rent = data.myRent || 0;
-    const fixedCharges = data.myCharges || 0;
-
-    const totalRevenus = data.myIncome + paReceived;
-    const totalCharges = taxes + rent + fixedCharges + paPaid;
-    const remaining = totalRevenus - totalCharges;
-
     return {
       compensatoryAllowance: Math.round(finalPC),
-      childSupport: Math.round(paTotal),
-      childSupportPerChild: paPerChild,
       custodyTypeUsed: custody,
       marriageDurationUsed: duration,
-      liquidationShare: Math.round(soulteToPay),
-      remainingLiveable: Math.round(remaining),
-      belowPovertyThreshold: remaining < SEUIL_PAUVRETE_2026,
-      budget: {
-        totalRevenus: Math.round(totalRevenus),
-        totalCharges: Math.round(totalCharges),
-        taxes: Math.round(taxes),
-        rent: Math.round(rent),
-        fixedCharges: Math.round(fixedCharges),
-        paPaid: Math.round(paPaid),
-        paReceived: Math.round(paReceived),
-      },
       details: {
         pilote: {
           value: Math.round(pcPilote),
@@ -495,11 +354,6 @@ export const legalEngine = {
           value: Math.round(pcInsee),
           min: Math.round(pcInseeMin),
           max: Math.round(pcInseeMax),
-        },
-        paBased: {
-          value: Math.round(pcPaBased),
-          min: Math.round(pcPaBasedMin),
-          max: Math.round(pcPaBasedMax),
         },
         axelDepondt: {
           value: Math.round(pcAxelDepondt),

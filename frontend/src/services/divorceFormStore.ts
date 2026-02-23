@@ -27,20 +27,6 @@ export interface DivorceFormData {
   childrenAges: number[];
   custodyType: string; // "classic" | "alternating" | "reduced"
 
-  // Régime
-  matrimonialRegime: string; // "community" | "separation"
-
-  // Capital (Liquidation)
-  assetsValue: number;
-  assetsCRD: number;
-  rewardsAlice: number;
-  rewardsBob: number;
-
-  // Charges (Reste à vivre)
-  myTaxes: number;
-  myRent: number;
-  myCharges: string; // Charges fixes (string for empty-state)
-
   // Projections Calcul PC — Débiteur
   debtorGrossIncome: string;
   debtorIncomeMode: string; // "monthly" | "annual"
@@ -78,14 +64,6 @@ const INITIAL_FORM_DATA: DivorceFormData = {
   childrenCount: 0,
   childrenAges: [],
   custodyType: "classic",
-  matrimonialRegime: "community",
-  assetsValue: 0,
-  assetsCRD: 0,
-  rewardsAlice: 0,
-  rewardsBob: 0,
-  myTaxes: 0,
-  myRent: 0,
-  myCharges: "",
   debtorGrossIncome: "",
   debtorIncomeMode: "monthly",
   debtorChildContribution: "",
@@ -170,26 +148,11 @@ export function getNavigationPages(): string[] {
   const pages: string[] = [];
 
   const hasPC = selectedCalcs.includes("prestationCompensatoire");
-  const hasPA = selectedCalcs.includes("pensionAlimentaire");
-  const hasLiq = selectedCalcs.includes("liquidation");
-  const hasRAV = selectedCalcs.includes("resteAVivre");
 
   if (hasPC) {
     pages.push("/prestation-compensatoire");
-  }
-
-  // PA fields are a strict subset of PC fields. Show PA page only when PC is
-  // NOT selected.
-  if (hasPA && !hasPC) {
-    pages.push("/pension-alimentaire");
-  }
-
-  if (hasLiq) {
-    pages.push("/liquidation");
-  }
-
-  if (hasRAV) {
-    pages.push("/reste-a-vivre");
+    pages.push("/informations-debiteur");
+    pages.push("/informations-creancier");
   }
 
   // Always end with the recap page
@@ -217,80 +180,7 @@ export function getPreviousPage(currentPath: string): string {
   const pages = getNavigationPages();
   const idx = pages.indexOf(currentPath);
   if (idx > 0) return pages[idx - 1];
-  return "/simulation-mode"; // Before first data page
-}
-
-// ---------------------------------------------------------------------------
-// Context-aware field helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Returns true when a specific field has already been asked on a page that
- * appears *before* the given current path in the navigation sequence.
- */
-export function isFieldAlreadyAsked(
-  field: string,
-  currentPath: string,
-): boolean {
-  const pages = getNavigationPages();
-  const currentIdx = pages.indexOf(currentPath);
-  if (currentIdx <= 0) return false;
-
-  // Which fields are "owned" by each page type
-  const PAGE_FIELDS: Record<string, string[]> = {
-    "/prestation-compensatoire": [
-      "marriageDate",
-      "divorceDate",
-      "myBirthDate",
-      "spouseBirthDate",
-      "myIncome",
-      "spouseIncome",
-      "childrenCount",
-      "childrenAges",
-      "custodyType",
-      "matrimonialRegime",
-      "debtorGrossIncome",
-      "debtorIncomeMode",
-      "debtorChildContribution",
-      "debtorFutureIncome",
-      "debtorFutureChildContribution",
-      "debtorChangeDate",
-      "debtorPropertyValue",
-      "debtorPropertyYield",
-      "creditorGrossIncome",
-      "creditorIncomeMode",
-      "creditorChildContribution",
-      "creditorFutureIncome",
-      "creditorFutureChildContribution",
-      "creditorChangeDate",
-      "creditorPropertyValue",
-      "creditorPropertyYield",
-      "creditorRetirementGapYears",
-      "creditorPreRetirementIncome",
-      "debtorExpectsRevenueChange",
-      "creditorExpectsRevenueChange",
-    ],
-    "/pension-alimentaire": [
-      "myIncome",
-      "spouseIncome",
-      "childrenCount",
-      "custodyType",
-    ],
-    "/liquidation": [
-      "assetsValue",
-      "assetsCRD",
-      "rewardsAlice",
-      "rewardsBob",
-      "matrimonialRegime",
-    ],
-    "/reste-a-vivre": ["myIncome", "myTaxes", "myRent", "myCharges"],
-  };
-
-  for (let i = 0; i < currentIdx; i++) {
-    const pageFields = PAGE_FIELDS[pages[i]] || [];
-    if (pageFields.includes(field)) return true;
-  }
-  return false;
+  return "/disclaimer"; // Before first data page
 }
 
 // ---------------------------------------------------------------------------
@@ -329,23 +219,15 @@ export function buildFinancialPayload(
 
   return {
     myIncome: parseFloat(formData.myIncome) || 0,
-    myCharges: parseFloat(formData.myCharges) || 0,
     spouseIncome: parseFloat(formData.spouseIncome) || 0,
     marriageDate: formData.marriageDate,
     divorceDate: formData.divorceDate,
     childrenCount: formData.childrenCount || 0,
     childrenAges: (formData.childrenAges || []).map((a) => Number(a) || 0),
-    matrimonialRegime: formData.matrimonialRegime || "community",
     marriageDuration,
     myAge: computeAge(formData.myBirthDate) || 42,
     spouseAge: computeAge(formData.spouseBirthDate) || 44,
     custodyType: formData.custodyType || "classic",
-    myTaxes: formData.myTaxes || 0,
-    myRent: formData.myRent || 0,
-    assetsValue: formData.assetsValue || 0,
-    assetsCRD: formData.assetsCRD || 0,
-    rewardsAlice: formData.rewardsAlice || 0,
-    rewardsBob: formData.rewardsBob || 0,
     debtorGrossIncome: parseFloat(formData.debtorGrossIncome) || 0,
     debtorIncomeMode: formData.debtorIncomeMode || "monthly",
     debtorChildContribution: parseFloat(formData.debtorChildContribution) || 0,
@@ -354,7 +236,7 @@ export function buildFinancialPayload(
       parseFloat(formData.debtorFutureChildContribution) || 0,
     debtorChangeDate: formData.debtorChangeDate,
     debtorPropertyValue: parseFloat(formData.debtorPropertyValue) || 0,
-    debtorPropertyYield: parseFloat(formData.debtorPropertyYield) || 0,
+    debtorPropertyYield: parseFloat(formData.debtorPropertyYield) || 3,
     creditorGrossIncome: parseFloat(formData.creditorGrossIncome) || 0,
     creditorIncomeMode: formData.creditorIncomeMode || "monthly",
     creditorChildContribution:
@@ -364,7 +246,7 @@ export function buildFinancialPayload(
       parseFloat(formData.creditorFutureChildContribution) || 0,
     creditorChangeDate: formData.creditorChangeDate,
     creditorPropertyValue: parseFloat(formData.creditorPropertyValue) || 0,
-    creditorPropertyYield: parseFloat(formData.creditorPropertyYield) || 0,
+    creditorPropertyYield: parseFloat(formData.creditorPropertyYield) || 3,
     creditorRetirementGapYears:
       parseFloat(formData.creditorRetirementGapYears) || 0,
     creditorPreRetirementIncome:

@@ -4,13 +4,11 @@ import LandingPage from "./pages/LandingPage";
 import DisclaimerPage from "./pages/DisclaimerPage";
 import DashboardPage from "./pages/DashboardPage";
 import ExportPage from "./pages/ExportPage";
-import CalculationChoicePage from "./pages/CalculationChoicePage";
-import SimulationModePage from "./pages/SimulationModePage";
 import PrestationCompensatoirePage from "./pages/PrestationCompensatoirePage";
-import PensionAlimentairePage from "./pages/PensionAlimentairePage";
-import LiquidationPage from "./pages/LiquidationPage";
-import ResteAVivrePage from "./pages/ResteAVivrePage";
+import DebiteurPage from "./pages/DebiteurPage";
+import CreancierPage from "./pages/CreancierPage";
 import RecapitulatifPage from "./pages/RecapitulatifPage";
+import InterstitialAdPage from "./pages/InterstitialAdPage";
 
 import GuidePage from "./pages/GuidePage";
 import PrivacyPage from "./pages/PrivacyPage";
@@ -57,22 +55,7 @@ const App: React.FC = () => {
             </CenteredLayout>
           }
         />
-        <Route
-          path="/calculation-choice"
-          element={
-            <CenteredLayout>
-              <CalculationChoicePage />
-            </CenteredLayout>
-          }
-        />
-        <Route
-          path="/simulation-mode"
-          element={
-            <CenteredLayout>
-              <SimulationModePage />
-            </CenteredLayout>
-          }
-        />
+
         <Route
           path="/guide"
           element={
@@ -123,34 +106,35 @@ const App: React.FC = () => {
           }
         />
         <Route
-          path="/pension-alimentaire"
+          path="/informations-debiteur"
           element={
             <CenteredLayout>
-              <PensionAlimentairePage />
+              <DebiteurPage />
             </CenteredLayout>
           }
         />
         <Route
-          path="/liquidation"
+          path="/informations-creancier"
           element={
             <CenteredLayout>
-              <LiquidationPage />
+              <CreancierPage />
             </CenteredLayout>
           }
         />
-        <Route
-          path="/reste-a-vivre"
-          element={
-            <CenteredLayout>
-              <ResteAVivrePage />
-            </CenteredLayout>
-          }
-        />
+
         <Route
           path="/recapitulatif"
           element={
             <CenteredLayout>
               <RecapitulatifPage />
+            </CenteredLayout>
+          }
+        />
+        <Route
+          path="/transition"
+          element={
+            <CenteredLayout>
+              <InterstitialAdPage />
             </CenteredLayout>
           }
         />

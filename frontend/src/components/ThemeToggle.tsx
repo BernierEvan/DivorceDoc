@@ -5,23 +5,20 @@ import { Moon, Sun } from "lucide-react";
 const ThemeToggle: React.FC = () => {
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("theme");
-      if (saved) return saved === "dark";
       return window.matchMedia("(prefers-color-scheme: dark)").matches;
     }
     return false;
   });
 
+  // Apply theme classes
   useEffect(() => {
     const root = document.documentElement;
     if (isDark) {
       root.classList.add("dark");
       root.classList.remove("light");
-      localStorage.setItem("theme", "dark");
     } else {
       root.classList.remove("dark");
       root.classList.add("light");
-      localStorage.setItem("theme", "light");
     }
 
     // Update PWA theme-color meta tag
@@ -30,6 +27,16 @@ const ThemeToggle: React.FC = () => {
       meta.setAttribute("content", isDark ? "#020617" : "#f8fafc");
     }
   }, [isDark]);
+
+  // Listen for system preference changes
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = (e: MediaQueryListEvent) => {
+      setIsDark(e.matches);
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   return createPortal(
     <button

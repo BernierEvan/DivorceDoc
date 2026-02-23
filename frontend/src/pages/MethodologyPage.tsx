@@ -6,8 +6,6 @@ import {
   Home,
   BookOpen,
   Scale,
-  FileText,
-  Database,
   ShieldCheck,
   Mail,
   Download,
@@ -25,37 +23,10 @@ const CALCULATION_CATEGORIES = [
     id: "prestation_compensatoire",
     label: "Prestation Compensatoire",
     description:
-      "Méthode Calcul PC (projections magistrat), Méthode Pilote (Tiers Pondéré), Méthode INSEE (Unités de Consommation OCDE) et Méthode Pension Alimentaire (PA × 12 × 8). Coefficients d'âge, durée du mariage, capitalisation.",
+      "Méthode Calcul PC (projections magistrat), Méthode Pilote (Tiers Pondéré) et Méthode INSEE (Unités de Consommation OCDE). Coefficients d'âge, durée du mariage, capitalisation.",
     icon: Scale,
     color: "text-teal-400",
     bg: "bg-teal-500/10",
-  },
-  {
-    id: "pension_alimentaire",
-    label: "Pension Alimentaire",
-    description:
-      "Barème du Ministère de la Justice 2026. Calcul basé sur les revenus du débiteur, le RSA socle, le nombre d'enfants et le type de garde.",
-    icon: BookOpen,
-    color: "text-cyan-400",
-    bg: "bg-cyan-500/10",
-  },
-  {
-    id: "liquidation",
-    label: "Liquidation (Soulte)",
-    description:
-      "Calcul de la soulte selon le régime matrimonial : communauté réduite aux acquêts (avec récompenses) ou séparation de biens (indivision 50/50).",
-    icon: Database,
-    color: "text-amber-400",
-    bg: "bg-amber-500/10",
-  },
-  {
-    id: "reste_a_vivre",
-    label: "Reste à Vivre (Budget)",
-    description:
-      "Calcul du budget post-divorce : revenus nets, pension alimentaire reçue/versée, impôts, loyer et charges fixes. Comparaison au seuil de pauvreté 2026.",
-    icon: FileText,
-    color: "text-purple-400",
-    bg: "bg-purple-500/10",
   },
 ];
 
@@ -173,7 +144,7 @@ const MethodologyPage: React.FC = () => {
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative text-white font-sans">
       <SEO
         title="Méthodologie et Sources Juridiques — Code Civil, Barèmes 2026"
-        description="Transparence sur les sources juridiques et méthodes de calcul utilisées : barème pension alimentaire MJ 2026, méthodes Calcul PC, Tiers Pondéré et INSEE pour la prestation compensatoire."
+        description="Transparence sur les sources juridiques et méthodes de calcul utilisées : méthodes Calcul PC, Tiers Pondéré et INSEE pour la prestation compensatoire."
         path="/methodology"
         type="article"
         jsonLd={breadcrumbJsonLd([
@@ -212,7 +183,7 @@ const MethodologyPage: React.FC = () => {
           </h1>
           <p className="text-xs text-gray-400 max-w-sm mx-auto">
             Transparence sur les règles de droit et les méthodes de calcul
-            utilisées par DivorceDoc (v2026).
+            utilisées par SimulDivorce (v2026).
           </p>
         </div>
 
@@ -226,14 +197,6 @@ const MethodologyPage: React.FC = () => {
                 "Critères de disparité et modalités de versement.",
               ],
               [
-                "Pension Alimentaire",
-                "Obligation d'entretien proportionnelle aux ressources.",
-              ],
-              [
-                "Régimes Matrimoniaux",
-                "Règles de liquidation (Communauté/Séparation).",
-              ],
-              [
                 "Preuve des Revenus",
                 "Obligation de déclaration sur l'honneur.",
               ],
@@ -243,27 +206,9 @@ const MethodologyPage: React.FC = () => {
 
         {/* 2. Référentiels Calcul */}
         <Section title="2. Référentiels de Calcul" icon={Scale}>
-          <div className="glass-panel p-4 rounded-xl border border-white/10 mb-4">
-            <h3 className="text-xs font-bold text-[var(--color-plasma-cyan)] mb-2">
-              A. Pension Alimentaire
-            </h3>
-            <p className="text-xs text-gray-300 mb-2">
-              Basé sur la{" "}
-              <strong>
-                Table de Référence du Ministère de la Justice (Janvier 2026)
-              </strong>
-              .
-            </p>
-            <p className="text-xs text-gray-400">
-              Le calcul tient compte du revenu du débiteur, du RSA socle en
-              vigueur, du nombre d'enfants et du type de garde (classique,
-              alternée ou réduite).
-            </p>
-          </div>
-
           <div className="glass-panel p-4 rounded-xl border border-white/10">
             <h3 className="text-xs font-bold text-[var(--color-plasma-cyan)] mb-2">
-              B. Prestation Compensatoire
+              Prestation Compensatoire
             </h3>
             <p className="text-xs text-gray-300 mb-2">
               Méthodes doctrinales croisées :
@@ -283,10 +228,6 @@ const MethodologyPage: React.FC = () => {
                 <strong>Méthode INSEE :</strong> Analyse basée sur les unités de
                 consommation OCDE, prenant en compte les enfants et le type de
                 garde.
-              </li>
-              <li>
-                <strong>Méthode PA Based :</strong> Capitalisation de la pension
-                alimentaire mensuelle sur une durée de référence.
               </li>
             </ul>
           </div>

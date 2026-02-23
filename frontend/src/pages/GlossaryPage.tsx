@@ -5,9 +5,7 @@ import {
   Home,
   Book,
   Scale,
-  Wallet,
   Users,
-  Activity,
   Calculator,
 } from "lucide-react";
 import { SEO, breadcrumbJsonLd, faqJsonLd } from "../components/SEO";
@@ -53,30 +51,20 @@ const GlossaryPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative text-white font-sans">
       <SEO
-        title="Lexique Juridique du Divorce — Définitions 2026"
-        description="Définitions claires des termes juridiques du divorce : prestation compensatoire, soulte, récompense, pension alimentaire, reste à vivre, créancier, débiteur, tiers pondéré."
+        title="Lexique du Divorce — Définitions 2026"
+        description="Définitions claires des termes juridiques du divorce : prestation compensatoire, créancier, débiteur, tiers pondéré, unités de consommation."
         path="/glossary"
         type="article"
         jsonLd={[
           breadcrumbJsonLd([
             { name: "Accueil", path: "/" },
-            { name: "Lexique juridique", path: "/glossary" },
+            { name: "Lexique", path: "/glossary" },
           ]),
           faqJsonLd([
             {
               question: "Qu'est-ce que la prestation compensatoire ?",
               answer:
-                "La prestation compensatoire est un capital versé pour compenser la disparité de niveau de vie causée par le divorce (art. 270 à 281 du Code Civil). Elle est estimée via plusieurs méthodes (Calcul PC, Tiers Pondéré, INSEE, PA Based). Les calculs sont réalisés localement sur votre appareil.",
-            },
-            {
-              question: "Qu'est-ce que la soulte dans un divorce ?",
-              answer:
-                "La soulte est la somme versée par l'époux qui conserve un bien commun à l'autre époux, calculée à partir de la valeur vénale du bien et du capital restant dû.",
-            },
-            {
-              question: "Qu'est-ce que le reste à vivre après un divorce ?",
-              answer:
-                "Le reste à vivre correspond au budget disponible après déduction de toutes les charges fixes (loyer, impôts, pension alimentaire). Il est comparé au seuil de pauvreté pour évaluer la situation financière post-divorce.",
+                "La prestation compensatoire est un capital versé pour compenser la disparité de niveau de vie causée par le divorce (art. 270 à 281 du Code Civil). Elle est estimée via plusieurs méthodes (Calcul PC, Tiers Pondéré, INSEE). Les calculs sont réalisés localement sur votre appareil.",
             },
             {
               question: "Que signifie créancier et débiteur dans un divorce ?",
@@ -103,7 +91,7 @@ const GlossaryPage: React.FC = () => {
           <ChevronLeft className="w-5 h-5 text-gray-300 group-hover:text-white" />
         </button>
         <span className="text-xs font-bold tracking-[0.2em] text-white uppercase text-glow">
-          Lexique Juridique
+          Lexique
         </span>
         <button
           onClick={() => navigate("/")}
@@ -152,17 +140,13 @@ const GlossaryPage: React.FC = () => {
             term="Méthode INSEE (UC OCDE)"
             def="Analyse basée sur les unités de consommation de l'OCDE. Prend en compte les enfants (âge et nombre), le type de garde et les revenus nets pour calculer la perte de niveau de vie du créancier."
           />
-          <Definition
-            term="Méthode PA Based"
-            def="Capitalisation de la pension alimentaire mensuelle sur une durée de référence (coefficient 6 à 10). Nécessite le calcul préalable de la pension alimentaire."
-          />
         </Section>
 
         {/* 3. Revenus */}
         <Section title="3. Revenus" icon={Book}>
           <Definition
             term="Net Social"
-            def="Montant obligatoire sur les bulletins de paie depuis 2024. Correspond au brut moins les cotisations sociales. C'est la base de calcul pour les méthodes Tiers Pondéré, INSEE et PA Based."
+            def="Montant obligatoire sur les bulletins de paie depuis 2024. Correspond au brut moins les cotisations sociales. C'est la base de calcul pour les méthodes Tiers Pondéré et INSEE."
           />
           <Definition
             term="Revenu Brut"
@@ -174,7 +158,7 @@ const GlossaryPage: React.FC = () => {
           />
           <Definition
             term="RSA Socle"
-            def="Revenu de Solidarité Active — montant de référence (645,50 € en 2026) utilisé comme plancher dans le calcul de la pension alimentaire."
+            def="Revenu de Solidarité Active — montant de référence utilisé dans certains barèmes de calcul."
           />
         </Section>
 
@@ -182,15 +166,15 @@ const GlossaryPage: React.FC = () => {
         <Section title="4. Famille & Garde" icon={Users}>
           <Definition
             term="Garde Classique (Droit de visite et d'hébergement)"
-            def="L'enfant réside principalement chez un parent. Le taux de pension alimentaire est le plus élevé."
+            def="L'enfant réside principalement chez un parent."
           />
           <Definition
             term="Garde Alternée"
-            def="L'enfant réside à parts égales chez les deux parents. Le taux de pension est réduit (environ la moitié)."
+            def="L'enfant réside à parts égales chez les deux parents."
           />
           <Definition
             term="Garde Réduite"
-            def="Droit de visite réduit. Le taux de pension alimentaire est le plus faible car le parent payeur a l'enfant la majeure partie du temps."
+            def="Droit de visite réduit. Le parent a l'enfant la majeure partie du temps."
           />
           <Definition
             term="Unité de Consommation (UC)"
@@ -198,64 +182,16 @@ const GlossaryPage: React.FC = () => {
           />
         </Section>
 
-        {/* 5. Patrimoine & Liquidation */}
-        <Section title="5. Patrimoine & Liquidation" icon={Wallet}>
-          <Definition
-            term="Soulte"
-            def="Somme versée par l'époux qui conserve un bien commun à l'autre époux. Calculée à partir de la valeur vénale du bien, du capital restant dû et des éventuelles récompenses."
-          />
-          <Definition
-            term="CRD (Capital Restant Dû)"
-            def="Montant restant à rembourser sur un crédit immobilier. Déduit de la valeur du bien pour calculer l'actif net à partager."
-          />
-          <Definition
-            term="Récompense"
-            def="Correction comptable appliquée en régime de communauté lorsque des fonds propres d'un époux (héritage, donation) ont financé un bien commun. Ajuste le partage final."
-          />
-          <Definition
-            term="Régime Matrimonial"
-            def={
-              <div>
-                Détermine les règles de partage des biens :
-                <ul className="list-disc pl-4 mt-2 space-y-1 text-gray-400">
-                  <li>
-                    <strong className="text-white">
-                      Communauté réduite aux acquêts :
-                    </strong>{" "}
-                    Biens acquis pendant le mariage sont communs (récompenses
-                    possibles).
-                  </li>
-                  <li>
-                    <strong className="text-white">
-                      Séparation de biens :
-                    </strong>{" "}
-                    Chaque époux conserve ses biens propres (indivision 50/50
-                    sur les biens communs).
-                  </li>
-                </ul>
-              </div>
-            }
-          />
-        </Section>
-
-        {/* 6. Prestations & Budget */}
-        <Section title="6. Prestations & Budget" icon={Activity}>
+        {/* 5. Prestation Compensatoire */}
+        <Section title="5. Prestation Compensatoire" icon={Scale}>
           <Definition
             term="Prestation Compensatoire (PC)"
-            def="Capital versé en une fois ou sous forme de rente pour compenser la disparité de niveau de vie causée par le divorce. Estimée via 4 méthodes croisées (Calcul PC, Tiers Pondéré, INSEE, PA Based)."
-          />
-          <Definition
-            term="Pension Alimentaire (PA / CEEE)"
-            def="Contribution à l'Entretien et l'Éducation des Enfants. Calculée selon le barème du Ministère de la Justice 2026, en fonction des revenus du débiteur, du nombre d'enfants et du type de garde."
-          />
-          <Definition
-            term="Reste à Vivre"
-            def="Budget mensuel disponible après déduction de toutes les charges fixes (impôts, loyer, charges, PA versée). Comparé au seuil de pauvreté 2026 (1 216 €/mois) pour évaluer la viabilité financière."
+            def="Capital versé en une fois ou sous forme de rente pour compenser la disparité de niveau de vie causée par le divorce. Estimée via 3 méthodes croisées (Calcul PC, Tiers Pondéré, INSEE)."
           />
         </Section>
 
-        {/* 7. Acronymes */}
-        <Section title="7. Acronymes" icon={Scale}>
+        {/* 6. Acronymes */}
+        <Section title="6. Acronymes" icon={Scale}>
           <div className="overflow-hidden rounded-xl border border-white/10">
             <table className="w-full text-xs text-left">
               <tbody className="divide-y divide-white/5 text-gray-300">
@@ -267,55 +203,21 @@ const GlossaryPage: React.FC = () => {
                 </tr>
                 <tr>
                   <td className="px-4 py-2 font-bold text-[var(--color-plasma-cyan)]">
-                    PA
-                  </td>
-                  <td className="px-4 py-2">Pension Alimentaire</td>
-                </tr>
-                <tr className="bg-white/5">
-                  <td className="px-4 py-2 font-bold text-[var(--color-plasma-cyan)]">
-                    CEEE
-                  </td>
-                  <td className="px-4 py-2">
-                    Contribution à l'Entretien et l'Éducation des Enfants
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-2 font-bold text-[var(--color-plasma-cyan)]">
                     JAF
                   </td>
                   <td className="px-4 py-2">Juge aux Affaires Familiales</td>
                 </tr>
                 <tr className="bg-white/5">
                   <td className="px-4 py-2 font-bold text-[var(--color-plasma-cyan)]">
-                    CRD
-                  </td>
-                  <td className="px-4 py-2">
-                    Capital Restant Dû (crédit immobilier)
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-2 font-bold text-[var(--color-plasma-cyan)]">
                     UC
                   </td>
                   <td className="px-4 py-2">Unité de Consommation (OCDE)</td>
                 </tr>
-                <tr className="bg-white/5">
+                <tr>
                   <td className="px-4 py-2 font-bold text-[var(--color-plasma-cyan)]">
                     RSA
                   </td>
                   <td className="px-4 py-2">Revenu de Solidarité Active</td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-2 font-bold text-[var(--color-plasma-cyan)]">
-                    RAV
-                  </td>
-                  <td className="px-4 py-2">Reste à Vivre</td>
-                </tr>
-                <tr className="bg-white/5">
-                  <td className="px-4 py-2 font-bold text-[var(--color-plasma-cyan)]">
-                    MJ
-                  </td>
-                  <td className="px-4 py-2">Ministère de la Justice</td>
                 </tr>
               </tbody>
             </table>

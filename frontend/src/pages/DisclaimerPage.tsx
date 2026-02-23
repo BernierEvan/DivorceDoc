@@ -18,7 +18,20 @@ const DisclaimerPage: React.FC = () => {
   const handleContinue = () => {
     if (!accepted) return;
     localStorage.setItem("disclaimerAccepted", "true");
-    navigate("/calculation-choice");
+
+    // Auto-select all PC methods (skip CalculationChoicePage)
+    const autoChoices = {
+      selectedCalcs: ["prestationCompensatoire"],
+      selectedMethods: {
+        prestationCompensatoire: ["axelDepondt", "pilote", "insee"],
+      },
+    };
+    localStorage.setItem("calculationChoices", JSON.stringify(autoChoices));
+
+    // Auto-set guided mode (skip SimulationModePage)
+    localStorage.setItem("simulationMode", "guided");
+
+    navigate("/prestation-compensatoire");
   };
 
   const handleQuit = () => {
@@ -28,7 +41,7 @@ const DisclaimerPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative text-white">
       <SEO
-        title="Avertissement Juridique — DivorceDoc"
+        title="Avertissement Juridique — SimulDivorce"
         description="Avertissement : cet outil ne constitue pas un conseil juridique. Prenez connaissance des limitations avant de commencer la simulation."
         path="/disclaimer"
         jsonLd={breadcrumbJsonLd([
@@ -68,7 +81,7 @@ const DisclaimerPage: React.FC = () => {
                   Aucune valeur juridique
                 </h3>
                 <p className="text-xs text-gray-300 leading-relaxed">
-                  Les résultats fournis par DivorceDoc sont de simples{" "}
+                  Les résultats fournis par SimulDivorce sont de simples{" "}
                   <strong className="text-white">
                     estimations indicatives
                   </strong>{" "}
@@ -156,7 +169,7 @@ const DisclaimerPage: React.FC = () => {
                   Absence de responsabilité
                 </h3>
                 <p className="text-xs text-gray-300 leading-relaxed">
-                  L'éditeur de DivorceDoc décline toute responsabilité quant à
+                  L'éditeur de SimulDivorce décline toute responsabilité quant à
                   l'utilisation qui pourrait être faite des résultats de cette
                   simulation. En poursuivant, vous reconnaissez avoir pris
                   connaissance de ces limitations et les accepter pleinement.

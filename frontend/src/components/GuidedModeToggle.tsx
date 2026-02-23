@@ -17,7 +17,7 @@ export const GuidedModeToggle: React.FC = () => {
   if (!mode) return null;
 
   // Hide on landing page and calculation choice page
-  const hiddenPages = ["/", "/calculation-choice"];
+  const hiddenPages = ["/"];
   if (hiddenPages.includes(pathname)) return null;
 
   // Hide on disclaimer page for desktop only

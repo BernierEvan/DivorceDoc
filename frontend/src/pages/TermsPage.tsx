@@ -51,7 +51,7 @@ const TermsPage: React.FC = () => {
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative text-white font-sans">
       <SEO
         title="Conditions Générales d'Utilisation (CGU)"
-        description="CGU de DivorceDoc : simulateur de divorce gratuit à vocation informative. Calculs locaux, publicité Google, envoi de documents par e-mail."
+        description="CGU de SimulDivorce : simulateur de divorce gratuit à vocation informative. Calculs locaux, publicité Google, envoi de documents par e-mail."
         path="/terms"
         jsonLd={breadcrumbJsonLd([
           { name: "Accueil", path: "/" },

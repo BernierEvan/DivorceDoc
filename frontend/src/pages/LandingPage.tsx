@@ -1,19 +1,19 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Shield } from "lucide-react";
+
 import { InfoTooltip } from "../components/InfoTooltip";
 import { SEO, faqJsonLd } from "../components/SEO";
 
 const landingFaq = faqJsonLd([
   {
-    question: `Comment fonctionne le simulateur de divorce "DivorceDoc" ?`,
+    question: `Comment fonctionne le simulateur de divorce "SimulDivorce" ?`,
     answer:
-      "DivorceDoc vous permet de saisir manuellement vos informations financières (revenus, charges, patrimoine) pour simuler la prestation compensatoire, la pension alimentaire, la liquidation du régime matrimonial et le reste à vivre. Les calculs sont réalisés localement sur votre appareil.",
+      "SimulDivorce vous permet de saisir manuellement vos informations financières (revenus, situation familiale) pour simuler la prestation compensatoire. Les calculs sont réalisés localement sur votre appareil.",
   },
   {
     question: "Le simulateur de divorce est-il gratuit ?",
     answer:
-      "Oui, DivorceDoc est 100% gratuit. Le service est financé par la publicité (Google AdSense). Aucun compte n'est requis.",
+      "Oui, SimulDivorce est 100% gratuit. Le service est financé par la publicité (Google AdSense). Aucun compte n'est requis.",
   },
   {
     question: "Mes données sont-elles en sécurité ?",
@@ -23,12 +23,12 @@ const landingFaq = faqJsonLd([
   {
     question: "Comment est calculée la prestation compensatoire ?",
     answer:
-      "DivorceDoc utilise deux méthodes doctrinales reconnues : la méthode Pilote (différentiel de revenus × durée du mariage × coefficient d'âge) et la méthode INSEE (analyse des unités de consommation). Les résultats sont croisés pour fournir une fourchette indicative.",
+      "SimulDivorce utilise deux méthodes doctrinales reconnues : la méthode Pilote (différentiel de revenus × durée du mariage × coefficient d'âge) et la méthode INSEE (analyse des unités de consommation). Les résultats sont croisés pour fournir une fourchette indicative.",
   },
   {
     question: "Le résultat remplace-t-il un avocat ?",
     answer:
-      "Non. DivorceDoc est un outil de simulation indicatif basé sur des barèmes publics (Ministère de la Justice, Code Civil). Il ne constitue pas un conseil juridique. Consultez un avocat spécialisé pour valider les résultats.",
+      "Non. SimulDivorce est un outil de simulation indicatif basé sur des barèmes publics (Ministère de la Justice, Code Civil). Il ne constitue pas un conseil juridique. Consultez un avocat spécialisé pour valider les résultats.",
   },
 ]);
 
@@ -38,8 +38,8 @@ const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center relative overflow-hidden text-center transition-colors duration-300">
       <SEO
-        title="Simulateur Divorce Gratuit — Prestation Compensatoire, Pension Alimentaire"
-        description="Simulez gratuitement votre prestation compensatoire, pension alimentaire et liquidation du régime matrimonial. Calculs locaux et confidentiels. Calcul soulte et reste à vivre."
+        title="Simulateur Divorce Gratuit — Prestation Compensatoire"
+        description="Simulez gratuitement votre prestation compensatoire. Calculs locaux et confidentiels. Trois méthodes croisées : Calcul PC, Tiers Pondéré, INSEE."
         path="/"
         jsonLd={landingFaq}
       />
@@ -56,7 +56,7 @@ const LandingPage: React.FC = () => {
             </span>
           </div>
           <span className="text-[var(--text-primary)] font-bold tracking-wider">
-            DivorceSim
+            SimulDivorce
           </span>
         </div>
       </div>
@@ -96,16 +96,6 @@ const LandingPage: React.FC = () => {
           />
         </div>
 
-        {/* Trust Badge */}
-        <div className="flex justify-center mb-8">
-          <div className="flex items-center space-x-2 bg-[var(--bg-secondary)] px-4 py-2 rounded-full border border-[var(--border-color)] backdrop-blur-md shadow-sm">
-            <Shield className="w-4 h-4 text-[var(--accent-primary)]" />
-            <span className="text-xs text-[var(--text-secondary)] uppercase tracking-widest">
-              Traitement local sécurisé
-            </span>
-          </div>
-        </div>
-
         {/* Kinetic Button */}
         <button
           onClick={() => navigate("/disclaimer")}
@@ -130,7 +120,7 @@ const LandingPage: React.FC = () => {
           to="/guide"
           className="mt-6 text-[var(--accent-primary)] hover:text-[var(--accent-hover)] text-xs uppercase tracking-widest font-bold border-b border-transparent hover:border-[var(--accent-primary)] transition-all pb-0.5"
         >
-          Guide de préparation des documents
+          Guide de préparation
         </Link>
 
         <nav className="flex mt-4 space-x-4" aria-label="Liens légaux">
@@ -166,7 +156,7 @@ const LandingPage: React.FC = () => {
             to="/glossary"
             className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-sm uppercase tracking-widest transition-colors"
           >
-            Lexique Juridique
+            Lexique
           </Link>
         </nav>
       </div>

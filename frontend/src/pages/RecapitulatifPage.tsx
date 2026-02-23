@@ -1,13 +1,10 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   ChevronLeft,
   Home,
   Scale,
-  Wallet,
-  Building2,
-  HeartPulse,
   CheckCircle,
 } from "lucide-react";
 import { SEO, breadcrumbJsonLd } from "../components/SEO";
@@ -53,15 +50,6 @@ const custodyLabel = (t: string) =>
       : t === "reduced"
         ? "Réduite (Élargi)"
         : t;
-
-const regimeLabel = (r: string) =>
-  r === "community"
-    ? "Communauté"
-    : r === "separation"
-      ? "Séparation de biens"
-      : r === "participation"
-        ? "Participation aux acquêts"
-        : r;
 
 // ---------------------------------------------------------------------------
 // Row component: a single key ➜ value line
@@ -113,11 +101,23 @@ const RecapitulatifPage: React.FC = () => {
 
   const formData: DivorceFormData = useMemo(() => loadFormData(), []);
   const choices = useMemo(() => getCalculationChoices(), []);
+  const [now] = useState(() => Date.now());
+  const marriageDurationLabel = useMemo(() => {
+    if (!formData.marriageDate) return "";
+    const end = formData.divorceDate
+      ? new Date(formData.divorceDate).getTime()
+      : now;
+    const years = Math.max(
+      0,
+      Math.round(
+        (end - new Date(formData.marriageDate).getTime()) /
+          (1000 * 60 * 60 * 24 * 365.25),
+      ),
+    );
+    return `${years} ans`;
+  }, [formData.marriageDate, formData.divorceDate, now]);
 
   const hasPC = choices.selectedCalcs.includes("prestationCompensatoire");
-  const hasPA = choices.selectedCalcs.includes("pensionAlimentaire");
-  const hasLiq = choices.selectedCalcs.includes("liquidation");
-  const hasRAV = choices.selectedCalcs.includes("resteAVivre");
   const showAxelDepondt =
     hasPC &&
     (choices.selectedMethods.prestationCompensatoire || []).includes(
@@ -130,18 +130,10 @@ const RecapitulatifPage: React.FC = () => {
     ) ||
       (choices.selectedMethods.prestationCompensatoire || []).includes(
         "insee",
-      ) ||
-      (choices.selectedMethods.prestationCompensatoire || []).includes(
-        "paBased",
       ));
   const pcNeedsFamilyData =
     hasPC &&
-    ((choices.selectedMethods.prestationCompensatoire || []).includes(
-      "insee",
-    ) ||
-      (choices.selectedMethods.prestationCompensatoire || []).includes(
-        "paBased",
-      ));
+    (choices.selectedMethods.prestationCompensatoire || []).includes("insee");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -151,7 +143,7 @@ const RecapitulatifPage: React.FC = () => {
     // Build the financial payload expected by DashboardPage
     const payload = buildFinancialPayload(formData);
     localStorage.setItem("financialData", JSON.stringify(payload));
-    navigate("/dashboard");
+    navigate("/transition?from=recap-to-dashboard&next=/dashboard");
   };
 
   return (
@@ -218,6 +210,21 @@ const RecapitulatifPage: React.FC = () => {
 
       {/* Content */}
       <div className="relative z-10 flex-1 px-4 space-y-6 overflow-y-auto sm:px-6 pb-28 sm:pb-32 animate-fade-in scrollbar-hide">
+        {/* Editorial Block */}
+        <div className="p-5 border rounded-2xl border-white/10 bg-white/[0.02]">
+          <h3 className="text-sm font-bold text-white mb-2">
+            Avant de valider
+          </h3>
+          <p className="text-xs leading-relaxed text-gray-400">
+            Prenez le temps de vérifier chaque information. Les montants
+            calculés dépendent directement de la précision des données saisies.
+            Une erreur sur la date de mariage ou les revenus peut entraîner un
+            écart significatif. Si vous constatez une anomalie, utilisez le
+            bouton retour pour corriger. Le calcul est réalisé localement sur
+            votre appareil.
+          </p>
+        </div>
+
         {/* ════════════════════════════════════════ */}
         {/* PRESTATION COMPENSATOIRE                */}
         {/* ════════════════════════════════════════ */}
@@ -242,19 +249,7 @@ const RecapitulatifPage: React.FC = () => {
                 }
               />
               {formData.marriageDate && (
-                <Row
-                  label="Durée du mariage"
-                  value={`${Math.max(
-                    0,
-                    Math.round(
-                      ((formData.divorceDate
-                        ? new Date(formData.divorceDate).getTime()
-                        : Date.now()) -
-                        new Date(formData.marriageDate).getTime()) /
-                        (1000 * 60 * 60 * 24 * 365.25),
-                    ),
-                  )} ans`}
-                />
+                <Row label="Durée du mariage" value={marriageDurationLabel} />
               )}
             </Section>
 
@@ -430,146 +425,6 @@ const RecapitulatifPage: React.FC = () => {
                 )}
               </Section>
             )}
-          </>
-        )}
-
-        {/* ════════════════════════════════════════ */}
-        {/* PENSION ALIMENTAIRE                      */}
-        {/* ════════════════════════════════════════ */}
-        {hasPA && (
-          <>
-            <Section
-              icon={<Wallet className="w-4 h-4" />}
-              color="text-amber-400"
-              category="Pension Alimentaire"
-              subcategory="Revenus"
-            >
-              <Row
-                label="Net Social Créancier"
-                value={formatCurrency(formData.myIncome)}
-              />
-              <Row
-                label="Revenu Débiteur"
-                value={formatCurrency(formData.spouseIncome)}
-              />
-            </Section>
-
-            <Section
-              icon={<Wallet className="w-4 h-4" />}
-              color="text-amber-400"
-              category="Pension Alimentaire"
-              subcategory="Famille"
-            >
-              <Row label="Nombre d'enfants" value={formData.childrenCount} />
-              {formData.childrenCount > 0 &&
-                formData.childrenAges.length > 0 && (
-                  <Row
-                    label="Âges des enfants"
-                    value={formData.childrenAges
-                      .slice(0, formData.childrenCount)
-                      .map((a) => `${a} ans`)
-                      .join(", ")}
-                  />
-                )}
-              {formData.childrenCount > 0 && (
-                <Row
-                  label="Type de garde"
-                  value={custodyLabel(formData.custodyType)}
-                />
-              )}
-            </Section>
-          </>
-        )}
-
-        {/* ════════════════════════════════════════ */}
-        {/* LIQUIDATION (SOULTE)                     */}
-        {/* ════════════════════════════════════════ */}
-        {hasLiq && (
-          <>
-            <Section
-              icon={<Building2 className="w-4 h-4" />}
-              color="text-indigo-400"
-              category="Liquidation (Soulte)"
-              subcategory="Régime"
-            >
-              <Row
-                label="Régime matrimonial"
-                value={regimeLabel(formData.matrimonialRegime)}
-              />
-            </Section>
-
-            <Section
-              icon={<Building2 className="w-4 h-4" />}
-              color="text-indigo-400"
-              category="Liquidation (Soulte)"
-              subcategory="Capital"
-            >
-              <Row
-                label="Valeur vénale du bien"
-                value={formatCurrency(formData.assetsValue)}
-              />
-              <Row
-                label="Capital Restant Dû (CRD)"
-                value={formatCurrency(formData.assetsCRD)}
-              />
-              <Row
-                label="Patrimoine net"
-                value={formatCurrency(
-                  formData.assetsValue - formData.assetsCRD,
-                )}
-              />
-              {formData.matrimonialRegime !== "separation" && (
-                <>
-                  <Row
-                    label="Récompenses Créancier"
-                    value={formatCurrency(formData.rewardsAlice)}
-                  />
-                  <Row
-                    label="Récompenses Débiteur"
-                    value={formatCurrency(formData.rewardsBob)}
-                  />
-                </>
-              )}
-            </Section>
-          </>
-        )}
-
-        {/* ════════════════════════════════════════ */}
-        {/* RESTE A VIVRE                            */}
-        {/* ════════════════════════════════════════ */}
-        {hasRAV && (
-          <>
-            <Section
-              icon={<HeartPulse className="w-4 h-4" />}
-              color="text-emerald-400"
-              category="Reste à Vivre"
-              subcategory="Revenus"
-            >
-              <Row
-                label="Net Social Créancier"
-                value={formatCurrency(formData.myIncome)}
-              />
-            </Section>
-
-            <Section
-              icon={<HeartPulse className="w-4 h-4" />}
-              color="text-emerald-400"
-              category="Reste à Vivre"
-              subcategory="Charges"
-            >
-              <Row
-                label="Impôts mensuels"
-                value={formatCurrency(formData.myTaxes)}
-              />
-              <Row
-                label="Loyer / Crédit immobilier"
-                value={formatCurrency(formData.myRent)}
-              />
-              <Row
-                label="Charges fixes"
-                value={formatCurrency(formData.myCharges)}
-              />
-            </Section>
           </>
         )}
 

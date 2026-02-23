@@ -1,15 +1,12 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  FileText,
   ChevronLeft,
   Shield,
   CreditCard,
   Home,
   Users,
   Calculator,
-  Landmark,
-  Wallet,
   ClipboardList,
 } from "lucide-react";
 import { SEO, howToJsonLd, breadcrumbJsonLd } from "../components/SEO";
@@ -21,7 +18,7 @@ const GuidePage: React.FC = () => {
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative text-white font-sans">
       <SEO
         title="Guide de Préparation — Informations Requises"
-        description="Préparez les informations nécessaires pour une simulation de divorce précise : revenus, patrimoine, charges, situation familiale. Guide par méthode de calcul."
+        description="Préparez les informations nécessaires pour une simulation de divorce précise : revenus, situation familiale. Guide par méthode de calcul."
         path="/guide"
         jsonLd={[
           breadcrumbJsonLd([
@@ -30,7 +27,7 @@ const GuidePage: React.FC = () => {
           ]),
           howToJsonLd(
             "Préparer ses informations pour une simulation de divorce",
-            "Guide étape par étape pour rassembler les informations nécessaires à une simulation précise de divorce (prestation compensatoire, pension alimentaire, liquidation).",
+            "Guide étape par étape pour rassembler les informations nécessaires à une simulation précise de la prestation compensatoire.",
             [
               {
                 name: "Rassembler les informations de base",
@@ -38,15 +35,11 @@ const GuidePage: React.FC = () => {
               },
               {
                 name: "Préparer les données de revenus",
-                text: "Revenus nets mensuels (pour les méthodes Tiers Pondéré, INSEE et PA Based) et/ou revenus bruts (pour la méthode Calcul PC).",
+                text: "Revenus nets mensuels (pour les méthodes Tiers Pondéré et INSEE) et/ou revenus bruts (pour la méthode Calcul PC).",
               },
               {
                 name: "Situation familiale",
                 text: "Nombre d'enfants, âge de chaque enfant et type de garde (classique, alternée ou réduite).",
-              },
-              {
-                name: "Patrimoine et charges",
-                text: "Valeur des biens immobiliers, Capital Restant Dû, montant des charges fixes, loyer, impôts mensuels.",
               },
               {
                 name: "Lancer la simulation",
@@ -154,7 +147,7 @@ const GuidePage: React.FC = () => {
                 <h4 className="text-lg font-bold">
                   Revenus nets mensuels{" "}
                   <span className="text-xs font-normal text-gray-500">
-                    (Tiers Pondéré, INSEE, PA Based)
+                    (Tiers Pondéré, INSEE)
                   </span>
                 </h4>
               </div>
@@ -225,7 +218,7 @@ const GuidePage: React.FC = () => {
                 <h4 className="text-lg font-bold">
                   Situation familiale{" "}
                   <span className="text-xs font-normal text-gray-500">
-                    (INSEE, PA Based, Pension Alimentaire)
+                    (INSEE)
                   </span>
                 </h4>
               </div>
@@ -243,115 +236,6 @@ const GuidePage: React.FC = () => {
                 </li>
               </ul>
             </div>
-
-            {/* Liquidation */}
-            <div className="p-5 border glass-panel rounded-2xl border-white/10">
-              <div className="flex items-center mb-4 space-x-3">
-                <div className="p-2 rounded-lg bg-amber-500/20">
-                  <Landmark className="w-5 h-5 text-amber-400" />
-                </div>
-                <h4 className="text-lg font-bold">
-                  Patrimoine immobilier{" "}
-                  <span className="text-xs font-normal text-gray-500">
-                    (Liquidation / Soulte)
-                  </span>
-                </h4>
-              </div>
-              <ul className="pl-2 space-y-3 text-sm text-gray-300 border-l-2 border-white/5">
-                <li>
-                  <strong className="text-white">Régime matrimonial</strong>{" "}
-                  (communauté ou séparation de biens)
-                </li>
-                <li>
-                  <strong className="text-white">
-                    Valeur vénale du bien immobilier
-                  </strong>
-                </li>
-                <li>
-                  <strong className="text-white">Capital Restant Dû</strong>{" "}
-                  (CRD — crédit immobilier)
-                </li>
-                <li>
-                  <strong className="text-white">Récompenses</strong> (fonds
-                  propres ayant financé un bien commun — régime communauté
-                  uniquement)
-                </li>
-              </ul>
-            </div>
-
-            {/* Reste à Vivre */}
-            <div className="p-5 border glass-panel rounded-2xl border-white/10">
-              <div className="flex items-center mb-4 space-x-3">
-                <div className="p-2 rounded-lg bg-purple-500/20">
-                  <Wallet className="w-5 h-5 text-purple-400" />
-                </div>
-                <h4 className="text-lg font-bold">
-                  Budget & Charges{" "}
-                  <span className="text-xs font-normal text-gray-500">
-                    (Reste à Vivre)
-                  </span>
-                </h4>
-              </div>
-              <ul className="pl-2 space-y-3 text-sm text-gray-300 border-l-2 border-white/5">
-                <li>
-                  <strong className="text-white">Impôts mensuels</strong>
-                </li>
-                <li>
-                  <strong className="text-white">Loyer mensuel</strong>
-                </li>
-                <li>
-                  <strong className="text-white">
-                    Charges fixes mensuelles
-                  </strong>{" "}
-                  (énergie, assurance, télécoms…)
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* 3. Récapitulatif par preset */}
-        <section className="delay-200 animate-fade-in">
-          <h3 className="mb-6 text-sm font-bold tracking-widest text-gray-500 uppercase">
-            Que préparer selon votre choix ?
-          </h3>
-          <div className="relative p-6 overflow-hidden border glass-panel rounded-2xl border-white/10">
-            <ul className="relative z-10 space-y-5">
-              <li className="flex space-x-3">
-                <FileText className="w-5 h-5 text-[var(--color-plasma-cyan)] shrink-0 mt-0.5" />
-                <div className="text-sm text-gray-300">
-                  <strong className="text-white block mb-0.5">Express</strong>
-                  Revenus nets + dates + âges. C'est tout.
-                </div>
-              </li>
-              <li className="flex space-x-3">
-                <FileText className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
-                <div className="text-sm text-gray-300">
-                  <strong className="text-white block mb-0.5">Standard</strong>
-                  Revenus nets + dates + âges + enfants (nombre, âge, garde).
-                </div>
-              </li>
-              <li className="flex space-x-3">
-                <FileText className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
-                <div className="text-sm text-gray-300">
-                  <strong className="text-white block mb-0.5">
-                    PC — Précision maximale
-                  </strong>
-                  Tout ci-dessus + revenus bruts, projections, patrimoine,
-                  retraite.
-                </div>
-              </li>
-              <li className="flex space-x-3">
-                <FileText className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                <div className="text-sm text-gray-300">
-                  <strong className="text-white block mb-0.5">
-                    Analyse complète
-                  </strong>
-                  Toutes les informations ci-dessus + patrimoine immobilier +
-                  charges/loyer/impôts.
-                </div>
-              </li>
-            </ul>
           </div>
         </section>
 

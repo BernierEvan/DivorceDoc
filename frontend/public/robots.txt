@@ -2,19 +2,21 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://divorcedoc.fr/sitemap.xml
+Sitemap: https://simuldivorce.fr/sitemap.xml
 
 # Disallow app-internal routes that should not be indexed
-Disallow: /scanner
-Disallow: /validation
+Disallow: /prestation-compensatoire
+Disallow: /informations-debiteur
+Disallow: /informations-creancier
+Disallow: /recapitulatif
 Disallow: /dashboard
 Disallow: /export
+Disallow: /transition
 
 # Allow crawling of all public pages
+Allow: /disclaimer
 Allow: /guide
 Allow: /privacy
 Allow: /terms
 Allow: /methodology
 Allow: /glossary
-Allow: /profile
-Allow: /quiz

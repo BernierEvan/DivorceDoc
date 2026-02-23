@@ -1,14 +1,14 @@
 import { useEffect } from "react";
 
-const SITE_NAME = "DivorceDoc";
-const SITE_URL = "https://divorcedoc.fr";
+const SITE_NAME = "SimulDivorce";
+const SITE_URL = "https://simuldivorce.fr";
 const DEFAULT_DESCRIPTION =
-  "Simulez gratuitement votre prestation compensatoire, pension alimentaire et liquidation du régime matrimonial. Calculs locaux et confidentiels.";
+  "Simulez gratuitement votre prestation compensatoire. Calculs locaux et confidentiels. Trois méthodes croisées : Calcul PC, Tiers Pondéré, INSEE.";
 const DEFAULT_IMAGE = `${SITE_URL}/icon-512.svg`;
 const LOCALE = "fr_FR";
 
 export interface SEOProps {
-  /** Page title — will be appended with " | DivorceDoc" */
+  /** Page title — will be appended with " | SimulDivorce" */
   title: string;
   /** Meta description (max ~155 chars) */
   description?: string;

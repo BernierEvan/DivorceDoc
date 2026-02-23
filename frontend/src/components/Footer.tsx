@@ -10,18 +10,17 @@ const Footer: React.FC = () => {
       itemScope
       itemType="https://schema.org/WPFooter"
     >
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex flex-col items-center md:items-start space-y-3">
+      <div className="px-6 mx-auto max-w-7xl sm:px-8 lg:px-12">
+        <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
+          <div className="flex flex-col items-center space-y-3 md:items-start">
             <span className="text-base font-bold text-[var(--text-primary)] tracking-wide">
-              DivorceDoc
+              SimulDivorce
             </span>
             <p className="text-xs text-[var(--text-muted)] font-medium">
-              © {currentYear} DivorceDoc. Tous droits réservés.
+              © {currentYear} SimulDivorce. Tous droits réservés.
             </p>
             <p className="text-xs text-[var(--text-muted)] max-w-xs text-center md:text-left">
-              Simulateur de divorce gratuit — prestation compensatoire, pension
-              alimentaire, liquidation du régime matrimonial.
+              Simulateur de divorce gratuit — prestation compensatoire.
             </p>
           </div>
 
@@ -57,7 +56,7 @@ const Footer: React.FC = () => {
               to="/glossary"
               className="text-sm text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-colors duration-200 font-medium"
             >
-              Lexique Juridique
+              Lexique
             </Link>
           </nav>
         </div>

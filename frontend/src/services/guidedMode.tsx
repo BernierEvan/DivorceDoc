@@ -6,14 +6,12 @@ interface GuidedModeContextType {
   mode: SimulationMode;
   isGuided: boolean;
   setMode: (mode: SimulationMode) => void;
-  disableGuide: () => void;
 }
 
 const GuidedModeContext = createContext<GuidedModeContextType>({
   mode: null,
   isGuided: false,
   setMode: () => {},
-  disableGuide: () => {},
 });
 
 export const GuidedModeProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -22,7 +20,7 @@ export const GuidedModeProvider: React.FC<{ children: React.ReactNode }> = ({
   const [mode, setModeState] = useState<SimulationMode>(() => {
     const saved = localStorage.getItem("simulationMode");
     if (saved === "guided" || saved === "unguided") return saved;
-    return null;
+    return "guided";
   });
 
   const setMode = useCallback((m: SimulationMode) => {
@@ -34,14 +32,9 @@ export const GuidedModeProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  const disableGuide = useCallback(() => {
-    setModeState("unguided");
-    localStorage.setItem("simulationMode", "unguided");
-  }, []);
-
   return (
     <GuidedModeContext.Provider
-      value={{ mode, isGuided: mode === "guided", setMode, disableGuide }}
+      value={{ mode, isGuided: mode === "guided", setMode }}
     >
       {children}
     </GuidedModeContext.Provider>

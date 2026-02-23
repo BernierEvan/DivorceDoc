@@ -40,7 +40,7 @@ const PrivacyPage: React.FC = () => {
     <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative text-white font-sans">
       <SEO
         title="Politique de Confidentialité — Privacy by Design"
-        description="DivorceDoc : calculs 100 % locaux, données publicitaires Google limitées au strict nécessaire, envoi de documents par e-mail sur demande. Conforme RGPD."
+        description="SimulDivorce : calculs 100 % locaux, données publicitaires Google limitées au strict nécessaire, envoi de documents par e-mail sur demande. Conforme RGPD."
         path="/privacy"
         jsonLd={breadcrumbJsonLd([
           { name: "Accueil", path: "/" },
@@ -117,9 +117,7 @@ const PrivacyPage: React.FC = () => {
             A. Données de Simulation (Sensibles)
           </h3>
           <ul className="list-disc pl-4 space-y-1 mb-4 text-gray-400">
-            <li>
-              Revenus, patrimoine, situation familiale, charges mensuelles.
-            </li>
+            <li>Revenus, situation familiale.</li>
             <li>
               Traitement : Exclusivement local (JavaScript côté navigateur).
             </li>
@@ -177,7 +175,7 @@ const PrivacyPage: React.FC = () => {
         <Section title="5. Destinataires & Transferts" icon={EyeOff}>
           <p>
             <strong>Données financières :</strong> Vos chiffres de simulation
-            (revenus, patrimoine, charges) restent sur votre appareil et ne sont
+            (revenus, situation familiale) restent sur votre appareil et ne sont
             transmis à aucun tiers.
           </p>
           <p>

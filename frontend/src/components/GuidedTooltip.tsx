@@ -141,7 +141,6 @@ export const GuidedStep: React.FC<GuidedStepProps> = ({
 export const useGuidedSteps = (totalSteps: number) => {
   const { isGuided } = useGuidedMode();
   const [currentStep, setCurrentStep] = React.useState(() =>
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     isGuided ? 0 : totalSteps,
   );
 
