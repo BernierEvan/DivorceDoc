@@ -178,21 +178,6 @@ const CreancierPage: React.FC = () => {
 
       {/* Content */}
       <div className="relative z-10 flex-1 px-4 space-y-8 overflow-y-auto sm:px-6 pb-28 sm:pb-32 animate-fade-in scrollbar-hide">
-        {/* Editorial Block */}
-        <div className="p-5 border rounded-2xl border-white/10 bg-white/[0.02]">
-          <h3 className="text-sm font-bold text-white mb-2">
-            Le rôle du créancier dans le calcul
-          </h3>
-          <p className="text-xs leading-relaxed text-gray-400">
-            Le créancier est le conjoint qui perçoit la prestation
-            compensatoire, généralement celui dont la situation financière est
-            la plus défavorable après la séparation. Ses revenus, ses
-            éventuelles interruptions de carrière et son patrimoine sont des
-            éléments déterminants. La méthode Calcul PC prend en compte l'écart
-            de retraite lié aux années sans cotisation pendant le mariage.
-          </p>
-        </div>
-
         <GuidedStep
           step={0}
           currentStep={currentStep}
@@ -506,6 +491,24 @@ const CreancierPage: React.FC = () => {
             )}
           </div>
         </GuidedStep>
+
+        {/* Editorial Block — bottom of scroll area */}
+        <details className="group rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+          <summary className="flex items-center justify-between cursor-pointer px-5 py-3 text-xs font-medium tracking-wide text-gray-500 uppercase select-none hover:text-gray-300 transition-colors">
+            <span>En savoir plus — Rôle du créancier</span>
+            <span className="transition-transform group-open:rotate-180 text-[10px]">▼</span>
+          </summary>
+          <div className="px-5 pb-4 pt-1">
+            <p className="text-xs leading-relaxed text-gray-400">
+              Le créancier est le conjoint qui perçoit la prestation
+              compensatoire, généralement celui dont la situation financière est
+              la plus défavorable après la séparation. Ses revenus, ses
+              éventuelles interruptions de carrière et son patrimoine sont des
+              éléments déterminants. La méthode Calcul PC prend en compte l'écart
+              de retraite lié aux années sans cotisation pendant le mariage.
+            </p>
+          </div>
+        </details>
       </div>
 
       {/* Footer */}

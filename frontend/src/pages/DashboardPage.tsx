@@ -109,9 +109,7 @@ const DashboardPage: React.FC = () => {
             <Home className="w-5 h-5 text-gray-400 group-hover:text-white" />
           </button>
           <button
-            onClick={() =>
-              navigate("/transition?from=dashboard-to-export&next=/export")
-            }
+            onClick={() => navigate("/transition?to=/export")}
             className="p-2.5 rounded-xl bg-[var(--accent-primary)]/15 hover:bg-[var(--accent-primary)]/25 transition group flex items-center justify-center"
             title="Télécharger le rapport"
           >
@@ -125,9 +123,7 @@ const DashboardPage: React.FC = () => {
         <div className="pb-10 space-y-4 animate-fade-in">
           {/* Prominent Download Button */}
           <button
-            onClick={() =>
-              navigate("/transition?from=dashboard-to-export&next=/export")
-            }
+            onClick={() => navigate("/transition?to=/export")}
             className="w-full bg-[var(--color-plasma-cyan)] hover:bg-[var(--accent-hover)] text-white font-bold py-5 rounded-2xl shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all flex items-center justify-center gap-2 sm:gap-3 group active:scale-95"
             style={{ color: "#ffffff" }}
           >

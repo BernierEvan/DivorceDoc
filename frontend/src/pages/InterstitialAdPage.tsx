@@ -1,169 +1,184 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowRight, BookOpen, Shield, Scale } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import AdUnit from "../components/AdUnit";
 import { SEO } from "../components/SEO";
 
-// ---------------------------------------------------------------------------
-// Editorial content variants — one per interstitial position
-// ---------------------------------------------------------------------------
+// ──────────────────────────────────────────────────────────────
+// Editorial content variants — substantial publisher content
+// to satisfy AdSense "pages with publisher content" requirement.
+// ──────────────────────────────────────────────────────────────
 
-interface EditorialVariant {
+interface ContentVariant {
   title: string;
   seoTitle: string;
   seoDescription: string;
-  intro: string;
-  paragraphs: { heading: string; text: string; icon: React.ReactNode }[];
+  paragraphs: string[];
 }
 
-const VARIANTS: Record<string, EditorialVariant> = {
-  "recap-to-dashboard": {
-    title: "Comprendre vos résultats",
-    seoTitle: "Comprendre les résultats — Prestation Compensatoire",
+const CONTENT_VARIANTS: Record<string, ContentVariant> = {
+  "/dashboard": {
+    title: "Avant vos résultats — ce qu'il faut savoir",
+    seoTitle: "Comprendre la Prestation Compensatoire — Avant vos résultats",
     seoDescription:
-      "Comment interpréter les résultats de votre simulation de prestation compensatoire : méthodes de calcul, fourchettes et limites.",
-    intro:
-      "Avant de consulter vos résultats, voici quelques clefs de lecture pour mieux les interpréter.",
+      "Informations essentielles sur la prestation compensatoire avant de consulter vos résultats de simulation de divorce.",
     paragraphs: [
-      {
-        heading: "Des fourchettes, pas un montant unique",
-        text: "SimulDivorce croise plusieurs méthodes doctrinales (Calcul PC / Axel Depondt, Tiers Pondéré, INSEE). Chacune produit une estimation différente. Le résultat final est la moyenne de ces méthodes, présenté comme une fourchette indicative — et non un chiffre définitif.",
-        icon: <Scale className="w-5 h-5 text-teal-400 shrink-0" />,
-      },
-      {
-        heading: "Une simulation, pas un jugement",
-        text: "Les montants calculés reposent sur des barèmes publics et des formules simplifiées. Ils ne tiennent pas compte de l'ensemble des critères retenus par le juge (sacrifices de carrière, état de santé, patrimoine futur). Consultez un avocat pour valider ces résultats.",
-        icon: <Shield className="w-5 h-5 text-amber-400 shrink-0" />,
-      },
-      {
-        heading: "Sources et transparence",
-        text: "Toutes les méthodes utilisées sont documentées dans notre page Méthodologie. Le détail des sources juridiques (Code civil art. 270-281, barèmes du Ministère de la Justice) est librement consultable.",
-        icon: <BookOpen className="w-5 h-5 text-blue-400 shrink-0" />,
-      },
+      "La prestation compensatoire est un mécanisme fondamental du droit du divorce en France. Prévue aux articles 270 à 281 du Code Civil, elle vise à compenser la disparité de niveau de vie créée par la rupture du mariage entre les deux époux. Contrairement à la pension alimentaire, elle est en principe versée sous forme de capital (somme forfaitaire), bien que le juge puisse exceptionnellement ordonner un versement sous forme de rente.",
+      "Le Juge aux Affaires Familiales (JAF) dispose d'un pouvoir d'appréciation souverain pour fixer le montant de la prestation compensatoire. Il prend en compte les critères listés à l'article 271 du Code Civil : durée du mariage, âge et état de santé des époux, qualification et situation professionnelle, conséquences des choix professionnels faits pendant la vie commune, patrimoine estimé après liquidation du régime matrimonial, et droits prévisibles à la retraite.",
+      "Les résultats que vous allez consulter sont issus de méthodes de calcul doctrinales (Tiers Pondéré, INSEE, Calcul PC) utilisées par les praticiens du droit. Ils constituent une estimation indicative et ne sauraient se substituer à l'avis d'un avocat spécialisé en droit de la famille.",
     ],
   },
-  "dashboard-to-export": {
-    title: "Avant de télécharger",
-    seoTitle: "Conseils avant export — Rapport de simulation",
+  "/export": {
+    title: "Avant votre rapport — conseils pratiques",
+    seoTitle: "Conseils Pratiques — Avant le téléchargement du rapport",
     seoDescription:
-      "Conseils pratiques avant de télécharger votre rapport de simulation de divorce : vérification, confidentialité et utilisation.",
-    intro:
-      "Votre rapport va être généré. Voici quelques points importants à garder en tête.",
+      "Conseils pour exploiter au mieux votre rapport de simulation de prestation compensatoire.",
     paragraphs: [
-      {
-        heading: "Vérifiez vos données",
-        text: "Le rapport PDF reprend fidèlement les données que vous avez saisies. Si certaines informations vous semblent incorrectes, vous pouvez revenir en arrière pour les corriger avant de télécharger. Un rapport basé sur des données erronées perd toute utilité.",
-        icon: <Scale className="w-5 h-5 text-teal-400 shrink-0" />,
-      },
-      {
-        heading: "Confidentialité du document",
-        text: "Le rapport est généré localement sur votre appareil. Il n'est pas envoyé à nos serveurs et n'est accessible qu'à vous. Si vous choisissez l'envoi par e-mail, votre adresse sera transmise uniquement à notre service d'expédition.",
-        icon: <Shield className="w-5 h-5 text-amber-400 shrink-0" />,
-      },
-      {
-        heading: "Utilisation du rapport",
-        text: "Ce document est un outil d'aide à la décision à caractère informatif. Il peut servir de base de discussion avec votre avocat, mais il n'a aucune valeur juridique et ne peut être produit devant un juge.",
-        icon: <BookOpen className="w-5 h-5 text-blue-400 shrink-0" />,
-      },
+      "Votre rapport de simulation est un outil d'aide à la décision qui synthétise les résultats des différentes méthodes de calcul sélectionnées. Il peut être présenté à votre avocat comme base de discussion, mais ne constitue en aucun cas un document juridique opposable. Seul le jugement de divorce ou la convention homologuée fixe définitivement le montant de la prestation compensatoire.",
+      "En cas de divorce par consentement mutuel (article 229-1 du Code Civil), les deux époux et leurs avocats respectifs négocient librement le montant de la prestation compensatoire. Un simulateur comme SimulDivorce permet d'objectiver la discussion en fournissant des fourchettes basées sur des barèmes reconnus. En cas de divorce contentieux, c'est le JAF qui tranche souverainement.",
+      "Pensez à consulter la page « Sources & Méthodologie » pour comprendre les hypothèses de calcul utilisées. Les coefficients d'âge, les projections de revenus et les unités de consommation OCDE sont détaillés pour chaque méthode, afin de garantir la transparence de la simulation.",
     ],
   },
 };
 
-// ---------------------------------------------------------------------------
-// Interstitial page component
-// ---------------------------------------------------------------------------
-
-const SKIP_DELAY_SECONDS = 5;
+// ──────────────────────────────────────────────────────────────
+// Countdown duration (seconds) before auto-redirect
+// ──────────────────────────────────────────────────────────────
+const COUNTDOWN_SECONDS = 12;
+const SKIP_AFTER_SECONDS = 5; // "Skip" button appears after this
 
 const InterstitialAdPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const destination = searchParams.get("to") || "/dashboard";
+  const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS);
+  const [canSkip, setCanSkip] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
-  const variantKey = searchParams.get("from") || "recap-to-dashboard";
-  const nextPage = searchParams.get("next") || "/dashboard";
-  const variant = VARIANTS[variantKey] || VARIANTS["recap-to-dashboard"];
-
-  const [countdown, setCountdown] = useState(SKIP_DELAY_SECONDS);
-  const canSkip = countdown <= 0;
+  const content =
+    CONTENT_VARIANTS[destination] || CONTENT_VARIANTS["/dashboard"];
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
 
-  useEffect(() => {
-    if (countdown <= 0) return;
-    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [countdown]);
+    timerRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          navigate(destination, { replace: true });
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-  const handleContinue = useCallback(() => {
-    navigate(nextPage);
-  }, [navigate, nextPage]);
+    const skipTimer = setTimeout(
+      () => setCanSkip(true),
+      SKIP_AFTER_SECONDS * 1000,
+    );
+
+    return () => {
+      clearInterval(timerRef.current);
+      clearTimeout(skipTimer);
+    };
+  }, [destination, navigate]);
+
+  const handleSkip = () => {
+    clearInterval(timerRef.current);
+    navigate(destination, { replace: true });
+  };
 
   return (
-    <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col relative text-white">
+    <div className="min-h-screen bg-[var(--color-deep-space)] flex flex-col text-white">
       <SEO
-        title={variant.seoTitle}
-        description={variant.seoDescription}
+        title={content.seoTitle}
+        description={content.seoDescription}
+        path="/transition"
         noindex={true}
       />
 
-      {/* Background Ambience */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[var(--color-plasma-cyan)]/5 rounded-full blur-[120px] pointer-events-none" />
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 z-10">
-        <h1 className="text-2xl font-bold text-white mb-2 text-center">
-          {variant.title}
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-white/5 bg-black/20 backdrop-blur-md">
+        <h1 className="text-xs font-bold tracking-widest text-white uppercase">
+          {content.title}
         </h1>
-        <p className="text-sm text-gray-400 mb-8 text-center max-w-md">
-          {variant.intro}
-        </p>
-
-        {/* Editorial paragraphs */}
-        <div className="w-full max-w-lg space-y-4 mb-8">
-          {variant.paragraphs.map((p, i) => (
-            <div
-              key={i}
-              className="p-5 border rounded-2xl border-white/10 bg-white/[0.02]"
+        <div className="flex items-center space-x-3">
+          {canSkip ? (
+            <button
+              onClick={handleSkip}
+              className="px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-lg bg-[var(--color-plasma-cyan)]/20 hover:bg-[var(--color-plasma-cyan)]/40 text-[var(--color-plasma-cyan)] transition-all"
             >
-              <div className="flex items-start space-x-3">
-                {p.icon}
-                <div>
-                  <h3 className="text-sm font-bold text-white mb-1">
-                    {p.heading}
-                  </h3>
-                  <p className="text-xs leading-relaxed text-gray-400">
-                    {p.text}
-                  </p>
-                </div>
-              </div>
+              Continuer →
+            </button>
+          ) : (
+            <div className="flex items-center space-x-2 text-gray-500">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              <span className="text-[10px] uppercase tracking-widest font-mono">
+                {countdown}s
+              </span>
             </div>
-          ))}
-        </div>
-
-        {/* ── Video Ad placeholder ── */}
-        <div className="w-full max-w-lg aspect-video bg-black/30 border border-white/10 rounded-2xl flex items-center justify-center mb-8">
-          <span className="text-xs uppercase tracking-widest text-gray-500">
-            Espace publicitaire vidéo
-          </span>
-        </div>
-
-        {/* Continue button */}
-        <button
-          onClick={handleContinue}
-          disabled={!canSkip}
-          className={`px-8 py-4 rounded-2xl font-bold text-sm uppercase tracking-widest transition-all flex items-center space-x-2 group ${
-            canSkip
-              ? "bg-[var(--color-plasma-cyan)] hover:bg-[var(--accent-hover)] text-white shadow-[0_0_30px_rgba(34,211,238,0.3)] active:scale-95"
-              : "bg-white/5 text-gray-500 cursor-not-allowed"
-          }`}
-          style={canSkip ? { color: "#ffffff" } : undefined}
-        >
-          <span>{canSkip ? "Continuer" : `Continuer dans ${countdown}s`}</span>
-          {canSkip && (
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           )}
-        </button>
+        </div>
+      </div>
+
+      {/* Content + Ad */}
+      <div className="flex-1 px-6 py-8 pb-24 space-y-6 overflow-y-auto">
+        {/* Editorial content */}
+        <article className="space-y-4">
+          {content.paragraphs.map((p, i) => (
+            <p
+              key={i}
+              className="text-sm leading-relaxed text-gray-300 animate-fade-in"
+              style={{ animationDelay: `${i * 150}ms` }}
+            >
+              {p}
+            </p>
+          ))}
+        </article>
+
+        {/* Ad unit — video/display ad surrounded by publisher content */}
+        <div className="flex justify-center py-4">
+          <AdUnit type="rectangle" />
+        </div>
+
+        {/* Additional editorial content below ad */}
+        <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02]">
+          <p className="text-xs leading-relaxed text-gray-500">
+            <strong className="text-gray-400">Rappel :</strong> SimulDivorce est
+            un outil de simulation indicatif basé sur des barèmes publics
+            (Ministère de la Justice, Code Civil, échelle OCDE). Il ne constitue
+            pas un conseil juridique. Pour toute décision importante, consultez
+            un avocat spécialisé en droit de la famille.
+          </p>
+        </div>
+
+        {/* Progress indicator */}
+        <div className="w-full h-1 overflow-hidden rounded-full bg-white/5">
+          <div
+            className="h-full bg-[var(--color-plasma-cyan)] transition-all duration-1000 ease-linear rounded-full"
+            style={{
+              width: `${((COUNTDOWN_SECONDS - countdown) / COUNTDOWN_SECONDS) * 100}%`,
+            }}
+          />
+        </div>
+
+        {/* Skip button (bottom) */}
+        {canSkip && (
+          <div className="flex justify-center pt-2 animate-fade-in">
+            <button
+              onClick={handleSkip}
+              className="w-full max-w-md bg-[var(--color-plasma-cyan)] hover:bg-[var(--accent-hover)] text-white font-bold py-4 rounded-2xl shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all flex items-center justify-center space-x-2 group active:scale-95"
+              style={{ color: "#ffffff" }}
+            >
+              <span className="text-sm tracking-widest uppercase">
+                Continuer vers{" "}
+                {destination === "/export"
+                  ? "le rapport"
+                  : "les résultats"}
+              </span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

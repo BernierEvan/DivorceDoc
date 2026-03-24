@@ -168,22 +168,6 @@ const DebiteurPage: React.FC = () => {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-28 sm:pb-32 animate-fade-in relative z-10 scrollbar-hide space-y-8">
-        {/* Editorial Block */}
-        <div className="p-5 border rounded-2xl border-white/10 bg-white/[0.02]">
-          <h3 className="text-sm font-bold text-white mb-2">
-            Le rôle du débiteur dans le calcul
-          </h3>
-          <p className="text-xs leading-relaxed text-gray-400">
-            Le débiteur est le conjoint dont les revenus et le patrimoine sont
-            supérieurs. C'est lui qui sera amené à verser la prestation
-            compensatoire. Ses revenus nets servent aux méthodes Tiers Pondéré
-            et INSEE, tandis que les revenus bruts et les projections
-            financières alimentent la méthode Calcul PC (Axel&nbsp;Depondt).
-            Plus les informations sont précises, plus la simulation reflétera
-            fidèlement l'estimation judiciaire.
-          </p>
-        </div>
-
         <GuidedStep
           step={0}
           currentStep={currentStep}
@@ -453,6 +437,25 @@ const DebiteurPage: React.FC = () => {
             )}
           </div>
         </GuidedStep>
+
+        {/* Editorial Block — bottom of scroll area */}
+        <details className="group rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+          <summary className="flex items-center justify-between cursor-pointer px-5 py-3 text-xs font-medium tracking-wide text-gray-500 uppercase select-none hover:text-gray-300 transition-colors">
+            <span>En savoir plus — Rôle du débiteur</span>
+            <span className="transition-transform group-open:rotate-180 text-[10px]">▼</span>
+          </summary>
+          <div className="px-5 pb-4 pt-1">
+            <p className="text-xs leading-relaxed text-gray-400">
+              Le débiteur est le conjoint dont les revenus et le patrimoine sont
+              supérieurs. C'est lui qui sera amené à verser la prestation
+              compensatoire. Ses revenus nets servent aux méthodes Tiers Pondéré
+              et INSEE, tandis que les revenus bruts et les projections
+              financières alimentent la méthode Calcul PC (Axel&nbsp;Depondt).
+              Plus les informations sont précises, plus la simulation reflétera
+              fidèlement l'estimation judiciaire.
+            </p>
+          </div>
+        </details>
       </div>
 
       {/* Footer */}

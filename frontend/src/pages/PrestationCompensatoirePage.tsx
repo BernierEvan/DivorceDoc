@@ -172,22 +172,6 @@ const PrestationCompensatoirePage: React.FC = () => {
 
       {/* Content */}
       <div className="relative z-10 flex-1 px-4 space-y-8 overflow-y-auto sm:px-6 pb-28 sm:pb-32 animate-fade-in scrollbar-hide">
-        {/* Editorial Block */}
-        <div className="p-5 border rounded-2xl border-white/10 bg-white/[0.02]">
-          <h3 className="mb-2 text-sm font-bold text-white">
-            Qu'est-ce que la prestation compensatoire ?
-          </h3>
-          <p className="text-xs leading-relaxed text-gray-400">
-            La prestation compensatoire (art.&nbsp;270 à 281 du Code civil) vise
-            à compenser la disparité de niveau de vie créée par la rupture du
-            mariage. Elle est fixée par le juge en fonction de critères comme la
-            durée du mariage, l'âge des conjoints, leurs revenus et leur
-            patrimoine. Le simulateur croise plusieurs méthodes doctrinales
-            reconnues pour vous fournir une fourchette indicative. Les
-            informations ci-dessous sont indispensables au calcul.
-          </p>
-        </div>
-
         {/* ── Section 1: Mariage ── */}
         <GuidedStep
           step={stepIdx("mariage")}
@@ -368,6 +352,24 @@ const PrestationCompensatoirePage: React.FC = () => {
             </div>
           </GuidedStep>
         )}
+
+        {/* Editorial Block — bottom of scroll area */}
+        <details className="group rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+          <summary className="flex items-center justify-between cursor-pointer px-5 py-3 text-xs font-medium tracking-wide text-gray-500 uppercase select-none hover:text-gray-300 transition-colors">
+            <span>En savoir plus — Prestation compensatoire</span>
+            <span className="transition-transform group-open:rotate-180 text-[10px]">▼</span>
+          </summary>
+          <div className="px-5 pb-4 pt-1">
+            <p className="text-xs leading-relaxed text-gray-400">
+              La prestation compensatoire (art.&nbsp;270 à 281 du Code civil) vise
+              à compenser la disparité de niveau de vie créée par la rupture du
+              mariage. Elle est fixée par le juge en fonction de critères comme la
+              durée du mariage, l'âge des conjoints, leurs revenus et leur
+              patrimoine. Le simulateur croise plusieurs méthodes doctrinales
+              reconnues pour vous fournir une fourchette indicative.
+            </p>
+          </div>
+        </details>
       </div>
 
       {/* Date Modal */}

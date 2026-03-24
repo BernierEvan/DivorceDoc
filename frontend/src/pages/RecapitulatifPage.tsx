@@ -143,7 +143,7 @@ const RecapitulatifPage: React.FC = () => {
     // Build the financial payload expected by DashboardPage
     const payload = buildFinancialPayload(formData);
     localStorage.setItem("financialData", JSON.stringify(payload));
-    navigate("/transition?from=recap-to-dashboard&next=/dashboard");
+    navigate("/transition?to=/dashboard");
   };
 
   return (
@@ -210,21 +210,6 @@ const RecapitulatifPage: React.FC = () => {
 
       {/* Content */}
       <div className="relative z-10 flex-1 px-4 space-y-6 overflow-y-auto sm:px-6 pb-28 sm:pb-32 animate-fade-in scrollbar-hide">
-        {/* Editorial Block */}
-        <div className="p-5 border rounded-2xl border-white/10 bg-white/[0.02]">
-          <h3 className="text-sm font-bold text-white mb-2">
-            Avant de valider
-          </h3>
-          <p className="text-xs leading-relaxed text-gray-400">
-            Prenez le temps de vérifier chaque information. Les montants
-            calculés dépendent directement de la précision des données saisies.
-            Une erreur sur la date de mariage ou les revenus peut entraîner un
-            écart significatif. Si vous constatez une anomalie, utilisez le
-            bouton retour pour corriger. Le calcul est réalisé localement sur
-            votre appareil.
-          </p>
-        </div>
-
         {/* ════════════════════════════════════════ */}
         {/* PRESTATION COMPENSATOIRE                */}
         {/* ════════════════════════════════════════ */}
@@ -428,7 +413,7 @@ const RecapitulatifPage: React.FC = () => {
           </>
         )}
 
-        {/* Info note */}
+        {/* Info note + Editorial */}
         <div className="px-4 py-3 rounded-xl border border-white/5 bg-white/[0.02]">
           <p className="text-xs leading-relaxed text-gray-500">
             💡 Vous pouvez revenir en arrière pour modifier les informations
@@ -436,6 +421,24 @@ const RecapitulatifPage: React.FC = () => {
             données ci-dessus.
           </p>
         </div>
+
+        <details className="group rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+          <summary className="flex items-center justify-between cursor-pointer px-5 py-3 text-xs font-medium tracking-wide text-gray-500 uppercase select-none hover:text-gray-300 transition-colors">
+            <span>En savoir plus — Vérifier avant de calculer</span>
+            <span className="transition-transform group-open:rotate-180 text-[10px]">▼</span>
+          </summary>
+          <div className="px-5 pb-4 pt-1">
+            <p className="text-xs leading-relaxed text-gray-400">
+              Les montants calculés dépendent directement de la précision des
+              données saisies. Une erreur sur la date de mariage ou les revenus
+              peut entraîner un écart significatif. Le calcul est réalisé
+              localement sur votre appareil ; aucune donnée n'est transmise à un
+              serveur. Les méthodes utilisées (Tiers Pondéré, INSEE, Calcul PC)
+              sont des méthodes doctrinales reconnues par les praticiens du droit
+              de la famille.
+            </p>
+          </div>
+        </details>
       </div>
 
       {/* Footer */}
